@@ -14,8 +14,7 @@ namespace SIM {
 	
 	template <class real, enum Dim dim, class Derived>
 	class Particle : public ConsValue<real, dim> {
-		typedef Vec3<real> vec;
-		typedef Mat3<real> mat;
+		typedef Eigen::Matrix<real, dim, 1> vec; 
 		typedef Eigen::Matrix<real, 1, 3> vec13;
 		typedef Eigen::Matrix<real, 5, 1> vec5;
 		typedef Eigen::Matrix<real, 6, 1> vec6;
@@ -32,7 +31,7 @@ namespace SIM {
 		typedef Eigen::Matrix<real, 7, 3> mat73;
 		typedef Eigen::Matrix<real, 8, 3> mat83;
 		typedef Eigen::Matrix<real, 9, 3> mat93;
-		typedef Eigen::Matrix<real, dim, dim> matEi;
+		typedef Eigen::Matrix<real, dim, dim> mat;
 	public:
 		Particle() {}
 		~Particle() {}
@@ -51,8 +50,8 @@ namespace SIM {
 			file << dp << std::endl;
 			file << np << " " << bd1 << " " << bd2 << std::endl;
 			for (unsigned p = 0; p < np; p++) {
-				file << type[p] << " " << pos[p].x << " " << pos[p].y << " " << pos[p].z << " "
-					<< vel1[p].x << " " << vel1[p].y << " " << vel1[p].z << std::endl;
+				file << type[p] << " " << pos[p][0] << " " << pos[p][1] << " " << pos[p][2] << " "
+					<< vel1[p][0] << " " << vel1[p][1] << " " << vel1[p][2] << std::endl;
 			}
 			std::cout << " writing Geo. done " << std::endl;
 			file.close();
@@ -113,7 +112,7 @@ namespace SIM {
 						const unsigned key = cell->hash(ne);
 						for (unsigned m = 0; m < cell->linkList[key].size(); m++) {
 							const unsigned q = cell->linkList[key][m];
-							const real dr1 = (pos[q] - p).mag();
+							const real dr1 = (pos[q] - p).norm();
 							ret += w1(dr1);
 						}
 					}
@@ -133,7 +132,7 @@ namespace SIM {
 						for (unsigned m = 0; m < cell->linkList[key].size(); m++) {
 							const unsigned q = cell->linkList[key][m];
 							if (q == p) continue;
-							const real	dr1 = (pos[q] - pos[p]).mag();
+							const real	dr1 = (pos[q] - pos[p]).norm();
 							//if (dr1 < r0) ret += (isFs(q) ? 0.7 : 1.);
 							if (dr1 < r0) ret += 1.;
 						}
@@ -153,7 +152,7 @@ namespace SIM {
 						const unsigned key = cell->hash(ne);
 						for (unsigned m = 0; m < cell->linkList[key].size(); m++) {
 							const unsigned q = cell->linkList[key][m];
-							const real	dr1 = (pos[q] - pos[p]).mag();
+							const real	dr1 = (pos[q] - pos[p]).norm();
 							if (q == p || dr1 > r0) continue;
 							if (isFs(q)) ret++;
 						}
@@ -166,7 +165,7 @@ namespace SIM {
 		void buildCell() {
 			BBox<real> b = BBox<real>();
 			for (unsigned i = 0; i < pos.size(); i++) {
-				b += pos[i];
+				b += Vec3<real>(pos[i]);
 			}
 			b.Expand(0.1);
 			cell = new LinkCell<real>(b, r0);
@@ -198,7 +197,7 @@ namespace SIM {
 						const unsigned key = cell->hash(ne);
 						for (unsigned m = 0; m < cell->linkList[key].size(); m++) {
 							const unsigned q = cell->linkList[key][m];
-							const real	dr1 = (pos[q] - pos[p]).mag();
+							const real	dr1 = (pos[q] - pos[p]).norm();
 							if (q == p || dr1 > 2.*dp) continue;
 							dfs(q, t);
 						}
@@ -212,7 +211,7 @@ namespace SIM {
 			bbMap.clear();
 			for (unsigned p = 0; p < pos.size(); p++) {
 				if (type[p] != BD2) continue;
-				real tmpdr = std::numeric_limits<real>::infinity();
+				auto tmpdr = std::numeric_limits<real>::infinity();
 				unsigned tmpbb = 0;
 				const iVec3 c = cell->iCoord(pos[p]);
 				for (int k = -1; k <= 1; k++) {
@@ -223,7 +222,7 @@ namespace SIM {
 							for (unsigned m = 0; m < cell->linkList[key].size(); m++) {
 								const unsigned q = cell->linkList[key][m];
 								if (q == p || type[q] != BD1) continue;
-								const real dr1 = (pos[q] - pos[p]).mag();
+								const auto dr1 = (pos[q] - pos[p]).norm();
 								if (dr1 < tmpdr) {
 									tmpdr = dr1;
 									tmpbb = q;
@@ -248,7 +247,7 @@ namespace SIM {
 				if(tmp.mag() < n.mag())bdnorm[p.second] = n;
 			}
 			for (const auto& p : bbMap) {
-				bdnorm[p.second] = bdnorm.at(p.second).norm();
+				bdnorm[p.second] = bdnorm.at(p.second).normalized();
 			}
 		}
 
@@ -275,8 +274,7 @@ namespace SIM {
 			/*tamai surface detection*/
 			if (type[p] == BD2) return 0;
 			if (pnd[p] > (beta * n0)) return 0;
-			mat m3 = mat(vec(0., 0., 0.), vec(0., 0., 0.), vec(0., 0., 0.));
-			//vec gc = vec(0., 0., 0.);
+			mat mm = mat(0.);
 			const iVec3 c = cell->iCoord(pos[p]);
 			for (int k = -1; k <= 1; k++) {
 				for (int j = -1; j <= 1; j++) {
@@ -287,45 +285,29 @@ namespace SIM {
 							const unsigned q = cell->linkList[key][m];
 							if (q == p) continue;
 							const vec	dr = pos[q] - pos[p];
-							const real	dr1 = dr.mag();
+							const real	dr1 = dr.norm();
 							if (dr1 > r0) continue;
 							const real  w = w2(dr1);
 							const vec	npq = dr / dr1;
-							m3.x += w * npq.x * npq;
-							m3.y += w * npq.y * npq;
-							m3.z += w * npq.z * npq;
-							//gc += w* npq;
+							mm.x += w * npq.x * npq;
+							mm.y += w * npq.y * npq;
+							mm.z += w * npq.z * npq;
 						}
 					}
 				}
 			}
-			m3 = (dim / n0) * m3;
-			//gc = gc.norm();
-			matEi mi;
-			switch (dim) {
-			case 2:
-				mi << m3.x.x, m3.x.z, m3.z.x, m3.z.z; break;
-			case 3:
-				mi << m3.x.x, m3.x.y, m3.x.z, m3.y.x, m3.y.y, m3.y.z, m3.z.x, m3.z.y, m3.z.z; break;
-			}
-			Eigen::SelfAdjointEigenSolver<matEi> sol(mi);
-			Eigen::Matrix<real, dim, 1> eig = sol.eigenvalues();
-			Eigen::Matrix<real, dim, dim> eigvs = sol.eigenvectors();
+			mm = (dim / n0) * mm;
+
+			Eigen::SelfAdjointEigenSolver<mat> sol(mm);
+			vec eig = sol.eigenvalues();
+			mat eigvs = sol.eigenvectors();
 			real eigmin = eig[0];
-			Eigen::Matrix<real, dim, 1> eigv = eigvs.col(0);
+			vec eigv = eigvs.col(0);
+			vec neigv = -eigv;
 
 			if (eigmin <= 0.2) return 2;
 			if (eigmin > 0.8) return 0;
-			vec neigv1, neigv2;
-			switch (dim) {
-			case 2:
-				neigv1.x = eigv[0]; neigv1.z = eigv[1]; break;
-			case 3:
-				neigv1.x = eigv[0]; neigv1.y = eigv[1]; neigv1.z = eigv[2]; break;
-			}
-			neigv2 = -neigv1;
-			//if (neigv * gc > 0.) neigv = -1.*neigv;
-			//gc = -1. * gc;
+
 			const real root2 = 1.415;
 			int flag1 = 1, flag2 = 1;
 			for (int k = -1; k <= 1; k++) {
@@ -337,25 +319,25 @@ namespace SIM {
 							const unsigned q = cell->linkList[key][m];
 							if (q == p) continue;
 							const vec	dr = pos[q] - pos[p];
-							const real	dr1 = dr.mag();
+							const real	dr1 = dr.norm();
 							if (dr1 < root2 * dp) {
-								if ((dr / dr1) * neigv1 >(root2 / 2.)) flag1 = 0;
-								if ((dr / dr1) * neigv2 >(root2 / 2.)) flag2 = 0;
+								if ((dr / dr1) * eigv >(root2 / 2.)) flag1 = 0;
+								if ((dr / dr1) * neigv >(root2 / 2.)) flag2 = 0;
 							}
 							else {
-								if ((pos[p] + dp * neigv1 - pos[q]).mag() < dp) flag1 = 0;
-								if ((pos[p] + dp * neigv2 - pos[q]).mag() < dp) flag2 = 0;
+								if ((pos[p] + dp * eigv - pos[q]).mag() < dp) flag1 = 0;
+								if ((pos[p] + dp * neigv - pos[q]).mag() < dp) flag2 = 0;
 							}
 						}
 					}
 				}
 			}
 			if (flag1) {
-				norm[p] = neigv1;
+				norm[p] = eigv;
 				return 1;
 			}
 			if (flag2) {
-				norm[p] = neigv2;
+				norm[p] = neigv;
 				return 1;
 			}
 			return 0;
@@ -406,7 +388,7 @@ namespace SIM {
 #endif
 			for (int p = 0; p < int(np); p++) {
 				if (type[p] != BD2) continue;
-				vel1[p] = vel2[p] = 0.;
+				vel1[p] = vel2[p] = vec(0.);
 			}
 		}
 

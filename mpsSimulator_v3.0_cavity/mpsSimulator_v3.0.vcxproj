@@ -111,7 +111,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Users\HU FANGYUAN\Documents\Visual Studio 2013\Projects\extern\lsqrWin\Src\LSqrDll;C:\Users\HU FANGYUAN\Documents\Visual Studio 2013\Projects\extern\common;src;inc;..\..\extern\freeglut-2.8.1\include;..\..\extern\glew-1.11.0\include;..\..\extern\glm;..\..\extern\eigen</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;C:\Users\HU FANGYUAN\Documents\Visual Studio 2013\Projects\mpsSimulator_v3.0_cavity\mpsSimulator_v3.0_cavity\common;..\..\extern\freeglut-2.8.1\include;..\..\extern\glew-1.11.0\include;..\..\extern\glm;..\..\extern\eigen</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <OpenMPSupport>true</OpenMPSupport>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -156,7 +156,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Users\HU FANGYUAN\Documents\Visual Studio 2013\Projects\extern\common\typedef;src;inc;..\..\extern\freeglut-2.8.1\include;..\..\extern\glew-1.11.0\include;..\..\extern\glm;..\..\extern\eigen</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;C:\Users\HU FANGYUAN\Documents\Visual Studio 2013\Projects\mpsSimulator_v3.0_cavity\mpsSimulator_v3.0_cavity\common;..\..\extern\freeglut-2.8.1\include;..\..\extern\glew-1.11.0\include;..\..\extern\glm;..\..\extern\eigen</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <OpenMPSupport>true</OpenMPSupport>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
