@@ -1,11 +1,11 @@
 /*
 */
 #pragma once
-#include "iVec3.h"
-#include "Vec3.h"
-#include "Mat3.h"
-#include "BBox.h"
-#include "Timer.h"
+#include <iVec3.h>
+#include <Vec3.h>
+#include <Mat3.h>
+#include <BBox.h>
+#include <Timer.h>
 
 #define DEBUG 1
 #define NTHREAD 4

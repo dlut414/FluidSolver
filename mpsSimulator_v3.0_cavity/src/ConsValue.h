@@ -11,7 +11,8 @@ namespace SIM {
 
 	template <typename real, enum Dim dim>
 	class ConsValue {
-		typedef Vec3<real> vec;
+		typedef Eigen::Matrix<real, dim, 1> vec;
+		typedef Eigen::Matrix<real, 2, 1> vec2;
 		typedef Eigen::Matrix<real, 3, 1> vec3;
 		typedef Eigen::Matrix<real, 5, 1> vec5;
 		typedef Eigen::Matrix<real, 6, 1> vec6;
@@ -27,26 +28,10 @@ namespace SIM {
 				return 0.;
 			}
 			else {
-				//return re / r - 1.;
 				return pow((1 - r / re), 2);
 			}
 		}
-		//inline const real wPnd(const real& r) const {
-		//	if (r >= r0) {
-		//		return 0.;
-		//	}
-		//	else {
-		//		return r0 / r - 1.;
-		//	}
-		//}
-		//inline const real wPnd(const real& r, const real& re) const {
-		//	if (r >= re) {
-		//		return 0.;
-		//	}
-		//	else {
-		//		return re / r - 1.;
-		//	}
-		//}
+
 		inline const real w1(const real& r) const {
 			if (r >= r0) {
 				return 0.;
@@ -170,9 +155,9 @@ namespace SIM {
 					pn0 = pn > pn0 ? pn : pn0;
 				}
 			}
-			std::cout << " n0: " << n0 << std::endl;
-			std::cout << " lambda: " << lambda << std::endl;
-			std::cout << " pn0: " << pn0 << std::endl;
+			else {
+				std::cout << "wrong dimension number !" << std::endl;
+			}
 			v.clear();
 		}
 	};
