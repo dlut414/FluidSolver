@@ -92,7 +92,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Users\HU FANGYUAN\Documents\Visual Studio 2013\Projects\extern\common\typedef;C:\Users\HU FANGYUAN\Documents\Visual Studio 2013\Projects\mpsSimulator_v2.0_cavity\mpsSimulator_v2.0\src;..\..\extern\freeglut-2.8.1\include;..\..\extern\glew-1.11.0\include;..\..\extern\glm;..\..\extern\eigen</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\HU FANGYUAN\Documents\Visual Studio 2013\Projects\mpsSimulator_v2.0_cavity\mpsSimulator_v2.0\src;..\..\extern\freeglut-2.8.1\include;..\..\extern\glew-1.11.0\include;..\..\extern\glm;..\..\extern\eigen</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <OpenMPSupport>true</OpenMPSupport>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
@@ -132,7 +132,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Users\HU FANGYUAN\Documents\Visual Studio 2013\Projects\extern\common\typedef;C:\Users\HU FANGYUAN\Documents\Visual Studio 2013\Projects\mpsSimulator_v2.0_cavity\mpsSimulator_v2.0\src;..\..\extern\freeglut-2.8.1\include;..\..\extern\glew-1.11.0\include;..\..\extern\glm;..\..\extern\eigen</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\HU FANGYUAN\Documents\Visual Studio 2013\Projects\mpsSimulator_v2.0_cavity\mpsSimulator_v2.0\src;..\..\extern\freeglut-2.8.1\include;..\..\extern\glew-1.11.0\include;..\..\extern\glm;..\..\extern\eigen</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <OpenMPSupport>true</OpenMPSupport>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
@@ -174,13 +174,16 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Mls_2d_i_cst.h" />
-    <ClInclude Include="Mls_2d_i_euler.h" />
-    <ClInclude Include="Mls_2d_j.h" />
-    <ClInclude Include="Mls_2d_j_euler.h" />
-    <ClInclude Include="Particle_2d_i_cst.h" />
-    <ClInclude Include="Particle_2d_j.h" />
-    <ClInclude Include="Particle_mps.h" />
+    <ClInclude Include="common\BBox.h" />
+    <ClInclude Include="common\Bitmap.h" />
+    <ClInclude Include="common\iVec3.h" />
+    <ClInclude Include="common\Mat3.h" />
+    <ClInclude Include="common\Point.h" />
+    <ClInclude Include="common\Timer.h" />
+    <ClInclude Include="common\TimeX.h" />
+    <ClInclude Include="common\TypeX.h" />
+    <ClInclude Include="common\Vec3.h" />
+    <ClInclude Include="common\Vector.h" />
     <ClInclude Include="renderer\Camera.h" />
     <ClInclude Include="renderer\Controller.h" />
     <ClInclude Include="renderer\DrawSim.h" />
@@ -191,31 +194,20 @@
     <ClInclude Include="src\BgPart.h" />
     <ClInclude Include="src\Bvp.h" />
     <ClInclude Include="src\ConsValue.h" />
-    <ClInclude Include="src\DFMps.h" />
     <ClInclude Include="src\header.h" />
     <ClInclude Include="src\LinkCell.h" />
     <ClInclude Include="src\MatSolver.h" />
-    <ClInclude Include="src\Mls.h" />
-    <ClInclude Include="src\Mls_2d_a.h" />
-    <ClInclude Include="src\Mls_2d_b.h" />
-    <ClInclude Include="src\Mls_2d_c.h" />
-    <ClInclude Include="src\Mls_2d_d.h" />
-    <ClInclude Include="src\Mls_2d_e.h" />
-    <ClInclude Include="src\Mls_2d_e_exp.h" />
-    <ClInclude Include="src\Mls_2d_f.h" />
-    <ClInclude Include="src\Mls_2d_g.h" />
-    <ClInclude Include="src\Mls_2d_h.h" />
     <ClInclude Include="src\Mls_2d_i.h" />
-    <ClInclude Include="src\Mps.h" />
+    <ClInclude Include="src\Mls_2d_i_cst.h" />
+    <ClInclude Include="src\Mls_2d_i_euler.h" />
+    <ClInclude Include="src\Mls_2d_j.h" />
+    <ClInclude Include="src\Mls_2d_j_euler.h" />
     <ClInclude Include="src\Parameter.h" />
     <ClInclude Include="src\Particle.h" />
-    <ClInclude Include="src\Particle_2d_c.h" />
-    <ClInclude Include="src\Particle_2d_d.h" />
-    <ClInclude Include="src\Particle_2d_e.h" />
-    <ClInclude Include="src\Particle_2d_f.h" />
-    <ClInclude Include="src\Particle_2d_g.h" />
-    <ClInclude Include="src\Particle_2d_h.h" />
     <ClInclude Include="src\Particle_2d_i.h" />
+    <ClInclude Include="src\Particle_2d_i_cst.h" />
+    <ClInclude Include="src\Particle_2d_j.h" />
+    <ClInclude Include="src\Particle_x.h" />
     <ClInclude Include="src\Sensor.h" />
     <ClInclude Include="src\Shifter.h" />
     <ClInclude Include="src\Simulator.h" />
