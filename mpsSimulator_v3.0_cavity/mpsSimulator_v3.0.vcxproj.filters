@@ -28,6 +28,9 @@
     <Filter Include="Header Files\SIM\Particle">
       <UniqueIdentifier>{5800640c-b014-4332-a956-8a00a9f6579b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\common">
+      <UniqueIdentifier>{cd382d1b-f993-4e6c-bc1c-7bad1f4be9d0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -56,66 +59,6 @@
     </ClInclude>
     <ClInclude Include="src\Particle.h">
       <Filter>Header Files\SIM\Particle</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Particle_2d_c.h">
-      <Filter>Header Files\SIM\Particle</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Particle_2d_d.h">
-      <Filter>Header Files\SIM\Particle</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Particle_2d_e.h">
-      <Filter>Header Files\SIM\Particle</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Particle_2d_f.h">
-      <Filter>Header Files\SIM\Particle</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Particle_2d_g.h">
-      <Filter>Header Files\SIM\Particle</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Particle_2d_h.h">
-      <Filter>Header Files\SIM\Particle</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Particle_2d_i.h">
-      <Filter>Header Files\SIM\Particle</Filter>
-    </ClInclude>
-    <ClInclude Include="src\DFMps.h">
-      <Filter>Header Files\SIM\Simulator</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Mls.h">
-      <Filter>Header Files\SIM\Simulator</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Mls_2d_a.h">
-      <Filter>Header Files\SIM\Simulator</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Mls_2d_b.h">
-      <Filter>Header Files\SIM\Simulator</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Mls_2d_c.h">
-      <Filter>Header Files\SIM\Simulator</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Mls_2d_d.h">
-      <Filter>Header Files\SIM\Simulator</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Mls_2d_e.h">
-      <Filter>Header Files\SIM\Simulator</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Mls_2d_e_exp.h">
-      <Filter>Header Files\SIM\Simulator</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Mls_2d_f.h">
-      <Filter>Header Files\SIM\Simulator</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Mls_2d_g.h">
-      <Filter>Header Files\SIM\Simulator</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Mls_2d_h.h">
-      <Filter>Header Files\SIM\Simulator</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Mls_2d_i.h">
-      <Filter>Header Files\SIM\Simulator</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Mps.h">
-      <Filter>Header Files\SIM\Simulator</Filter>
     </ClInclude>
     <ClInclude Include="src\Simulator.h">
       <Filter>Header Files\SIM\Simulator</Filter>
@@ -147,25 +90,61 @@
     <ClInclude Include="src\Shifter.h">
       <Filter>Header Files\SIM</Filter>
     </ClInclude>
-    <ClInclude Include="Particle_mps.h">
+    <ClInclude Include="common\BBox.h">
+      <Filter>Header Files\common</Filter>
+    </ClInclude>
+    <ClInclude Include="common\Bitmap.h">
+      <Filter>Header Files\common</Filter>
+    </ClInclude>
+    <ClInclude Include="common\iVec3.h">
+      <Filter>Header Files\common</Filter>
+    </ClInclude>
+    <ClInclude Include="common\Mat3.h">
+      <Filter>Header Files\common</Filter>
+    </ClInclude>
+    <ClInclude Include="common\Point.h">
+      <Filter>Header Files\common</Filter>
+    </ClInclude>
+    <ClInclude Include="common\Timer.h">
+      <Filter>Header Files\common</Filter>
+    </ClInclude>
+    <ClInclude Include="common\TimeX.h">
+      <Filter>Header Files\common</Filter>
+    </ClInclude>
+    <ClInclude Include="common\TypeX.h">
+      <Filter>Header Files\common</Filter>
+    </ClInclude>
+    <ClInclude Include="common\Vec3.h">
+      <Filter>Header Files\common</Filter>
+    </ClInclude>
+    <ClInclude Include="common\Vector.h">
+      <Filter>Header Files\common</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Particle_2d_i.h">
       <Filter>Header Files\SIM\Particle</Filter>
     </ClInclude>
-    <ClInclude Include="Particle_2d_i_cst.h">
+    <ClInclude Include="src\Particle_2d_i_cst.h">
       <Filter>Header Files\SIM\Particle</Filter>
     </ClInclude>
-    <ClInclude Include="Particle_2d_j.h">
+    <ClInclude Include="src\Particle_2d_j.h">
       <Filter>Header Files\SIM\Particle</Filter>
     </ClInclude>
-    <ClInclude Include="Mls_2d_j.h">
+    <ClInclude Include="src\Particle_x.h">
+      <Filter>Header Files\SIM\Particle</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Mls_2d_i.h">
       <Filter>Header Files\SIM\Simulator</Filter>
     </ClInclude>
-    <ClInclude Include="Mls_2d_i_euler.h">
+    <ClInclude Include="src\Mls_2d_i_cst.h">
       <Filter>Header Files\SIM\Simulator</Filter>
     </ClInclude>
-    <ClInclude Include="Mls_2d_j_euler.h">
+    <ClInclude Include="src\Mls_2d_i_euler.h">
       <Filter>Header Files\SIM\Simulator</Filter>
     </ClInclude>
-    <ClInclude Include="Mls_2d_i_cst.h">
+    <ClInclude Include="src\Mls_2d_j.h">
+      <Filter>Header Files\SIM\Simulator</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Mls_2d_j_euler.h">
       <Filter>Header Files\SIM\Simulator</Filter>
     </ClInclude>
   </ItemGroup>

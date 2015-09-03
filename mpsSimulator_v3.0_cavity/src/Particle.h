@@ -14,7 +14,7 @@ namespace SIM {
 	
 	template <class real, enum Dim dim, class Derived>
 	class Particle : public ConsValue<real, dim> {
-		typedef Eigen::Matrix<real, dim, 1> vec; 
+		typedef Eigen::Matrix<real, dim, 1> vec;
 		typedef Eigen::Matrix<real, 1, 3> vec13;
 		typedef Eigen::Matrix<real, 5, 1> vec5;
 		typedef Eigen::Matrix<real, 6, 1> vec6;
@@ -50,8 +50,14 @@ namespace SIM {
 			file << dp << std::endl;
 			file << np << " " << bd1 << " " << bd2 << std::endl;
 			for (unsigned p = 0; p < np; p++) {
-				file << type[p] << " " << pos[p][0] << " " << pos[p][1] << " " << pos[p][2] << " "
-					<< vel1[p][0] << " " << vel1[p][1] << " " << vel1[p][2] << std::endl;
+				file << type[p] << " ";
+				for (int d = 0; d < dim; d++) {
+					file << pos[p][d] << " ";
+				}
+				for (int d = 0; d < dim; d++) {
+					file << vel1[p][0] << " ";
+				}
+				file << std::endl;
 			}
 			std::cout << " writing Geo. done " << std::endl;
 			file.close();
@@ -63,8 +69,10 @@ namespace SIM {
 			file >> ct >> dp >> np >> bd1 >> bd2;
 			n = np;
 			while (n-- > 0) {
-				file >> t >> p.x >> p.y >> p.z >> v.x >> v.y >> v.z;
-				addPart(pType(t), p, v); 
+				file >> t;
+				for (int d = 0; d < dim; d++) file >> p[d];
+				for (int d = 0; d < dim; d++) file >> v[d];
+				addPart(pType(t), p, v);
 			}
 			file.close();
 			std::cout << " reading Geo. done " << std::endl;
@@ -164,8 +172,8 @@ namespace SIM {
 
 		void buildCell() {
 			BBox<real> b = BBox<real>();
-			for (unsigned i = 0; i < pos.size(); i++) {
-				b += Vec3<real>(pos[i]);
+			for (unsigned p = 0; p < pos.size(); p++) {
+				b += pos[p];
 			}
 			b.Expand(0.1);
 			cell = new LinkCell<real>(b, r0);
