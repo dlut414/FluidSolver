@@ -147,6 +147,9 @@
     <ClInclude Include="src\Mls_2d_j_euler.h">
       <Filter>Header Files\SIM\Simulator</Filter>
     </ClInclude>
+    <ClInclude Include="src\Polynomial.h">
+      <Filter>Header Files\SIM</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="renderer\shader0\fragment.glsl">

@@ -8,16 +8,14 @@
 
 namespace SIM {
 
-	template <typename real, enum Dim dim>
-	class Particle_x : public Particle< real, dim, Particle_x<real, dim> > {
-		typedef Vec3<real> vec;
-		typedef Mat3<real> mat;
-		typedef Eigen::Matrix<real, dim, 1> vec;
-		typedef Eigen::Matrix<real, 5, 1> vecp;
-		typedef Eigen::Matrix<real, 5, 3> matp3;
-		typedef Eigen::Matrix<real, 3, 3> mat33;
-		typedef Eigen::Matrix<real, 5, 5> matpp;
-		typedef Eigen::Matrix<real, dim, dim> matEi;
+	template <typename R, unsigned D>
+	class Particle_x : public Particle< R, D, Particle_x<R, D> > {
+		typedef Eigen::Matrix<R, D, 1> vec;
+		typedef Eigen::Matrix<R, D, D> mat;
+		typedef Eigen::Matrix<R, 5, 1> vecp;
+		typedef Eigen::Matrix<R, 5, 3> matp3;
+		typedef Eigen::Matrix<R, 3, 3> mat33;
+		typedef Eigen::Matrix<R, 5, 5> matpp;
 	public:
 		Particle_x() : Particle() {}
 		~Particle_x() {}
@@ -100,7 +98,7 @@ namespace SIM {
 			return ret;
 		}
 
-		const real func(const std::vector<real>& phi, const unsigned& p) const {
+		const R func(const std::vector<R>& phi, const unsigned& p) const {
 			return phi[p];
 		}
 
@@ -108,7 +106,7 @@ namespace SIM {
 			return u[p];
 		}
 
-		const vec grad(const std::vector<real>& phi, const unsigned& p) const {
+		const vec grad(const std::vector<R>& phi, const unsigned& p) const {
 			vecp  vv = vecp::Zero();
 			const iVec3 c = cell->iCoord(pos[p]);
 			for (int k = -1; k <= 1; k++) {
@@ -122,9 +120,9 @@ namespace SIM {
 							if (bdOpt(p, q)) continue;
 #endif
 							const vec	dr = pos[q] - pos[p];
-							const real	dr1 = dr.mag();
+							const R	dr1 = dr.mag();
 							if (dr1 > r0) continue;
-							const real  w = w3(dr1);
+							const R  w = w3(dr1);
 							const vecp	npq = poly(dr);
 							vv += w * (phi[q] - phi[p]) * npq;
 						}
@@ -170,7 +168,7 @@ namespace SIM {
 				vec(pz.dot(a.block<5, 1>(0, 0)), 0., pz.dot(a.block<5, 1>(0, 2))));
 		}
 
-		const real div(const std::vector<vec>& u, const unsigned& p) const {
+		const R div(const std::vector<vec>& u, const unsigned& p) const {
 			matp3 vv = matp3::Zero();
 			const iVec3 c = cell->iCoord(pos[p]);
 			for (int k = -1; k <= 1; k++) {
@@ -184,9 +182,9 @@ namespace SIM {
 							if (bdOpt(p, q)) continue;
 #endif
 							const vec	dr = pos[q] - pos[p];
-							const real	dr1 = dr.mag();
+							const R	dr1 = dr.mag();
 							if (dr1 > r0) continue;
-							const real  w = w3(dr1);
+							const R  w = w3(dr1);
 							const vecp	npq = poly(dr);
 							vv.block<5, 1>(0, 0) += w * (u[q].x - u[p].x) * npq;
 							vv.block<5, 1>(0, 1) += w * (u[q].y - u[p].y) * npq;
@@ -201,7 +199,7 @@ namespace SIM {
 			return a.block<5, 1>(0, 0).dot(px) + 0. + a.block<5, 1>(0, 2).dot(pz);
 		}
 
-		const real lap(const std::vector<real>& phi, const unsigned& p) const {
+		const R lap(const std::vector<R>& phi, const unsigned& p) const {
 			vecp vv = vecp::Zero();
 			const iVec3 c = cell->iCoord(pos[p]);
 			for (int k = -1; k <= 1; k++) {
@@ -215,9 +213,9 @@ namespace SIM {
 							if (bdOpt(p, q)) continue;
 #endif
 							const vec	dr = pos[q] - pos[p];
-							const real	dr1 = dr.mag();
+							const R	dr1 = dr.mag();
 							if (dr1 > r0) continue;
-							const real  w = w3(dr1);
+							const R  w = w3(dr1);
 							const vecp	npq = poly(dr);
 							vv += w * (phi[q] - phi[p]) * npq;
 						}
@@ -243,9 +241,9 @@ namespace SIM {
 							if (bdOpt(p, q)) continue;
 #endif
 							const vec	dr = pos[q] - pos[p];
-							const real	dr1 = dr.mag();
+							const R	dr1 = dr.mag();
 							if (dr1 > r0) continue;
-							const real  w = w3(dr1);
+							const R  w = w3(dr1);
 							const vecp	npq = poly(dr);
 							vv.block<5, 1>(0, 0) += w * (u[q].x - u[p].x) * npq;
 							vv.block<5, 1>(0, 1) += w * (u[q].y - u[p].y) * npq;
@@ -290,10 +288,10 @@ namespace SIM {
 			return vec(0., px.dot(a.block<5, 1>(0, 2)) - pz.dot(a.block<5, 1>(0, 0)), 0.);
 		}
 
-		const real func(const std::vector<real>& phi, const vec& p) const {
+		const R func(const std::vector<R>& phi, const vec& p) const {
 			auto rid = 0;
 			auto flag = 0;
-			auto rr = std::numeric_limits<real>::max();
+			auto rr = std::numeric_limits<R>::max();
 			auto c = cell->iCoord(p);
 			for (auto k = -1; k <= 1; k++) {
 				for (auto j = -1; j <= 1; j++) {
@@ -348,7 +346,7 @@ namespace SIM {
 		const vec func(const std::vector<vec>& u, const vec& p) const {
 			auto rid = 0;
 			auto flag = 0;
-			auto rr = std::numeric_limits<real>::max();
+			auto rr = std::numeric_limits<R>::max();
 			auto c = cell->iCoord(p);
 			for (auto k = -1; k <= 1; k++) {
 				for (auto j = -1; j <= 1; j++) {
@@ -429,7 +427,7 @@ namespace SIM {
 			for (int fp = 1; fp <= 4; fp++) {
 				if (fp == 3) continue;
 				ret[fp] = vec(0.);
-				auto ww = real(0.);
+				auto ww = R(0.);
 				auto c = cell->iCoord(pLocal[fp]);
 				for (int k = -1; k <= 1; k++) {
 					for (int j = -1; j <= 1; j++) {
@@ -481,7 +479,7 @@ namespace SIM {
 			for (int fp = 1; fp <= 4; fp++) {
 				if (fp == 3) continue;
 				ret[fp] = vec(0.);
-				auto ww = real(0.);
+				auto ww = R(0.);
 				auto c = cell->iCoord(pLocal[fp]);
 				for (int k = -1; k <= 1; k++) {
 					for (int j = -1; j <= 1; j++) {
@@ -797,7 +795,7 @@ namespace SIM {
 	public:
 		std::vector<matpp> invMat;
 
-		std::vector<real> varrho;
+		std::vector<R> varrho;
 		vecp poly_px_0;
 		vecp poly_pz_0;
 		vecp poly_lap_0;
