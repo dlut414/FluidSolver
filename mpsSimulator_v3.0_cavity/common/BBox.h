@@ -46,39 +46,44 @@ public:
 		}
     }
 
-    void operator+=(const vec& p) {
+	void operator+=(const vec& p) {
 		for (int i = 0; i < D; i++) {
 			pMin[i] = std::min(pMin[i], p[i]);
 			pMax[i] = std::max(pMax[i], p[i]);
 		}
-    }
+	}
 
     BBox Union(const BBox& b1, const BBox &b2) const {
-        BBox ret = b1;
-        ret.pMin.x = std::min(b1.pMin.x, b2.pMin.x);
-        ret.pMin.y = std::min(b1.pMin.y, b2.pMin.y);
-        ret.pMin.z = std::min(b1.pMin.z, b2.pMin.z);
-        ret.pMax.x = std::max(b1.pMax.x, b2.pMax.x);
-        ret.pMax.y = std::max(b1.pMax.y, b2.pMax.y);
-        ret.pMax.z = std::max(b1.pMax.z, b2.pMax.z);
+		BBox ret = b1;
+		for (int i = 0; i < D; i++) {
+			ret.pMin[i] = std::min(b1.pMin[i], b2.pMin[i]);
+			ret.pMax[i] = std::max(b1.pMax[i], b2.pMax[i]);
+		}
         return ret;
     }
 
     bool bOverlaps(const BBox &b) const {
-        bool x = (pMax.x >= b.pMin.x) && (pMin.x <= b.pMax.x);
-        bool y = (pMax.y >= b.pMin.y) && (pMin.y <= b.pMax.y);
-        bool z = (pMax.z >= b.pMin.z) && (pMin.z <= b.pMax.z);
-        return (x && y && z);
+		bool ret = true;
+		for (int i = 0; i < D; i++) {
+			ret = ret && (pMax[i] >= b.pMin[i]) && (pMin[i] <= b.pMax[i]);
+		}
+        return ret;
     }
 
     bool bInside(const vec &p) const {
-        return (p.x >= pMin.x && p.x <=pMax.x &&
-                p.y >= pMin.y && p.y <=pMax.y &&
-                p.z >= pMin.z && p.z <=pMax.z);
+		bool ret = true;
+		for (int i = 0; i < D; i++) {
+			ret = ret && (p[i] >= pMin[i] && p[i] <= pMax[i]);
+		}
+		return ret;
     }
 
     vec pCenter() const {
-        return vec( (pMax.x+pMin.x), (pMax.y+pMin.y), (pMax.z+pMin.z) ) * 0.5f;
+		vec ret;;
+		for (int i = 0; i < D; i++) {
+			ret[i] = 0.5* (pMin[i] + pMax[i]);
+		}
+		return ret;
     }
 
     void Expand(const real& s) {
