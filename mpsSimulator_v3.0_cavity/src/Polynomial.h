@@ -3,32 +3,11 @@
 #pragma once
 #include <vector>
 #include <Eigen/Dense>
+#include "mMath.h"
 
 namespace SIM {
 
-	template <unsigned n>
-	class factorial {
-	public:
-		enum { value = n* factorial<n - 1>::value, };
-	};
-
-	template <>
-	class factorial < 1 > {
-	public:
-		enum { value = 1, };
-	};
-
-	template <unsigned n, unsigned m>
-	class H {
-	public:
-		enum { value = factorial<n + m - 1>::value / (factorial<m>::value * factorial<n - 1>::value), };
-	};
-
-	template <unsigned i, unsigned j>
-	class coefTable {
-	public:
-		enum {value = 1,};
-	};
+	using namespace mMath;
 
 	template <typename R, unsigned D, unsigned P>
 	class Polynomial_A {
