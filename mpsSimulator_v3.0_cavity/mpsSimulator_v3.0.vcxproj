@@ -202,6 +202,7 @@
     <ClInclude Include="src\Mls_2d_i_euler.h" />
     <ClInclude Include="src\Mls_2d_j.h" />
     <ClInclude Include="src\Mls_2d_j_euler.h" />
+    <ClInclude Include="src\mMath.h" />
     <ClInclude Include="src\Parameter.h" />
     <ClInclude Include="src\Particle.h" />
     <ClInclude Include="src\Particle_2d_i.h" />
