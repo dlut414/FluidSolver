@@ -147,10 +147,13 @@
     <ClInclude Include="src\Mls_2d_j_euler.h">
       <Filter>Header Files\SIM\Simulator</Filter>
     </ClInclude>
-    <ClInclude Include="src\Polynomial.h">
+    <ClInclude Include="src\mMath.h">
       <Filter>Header Files\SIM</Filter>
     </ClInclude>
-    <ClInclude Include="src\mMath.h">
+    <ClInclude Include="src\_Polynomial.h">
+      <Filter>Header Files\SIM</Filter>
+    </ClInclude>
+    <ClInclude Include="Polynomial.h">
       <Filter>Header Files\SIM</Filter>
     </ClInclude>
   </ItemGroup>

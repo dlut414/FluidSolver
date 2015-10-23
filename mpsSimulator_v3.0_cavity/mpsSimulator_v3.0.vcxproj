@@ -184,6 +184,7 @@
     <ClInclude Include="common\TypeX.h" />
     <ClInclude Include="common\Vec3.h" />
     <ClInclude Include="common\Vector.h" />
+    <ClInclude Include="Polynomial.h" />
     <ClInclude Include="renderer\Camera.h" />
     <ClInclude Include="renderer\Controller.h" />
     <ClInclude Include="renderer\DrawSim.h" />
@@ -209,7 +210,7 @@
     <ClInclude Include="src\Particle_2d_i_cst.h" />
     <ClInclude Include="src\Particle_2d_j.h" />
     <ClInclude Include="src\Particle_x.h" />
-    <ClInclude Include="src\Polynomial.h" />
+    <ClInclude Include="src\_Polynomial.h" />
     <ClInclude Include="src\Sensor.h" />
     <ClInclude Include="src\Shifter.h" />
     <ClInclude Include="src\Simulator.h" />
