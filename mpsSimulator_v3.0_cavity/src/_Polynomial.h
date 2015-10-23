@@ -28,19 +28,34 @@ namespace SIM {
 	struct Multiset<D,P,I,J,ROrder,0> { enum { value = Multiset<D,P,I-1,J,ROrder,CurRepetitionIns<D,I-1,J,ROrder>::value>=Repetition<D,J,ROrder>::value&&CurRepetitionIns<D,I-1,J,ROrder>::value!=0>::value, }; };
 	template <unsigned D, unsigned P, unsigned I, unsigned J, unsigned ROrder>
 	struct Multiset<D,P,I,J,ROrder,1> { enum { value = Multiset<D,P,I-1,J,ROrder,CurRepetitionIns<D,I-1,J,ROrder>::value>=Repetition<D,J,ROrder>::value&&CurRepetitionIns<D,I-1,J,ROrder>::value!=0>::value - 1, }; };
+	template <unsigned D, unsigned P, unsigned I, unsigned J, unsigned ROrder>
+	struct MultisetIns { enum { value = Multiset<D,P,I,J,ROrder,CurRepetitionIns<D,I,J,ROrder>::value>=Repetition<D,J,ROrder>::value&&CurRepetitionIns<D,I,J,ROrder>::value!=0>::value, }; };
 
-	template <unsigned D, unsigned P, unsigned I, unsigned J, unsigned ROrder, int Left, bool RepOver>
+	template <unsigned D, unsigned P, unsigned I, unsigned J, unsigned ROrder, bool RepOver, bool Left>
 	struct MultisetUp { enum { value, }; };
-
 	template <unsigned D, unsigned P, unsigned I, unsigned J, unsigned ROrder, bool RepOver>
-	struct MultisetUp<D,P,I,J,ROrder,0,RepOver> { enum { value = 0, }; };
+	struct MultisetUp<D,P,I,J,ROrder,RepOver,0> { enum { value = MultisetIns<D,P,I,J,ROrder>::value, }; };
 	template <unsigned D, unsigned P, unsigned I, unsigned J, unsigned ROrder, bool RepOver>
-	struct MultisetUp<D,P,I,J,ROrder,1,RepOver> { enum { value = ROrder + 1, }; };
+	struct MultisetUp<D,P,I,J,ROrder,RepOver,1> { enum { value = ROrder + 1, }; };
+	template <unsigned D, unsigned P, unsigned I, unsigned ROrder, bool RepOver>
+	struct MultisetUp<D,P,I,0,ROrder,RepOver,0> { enum { value = MultisetUp<D,P,I,0,ROrder,RepOver,0>::value, }; };
+	template <unsigned D, unsigned P, unsigned I, unsigned J, unsigned ROrder, bool RepOver, bool Left>
+	struct MultisetUp<D,P,I,0,ROrder,RepOver,1> { enum { value = MultisetUp<D,P,I,0,ROrder,RepOver,0>::value, }; };
 
-	template <unsigned D, unsigned P, unsigned I, unsigned J, unsigned ROrder, bool Left, bool RepOver>
-	struct MultisetUp<D,P,I,J,ROrder,Left,1,RepOver> { enum { value = 0, }; };
-	template <unsigned D, unsigned P, unsigned I, unsigned J, unsigned ROrder, bool Left, bool RepOver>
-	struct MultisetUp<D,P,I,J,ROrder,Left,0,RepOver> { enum { value = 0, }; };
+	template <unsigned D, unsigned P, unsigned I, unsigned J, unsigned ROrder, bool RepOver, bool LeftLeft>
+	struct MultisetUpUp { enum { value, }; };
+	template <unsigned D, unsigned P, unsigned I, unsigned J, unsigned ROrder, bool RepOver>
+	struct MultisetUpUp<D,P,I,J,ROrder,RepOver,0> { enum { value = MultisetUp<D,P,I,J,ROrder,RepOver,CurRepetitionIns<D,I-1,J-1,ROrder>::value>=Repetition<D,J-1,ROrder>::value&&CurRepetitionIns<D,I-1,J-1,ROrder>::value!=0>::value, }; };
+	template <unsigned D, unsigned P, unsigned I, unsigned J, unsigned ROrder, bool RepOver>
+	struct MultisetUpUp<D,P,I,J,ROrder,RepOver,1> { enum { value = 0, }; };
+	template <unsigned D, unsigned P, unsigned I, unsigned ROrder, bool RepOver>
+	struct MultisetUpUp<D,P,I,0,ROrder,RepOver,0> { enum { value = MultisetUpUp<D,P,I,0,ROrder,RepOver,0>::value, }; };
+	template <unsigned D, unsigned P, unsigned I, unsigned ROrder, bool RepOver>
+	struct MultisetUpUp<D,P,I,1,ROrder,RepOver,0> { enum { value = MultisetUpUp<D,P,I,1,ROrder,RepOver,0>::value, }; };
+	template <unsigned D, unsigned P, unsigned I, unsigned ROrder, bool RepOver>
+	struct MultisetUpUp<D,P,I,0,ROrder,RepOver,1> { enum { value = MultisetUpUp<D,P,I,0,ROrder,RepOver,0>::value, }; };
+	template <unsigned D, unsigned P, unsigned I, unsigned ROrder, bool RepOver>
+	struct MultisetUpUp<D,P,I,1,ROrder,RepOver,1> { enum { value = MultisetUpUp<D,P,I,1,ROrder,RepOver,0>::value, }; };
 
 	template <typename R, unsigned D, unsigned P>
 	class Polynomial_A {
