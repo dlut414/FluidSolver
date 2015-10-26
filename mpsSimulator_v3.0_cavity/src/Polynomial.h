@@ -26,8 +26,11 @@ namespace SIM {
 	private:
 		template <unsigned P_ = 1>	static __forceinline void Gen_		(const R& x, R* const out) { out[P_-1] = Power<P_>(x); Gen_<P_+1>(x, out); }
 		template <>					static __forceinline void Gen_<P>	(const R& x, R* const out) { out[P-1] = Power<P>(x); }
+		template <unsigned P_ = 1>	static __forceinline void Gen_		(const R& s, const R& x, R* const out) { out[P_-1] = Power<P_>(x/s); Gen_<P_+1>(s, x, out); }
+		template <>					static __forceinline void Gen_<P>	(const R& s, const R& x, R* const out) { out[P-1] = Power<P>(x/s); }
 	public:
 		static __forceinline void Gen(const R& x, R* const out) { Gen_(x, out); }
+		static __forceinline void Gen(const R& s, const R& x, R* const out) { Gen_(s, x, out); }
 	};
 
 	template <typename R, unsigned P>				class Polynomial_A<R,2,P> : public Polynomial_A_<R,2,P> {

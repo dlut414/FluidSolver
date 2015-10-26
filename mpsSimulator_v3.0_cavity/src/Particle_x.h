@@ -3,6 +3,7 @@
 #pragma once
 #include "header.h"
 #include "Particle.h"
+#include "Polynomial.h"
 
 #define UPWIND_VEL 0
 
@@ -10,15 +11,18 @@ namespace SIM {
 
 	template <typename R, unsigned D>
 	class Particle_x : public Particle< R, D, Particle_x<R, D> > {
+		typedef Polynomial_A<R, TWOD, 2> Poly;
 		typedef Eigen::Matrix<R, D, 1> vec;
 		typedef Eigen::Matrix<R, D, D> mat;
-		typedef Eigen::Matrix<R, 5, 1> vecp;
-		typedef Eigen::Matrix<R, 5, 3> matp3;
-		typedef Eigen::Matrix<R, 3, 3> mat33;
-		typedef Eigen::Matrix<R, 5, 5> matpp;
+		typedef Eigen::Matrix<R, Poly::value, 1> vecp1;
+		typedef Eigen::Matrix<R, Poly::value, 3> matp3;
+		typedef Eigen::Matrix<R, Poly::value, 3> mat33;
+		typedef Eigen::Matrix<R, Poly::value, 5> matpp;
 	public:
 		Particle_x() : Particle() {}
 		~Particle_x() {}
+		
+		static __forceinline void poly(const vec& in, vecp1& out) const { Poly::Gen(in.data(), out.data()); }
 
 		inline const vecp poly(const vec& v) const {
 			vecp ret;
