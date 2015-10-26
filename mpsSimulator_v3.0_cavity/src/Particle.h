@@ -46,10 +46,11 @@ namespace SIM {
 		}
 		void operator >> (std::string str) const {
 			std::ofstream file(str, std::ofstream::out);
-			file << ct << std::endl;
-			file << dp << std::endl;
+			file << std::scientific << std::setprecision(6) << ct << std::endl;
+			file << std::scientific << std::setprecision(6) << dp << std::endl;
 			file << np << " " << bd1 << " " << bd2 << std::endl;
 			for (unsigned p = 0; p < np; p++) {
+				filt << std::scientific << std::setprecision(6);
 				file << type[p] << " ";
 				for (int d = 0; d < D; d++) {
 					file << pos[p][d] << " ";
