@@ -156,6 +156,9 @@
     <ClInclude Include="src\Polynomial.h">
       <Filter>Header Files\SIM</Filter>
     </ClInclude>
+    <ClInclude Include="src\Derivative.h">
+      <Filter>Header Files\SIM</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="renderer\shader0\fragment.glsl">
