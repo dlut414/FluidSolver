@@ -11,7 +11,7 @@ namespace SIM {
 
 	template <typename R, unsigned D>
 	class Particle_x : public Particle< R, D, Particle_x<R, D> > {
-		typedef Polynomial_A<R, TWOD, 2> Poly;
+		typedef mMath::Polynomial_A<R, TWOD, 2> Poly;
 		typedef Eigen::Matrix<R, D, 1> vec;
 		typedef Eigen::Matrix<R, D, D> mat;
 		typedef Eigen::Matrix<R, Poly::value, 1> vecp1;
@@ -22,81 +22,70 @@ namespace SIM {
 		Particle_x() : Particle() {}
 		~Particle_x() {}
 		
-		static __forceinline void poly(const vec& in, vecp1& out) const { Poly::Gen(in.data(), out.data()); }
+		static __forceinline void poly(const vec& in, vecp1& out) const { Poly::Gen(varrho, in.data(), out.data()); }
 
-		inline const vecp poly(const vec& v) const {
-			vecp ret;
-			vec s = v / varrho[0];
-			ret <<
-				s.x,
-				s.z,
-				s.x*s.z,
-				s.x*s.x,
-				s.z*s.z;
-			return ret;
-		}
 		inline const vecp poly_px(const vec& v) const {
 			vecp ret;
-			vec s = v / varrho[0];
+			vec s = v / varrho;
 			ret <<
-				1. / varrho[0],
+				1. / varrho,
 				0.,
-				s.z / varrho[0],
-				2.*s.x / varrho[0],
+				s.z / varrho,
+				2.*s.x / varrho,
 				0.;
 			return ret;
 		}
 		inline const vecp poly_pz(const vec& v) const {
 			vecp ret;
-			vec s = v / varrho[0];
+			vec s = v / varrho;
 			ret <<
 				0.,
-				1. / varrho[0],
-				s.x / varrho[0],
+				1. / varrho,
+				s.x / varrho,
 				0.,
-				2.*s.z / varrho[0];
+				2.*s.z / varrho;
 			return ret;
 		}
 		inline const vecp poly_lap(const vec& v) const {
 			vecp ret;
-			vec s = v / varrho[0];
+			vec s = v / varrho;
 			ret <<
 				0.,
 				0.,
 				0.,
-				2. / (varrho[0] * varrho[0]),
-				2. / (varrho[0] * varrho[0]);
+				2. / (varrho * varrho),
+				2. / (varrho * varrho);
 			return ret;
 		}
 		inline const vecp poly_pxx(const vec& v) const {
 			vecp ret;
-			vec s = v / varrho[0];
+			vec s = v / varrho;
 			ret <<
 				0.,
 				0.,
 				0.,
-				2. / (varrho[0] * varrho[0]),
+				2. / (varrho * varrho),
 				0.;
 			return ret;
 		}
 		inline const vecp poly_pzz(const vec& v) const {
 			vecp ret;
-			vec s = v / varrho[0];
+			vec s = v / varrho;
 			ret <<
 				0.,
 				0.,
 				0.,
 				0.,
-				2. / (varrho[0] * varrho[0]);
+				2. / (varrho * varrho);
 			return ret;
 		}
 		inline const vecp poly_pxz(const vec& v) const {
 			vecp ret;
-			vec s = v / varrho[0];
+			vec s = v / varrho;
 			ret <<
 				0.,
 				0.,
-				1. / (varrho[0] * varrho[0]),
+				1. / (varrho * varrho),
 				0.,
 				0.;
 			return ret;
@@ -786,8 +775,7 @@ namespace SIM {
 				invMat.push_back(matpp());
 			}
 
-			varrho.clear();
-			varrho.push_back(1.*dp);
+			varrho = 1.*dp;
 			poly_px_0 = poly_px(vec(0.));
 			poly_pz_0 = poly_pz(vec(0.));
 			poly_lap_0 = poly_lap(vec(0.));
@@ -799,7 +787,7 @@ namespace SIM {
 	public:
 		std::vector<matpp> invMat;
 
-		std::vector<R> varrho;
+		R varrho;
 		vecp poly_px_0;
 		vecp poly_pz_0;
 		vecp poly_lap_0;
