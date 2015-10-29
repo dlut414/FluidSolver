@@ -195,7 +195,7 @@
     <ClInclude Include="src\Bvp.h" />
     <ClInclude Include="src\ConsValue.h" />
     <ClInclude Include="src\Derivative.h" />
-    <ClInclude Include="src\header.h" />
+    <ClInclude Include="src\Header.h" />
     <ClInclude Include="src\LinkCell.h" />
     <ClInclude Include="src\MatSolver.h" />
     <ClInclude Include="src\Mls_2d_i.h" />

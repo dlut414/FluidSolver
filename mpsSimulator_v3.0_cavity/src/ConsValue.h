@@ -3,7 +3,7 @@
 #pragma once
 #include <vector>
 #include <Eigen/Dense>
-#include "header.h"
+#include "Header.h"
 #define _USE_MATH_DEFINES
 #include <cmath>
 
