@@ -1,9 +1,6 @@
 /*
 */
 #pragma once
-#include <iVec3.h>
-#include <Vec3.h>
-#include <Mat3.h>
 #include <BBox.h>
 #include <Timer.h>
 
@@ -24,11 +21,4 @@ enum Dim {
 enum dType {
 	SCALAR,
 	VECTOR,
-};
-enum baseType {
-	A,
-	B,
-	C,
-	D,
-	E,
 };

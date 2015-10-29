@@ -1,7 +1,7 @@
 /*
 */
 #pragma once
-#include "header.h"
+#include "Header.h"
 #include "Particle.h"
 #include "Polynomial.h"
 
@@ -11,85 +11,17 @@ namespace SIM {
 
 	template <typename R, unsigned D>
 	class Particle_x : public Particle< R, D, Particle_x<R, D> > {
-		typedef mMath::Polynomial_A<R, TWOD, 2> Poly;
+		typedef mMath::Polynomial_A<R, D, 2> Poly;
 		typedef Eigen::Matrix<R, D, 1> vec;
 		typedef Eigen::Matrix<R, D, D> mat;
-		typedef Eigen::Matrix<R, Poly::value, 1> vecp1;
-		typedef Eigen::Matrix<R, Poly::value, 3> matp3;
-		typedef Eigen::Matrix<R, Poly::value, 3> mat33;
-		typedef Eigen::Matrix<R, Poly::value, 5> matpp;
+		typedef Eigen::Matrix<R, Poly::value, 1>	vecP1;
+		typedef Eigen::Matrix<R, Poly::value, D>	matPD;
+		typedef Eigen::Matrix<R, Poly::value, Poly::value> matPP;
 	public:
 		Particle_x() : Particle() {}
 		~Particle_x() {}
 		
-		static __forceinline void poly(const vec& in, vecp1& out) const { Poly::Gen(varrho, in.data(), out.data()); }
-
-		inline const vecp poly_px(const vec& v) const {
-			vecp ret;
-			vec s = v / varrho;
-			ret <<
-				1. / varrho,
-				0.,
-				s.z / varrho,
-				2.*s.x / varrho,
-				0.;
-			return ret;
-		}
-		inline const vecp poly_pz(const vec& v) const {
-			vecp ret;
-			vec s = v / varrho;
-			ret <<
-				0.,
-				1. / varrho,
-				s.x / varrho,
-				0.,
-				2.*s.z / varrho;
-			return ret;
-		}
-		inline const vecp poly_lap(const vec& v) const {
-			vecp ret;
-			vec s = v / varrho;
-			ret <<
-				0.,
-				0.,
-				0.,
-				2. / (varrho * varrho),
-				2. / (varrho * varrho);
-			return ret;
-		}
-		inline const vecp poly_pxx(const vec& v) const {
-			vecp ret;
-			vec s = v / varrho;
-			ret <<
-				0.,
-				0.,
-				0.,
-				2. / (varrho * varrho),
-				0.;
-			return ret;
-		}
-		inline const vecp poly_pzz(const vec& v) const {
-			vecp ret;
-			vec s = v / varrho;
-			ret <<
-				0.,
-				0.,
-				0.,
-				0.,
-				2. / (varrho * varrho);
-			return ret;
-		}
-		inline const vecp poly_pxz(const vec& v) const {
-			vecp ret;
-			vec s = v / varrho;
-			ret <<
-				0.,
-				0.,
-				1. / (varrho * varrho),
-				0.,
-				0.;
-			return ret;
-		}
+		__forceinline void poly(const vec& in, vecP1& out) const { Poly::Gen(varrho, in.data(), out.data()); }
 
 		const R func(const std::vector<R>& phi, const unsigned& p) const {
 			return phi[p];
@@ -100,7 +32,7 @@ namespace SIM {
 		}
 
 		const vec grad(const std::vector<R>& phi, const unsigned& p) const {
-			vecp  vv = vecp::Zero();
+			vecP1  vv = vecP1::Zero();
 			const iVec3 c = cell->iCoord(pos[p]);
 			for (int k = -1; k <= 1; k++) {
 				for (int j = -1; j <= 1; j++) {
@@ -112,19 +44,20 @@ namespace SIM {
 #if BD_OPT
 							if (bdOpt(p, q)) continue;
 #endif
-							const vec	dr = pos[q] - pos[p];
-							const R	dr1 = dr.mag();
+							const auto	dr = pos[q] - pos[p];
+							const auto	dr1 = dr.mag();
 							if (dr1 > r0) continue;
-							const R  w = w3(dr1);
-							const vecp	npq = poly(dr);
+							const auto	w = w3(dr1);
+							vecP1 npq;
+							poly(dr, npq);
 							vv += w * (phi[q] - phi[p]) * npq;
 						}
 					}
 				}
 			}
-			vecp  a = invMat[p] * vv;
-			vecp px = poly_px_0;
-			vecp pz = poly_pz_0;
+			vecP1	a = invMat[p] * vv;
+			vecP1	px = poly_px_0;
+			vecP1	pz = poly_pz_0;
 			return vec(px.dot(a), 0., pz.dot(a));
 		}
 
@@ -772,7 +705,7 @@ namespace SIM {
 		void init_x() {
 			invMat.clear();
 			for (int p = 0; p < int(np); p++) {
-				invMat.push_back(matpp());
+				invMat.push_back(matPP());
 			}
 
 			varrho = 1.*dp;
@@ -785,7 +718,7 @@ namespace SIM {
 		}
 
 	public:
-		std::vector<matpp> invMat;
+		std::vector<matPP> invMat;
 
 		R varrho;
 		vecp poly_px_0;
