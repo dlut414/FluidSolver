@@ -14,7 +14,7 @@ namespace mMath {
 	public:
 		template <unsigned N>	static __forceinline R Power(const R& x)	{ return x*Power<N-1>(x); }
 		template <>				static __forceinline R Power<0>(const R& x) { return 1; }
-		template <unsigned N, unsigned M>	static __forceinline R A() { return (factorial<N>::value) / (factorial<N-M>::value); }
+		template <unsigned N, unsigned M>	static __forceinline R A() { return (Factorial<N>::value) / (Factorial<N-M>::value); }
 	};
 
 	template <typename R, unsigned D, unsigned P>	class Derivative_A : public Derivative_A_<R,D,P> {};
