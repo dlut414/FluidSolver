@@ -26,31 +26,23 @@ namespace SIM {
 		
 		__forceinline void poly(const Vec& in, VecP& out) const { PN::Gen(varrho, in.data(), out.data()); }
 
-		const R func(const std::vector<R>& phi, const unsigned& p) const {
-			return phi[p];
-		}
-
-		const Vec func(const std::vector<Vec>& u, const unsigned& p) const {
-			return u[p];
-		}
-
 		const Vec grad(const std::vector<R>& phi, const unsigned& p) const {
 			VecP  vv = VecP::Zero();
-			const iVec c = cell->iCoord(pos[p]);
-			for (int k = -1; k <= 1; k++) {
-				for (int j = -1; j <= 1; j++) {
-					for (int i = -1; i <= 1; i++) {
-						const iVec ne = c + iVec(i, j, k);
-						const unsigned key = cell->hash(ne);
-						for (unsigned m = 0; m < cell->linkList[key].size(); m++) {
-							const unsigned q = cell->linkList[key][m];
+			const auto c = cell->iCoord(pos[p]);
+			for (auto k = -1; k <= 1; k++) {
+				for (auto j = -1; j <= 1; j++) {
+					for (auto i = -1; i <= 1; i++) {
+						const auto ne = c + iVec(i, j, k);
+						const auto key = cell->hash(ne);
+						for (auto m = 0; m < cell->linkList[key].size(); m++) {
+							const auto q = cell->linkList[key][m];
 #if BD_OPT
 							if (bdOpt(p, q)) continue;
 #endif
-							const auto	dr = pos[q] - pos[p];
-							const auto	dr1 = dr.mag();
+							const auto dr = pos[q] - pos[p];
+							const auto dr1 = dr.mag();
 							if (dr1 > r0) continue;
-							const auto	w = w3(dr1);
+							const auto w = w3(dr1);
 							VecP npq;
 							poly(dr, npq);
 							vv += w * (phi[q] - phi[p]) * npq;
@@ -96,21 +88,21 @@ namespace SIM {
 
 		const R div(const std::vector<Vec>& u, const unsigned& p) const {
 			MatPD vv = MatPD::Zero();
-			const iVec c = cell->iCoord(pos[p]);
-			for (int k = -1; k <= 1; k++) {
-				for (int j = -1; j <= 1; j++) {
-					for (int i = -1; i <= 1; i++) {
-						const iVec ne = c + iVec(i, j, k);
-						const unsigned key = cell->hash(ne);
-						for (unsigned m = 0; m < cell->linkList[key].size(); m++) {
-							const unsigned q = cell->linkList[key][m];
+			const auto c = cell->iCoord(pos[p]);
+			for (auto k = -1; k <= 1; k++) {
+				for (auto j = -1; j <= 1; j++) {
+					for (auto i = -1; i <= 1; i++) {
+						const auto ne = c + iVec(i, j, k);
+						const auto key = cell->hash(ne);
+						for (auto m = 0; m < cell->linkList[key].size(); m++) {
+							const auto q = cell->linkList[key][m];
 #if BD_OPT
 							if (bdOpt(p, q)) continue;
 #endif
-							const auto	dr = pos[q] - pos[p];
-							const auto	dr1 = dr.mag();
+							const auto dr = pos[q] - pos[p];
+							const auto dr1 = dr.mag();
 							if (dr1 > r0) continue;
-							const auto	w = w3(dr1);
+							const auto w = w3(dr1);
 							VecP npq;
 							poly(dr, npq);
 							vv += (w* npq)* (u[q] - u[p]);
@@ -120,27 +112,27 @@ namespace SIM {
 			}
 			const auto a = invMat[p] * vv;
 			auto R ret = static_cast<R>(0);
-			for (unsigned d = 0; d < D; d++) ret += pn_p_o.block<1,PN::value>(d, 0) * a.block<PN::value>(0, d);
+			for (auto d = 0; d < D; d++) ret += pn_p_o.block<1,PN::value>(d, 0) * a.block<PN::value>(0, d);
 			return ret;
 		}
 
 		const R lap(const std::vector<R>& phi, const unsigned& p) const {
 			VecP vv = VecP::Zero();
-			const iVec c = cell->iCoord(pos[p]);
-			for (int k = -1; k <= 1; k++) {
-				for (int j = -1; j <= 1; j++) {
-					for (int i = -1; i <= 1; i++) {
-						const iVec ne = c + iVec(i, j, k);
-						const unsigned key = cell->hash(ne);
-						for (unsigned m = 0; m < cell->linkList[key].size(); m++) {
-							const unsigned q = cell->linkList[key][m];
+			const auto c = cell->iCoord(pos[p]);
+			for (auto k = -1; k <= 1; k++) {
+				for (auto j = -1; j <= 1; j++) {
+					for (auto i = -1; i <= 1; i++) {
+						const auto ne = c + iVec(i, j, k);
+						const auto key = cell->hash(ne);
+						for (auto m = 0; m < cell->linkList[key].size(); m++) {
+							const auto q = cell->linkList[key][m];
 #if BD_OPT
 							if (bdOpt(p, q)) continue;
 #endif
-							const auto	dr = pos[q] - pos[p];
-							const auto	dr1 = dr.mag();
+							const auto dr = pos[q] - pos[p];
+							const auto dr1 = dr.mag();
 							if (dr1 > r0) continue;
-							const auto	w = w3(dr1);
+							const auto w = w3(dr1);
 							VecP	npq;
 							poly(dr, npq);
 							vv += w * (phi[q] - phi[p])* npq;
@@ -148,28 +140,28 @@ namespace SIM {
 					}
 				}
 			}
-			const VecP a = invMat[p] * vv;
+			const auto a = invMat[p] * vv;
 			return (pn_lap_o*a);
 		}
 
 		const Vec lap(const std::vector<Vec>& u, const unsigned& p) const {
 			MatPD vv = MatPD::Zero();
-			const iVec c = cell->iCoord(pos[p]);
-			for (int k = -1; k <= 1; k++) {
-				for (int j = -1; j <= 1; j++) {
-					for (int i = -1; i <= 1; i++) {
-						const iVec ne = c + iVec(i, j, k);
-						const unsigned key = cell->hash(ne);
-						for (unsigned m = 0; m < cell->linkList[key].size(); m++) {
-							const unsigned q = cell->linkList[key][m];
+			const auto c = cell->iCoord(pos[p]);
+			for (auto k = -1; k <= 1; k++) {
+				for (auto j = -1; j <= 1; j++) {
+					for (auto i = -1; i <= 1; i++) {
+						const auto ne = c + iVec(i, j, k);
+						const auto key = cell->hash(ne);
+						for (auto m = 0; m < cell->linkList[key].size(); m++) {
+							const auto q = cell->linkList[key][m];
 #if BD_OPT
 							if (bdOpt(p, q)) continue;
 #endif
-							const auto	dr = pos[q] - pos[p];
-							const auto	dr1 = dr.mag();
+							const auto dr = pos[q] - pos[p];
+							const auto dr1 = dr.mag();
 							if (dr1 > r0) continue;
-							const auto	w = w3(dr1);
-							VecP	npq;
+							const auto w = w3(dr1);
+							VecP npq;
 							poly(dr, npq);
 							vv += (w * npq) * (u[q] - [p]);
 						}
@@ -222,9 +214,17 @@ namespace SIM {
 			}
 		}
 
+		const R func(const std::vector<R>& phi, const unsigned& p) const {
+			return phi[p];
+		}
+
+		const Vec func(const std::vector<Vec>& u, const unsigned& p) const {
+			return u[p];
+		}
+
 		const R func(const std::vector<R>& phi, const Vec& p) const {
 			auto rid = 0;
-			auto flag = 0;
+			auto isNear = 0;
 			auto rr = std::numeric_limits<R>::max();
 			auto c = cell->iCoord(p);
 			for (auto k = -1; k <= 1; k++) {
@@ -237,49 +237,24 @@ namespace SIM {
 							const auto dr = pos[q] - p;
 							const auto dr1 = dr.mag();
 							if (dr1 > r0) continue;
-							flag = 1;
-							if (dr1 < rr) {
-								rr = dr1;
-								rid = q;
+							else {
+								isNear = 1;
+								if (dr1 < rr) {
+									rr = dr1;
+									rid = q;
+								}
 							}
 						}
 					}
 				}
 			}
-			if (!flag) return Vec(0.);
-
-			VecP vv = VecP::Zero();
-			c = cell->iCoord(pos[rid]);
-			for (auto k = -1; k <= 1; k++) {
-				for (auto j = -1; j <= 1; j++) {
-					for (auto i = -1; i <= 1; i++) {
-						const auto ne = c + iVec(i, j, k);
-						const auto key = cell->hash(ne);
-						for (auto m = 0; m < cell->linkList[key].size(); m++) {
-							const auto q = cell->linkList[key][m];
-#if BD_OPT
-							if (bdOpt(rid, q)) continue;
-#endif
-							const auto dr = pos[q] - pos[rid];
-							const auto dr1 = dr.mag();
-							if (dr1 > r0) continue;
-							const auto w = w3(dr1);
-							const auto npq = poly(dr);
-							vv += w * (phi[q] - phi[rid]) * npq;
-						}
-					}
-				}
-			}
-			auto a = invMat[rid] * vv;
-			auto px = poly_px_0;
-			auto pz = poly_pz_0;
-			auto gd = Vec(px.dot(a), 0., pz.dot(a));
-			return u[rid] + (p - pos[rid])*gd;
+			if (!isNear) return R(0);
+			else return phi[rid] + (p - pos[rid]).compose()*grad(phi,rid);
 		}
 
-		const Vec func(const std::vector<Vec>& u, const Vec& p) const {
+		const Vec func(const std::vector<Vec>& phi, const Vec& p) const {
 			auto rid = 0;
-			auto flag = 0;
+			auto isNear = 0;
 			auto rr = std::numeric_limits<R>::max();
 			auto c = cell->iCoord(p);
 			for (auto k = -1; k <= 1; k++) {
@@ -292,55 +267,23 @@ namespace SIM {
 							const auto dr = pos[q] - p;
 							const auto dr1 = dr.mag();
 							if (dr1 > r0) continue;
-							flag = 1;
-							if (dr1 < rr) {
-								rr = dr1;
-								rid = q;
+							else {
+								isNear = 1;
+								if (dr1 < rr) {
+									rr = dr1;
+									rid = q;
+								}
 							}
 						}
 					}
 				}
 			}
-			if (!flag) return Vec(0.);
-
-			MatPD vv = MatPD::Zero();
-			c = cell->iCoord(pos[rid]);
-			for (auto k = -1; k <= 1; k++) {
-				for (auto j = -1; j <= 1; j++) {
-					for (auto i = -1; i <= 1; i++) {
-						const auto ne = c + iVec(i, j, k);
-						const auto key = cell->hash(ne);
-						for (auto m = 0; m < cell->linkList[key].size(); m++) {
-							const auto q = cell->linkList[key][m];
-#if BD_OPT
-							if (bdOpt(rid, q)) continue;
-#endif
-							const auto dr = pos[q] - pos[rid];
-							const auto dr1 = dr.mag();
-							if (dr1 > r0) continue;
-							const auto w = w3(dr1);
-							const auto npq = poly(dr);
-							vv.block<5, 1>(0, 0) += w * (u[q].x - u[rid].x) * npq;
-							vv.block<5, 1>(0, 1) += w * (u[q].y - u[rid].y) * npq;
-							vv.block<5, 1>(0, 2) += w * (u[q].z - u[rid].z) * npq;
-						}
-					}
-				}
-			}
-			auto a = invMat[rid] * vv;
-			auto px = poly_px_0;
-			auto pz = poly_pz_0;
-			auto gd = Mat(Vec(px.dot(a.block<5, 1>(0, 0)), 0., px.dot(a.block<5, 1>(0, 2))),
-				Vec(0.),
-				Vec(pz.dot(a.block<5, 1>(0, 0)), 0., pz.dot(a.block<5, 1>(0, 2))));
-			return u[rid] + (p - pos[rid])*gd;
+			if (!isNear) return R(0);
+			const auto dpt = (p - pos[rid]).compose();
+			else return phi[rid] + (dpt*grad(phi, rid)).compose();
 		}
 
-		const Vec func_nobd2(const std::vector<Vec>& u, const Vec& p) const {
-			return  Vec(0.);
-		}
-
-		const Vec func_mafl(const std::vector<Vec>& u, const unsigned& p, const Vec& p_new) const {
+		const Vec func_mafl(const std::vector<Vec>& phi, const unsigned& p, const Vec& p_new) const {
 			const auto re = 1.5* dp;
 			const auto dx = 1.5* dp;
 			const auto p_i = pos[p];
@@ -352,24 +295,24 @@ namespace SIM {
 #endif
 			Vec pLocal[6];
 
-			for (int i = -3; i <= 2; i++) {
+			for (auto i = -3; i <= 2; i++) {
 				pLocal[i + 3] = p_i - i*dx*up;
 			}
 
 			Vec ret[6];
-			ret[3] = u[p];
-			for (int fp = 1; fp <= 4; fp++) {
+			ret[3] = phi[p];
+			for (auto fp = 1; fp <= 4; fp++) {
 				if (fp == 3) continue;
-				ret[fp] = Vec(0.);
-				auto ww = R(0.);
+				ret[fp] = Vec::Zero();
+				auto ww = static_cast<R>(0);
 				auto c = cell->iCoord(pLocal[fp]);
-				for (int k = -1; k <= 1; k++) {
-					for (int j = -1; j <= 1; j++) {
-						for (int i = -1; i <= 1; i++) {
+				for (auto k = -1; k <= 1; k++) {
+					for (auto j = -1; j <= 1; j++) {
+						for (auto i = -1; i <= 1; i++) {
 							const auto ne = c + iVec(i, j, k);
 							const auto key = cell->hash(ne);
-							for (unsigned m = 0; m < cell->linkList[key].size(); m++) {
-								const unsigned q = cell->linkList[key][m];
+							for (auto m = 0; m < cell->linkList[key].size(); m++) {
+								const auto q = cell->linkList[key][m];
 								if (type[q] == BD2) continue;
 #if BD_OPT
 								if (bdOpt(q)) continue;
@@ -381,7 +324,7 @@ namespace SIM {
 								if (dr1 > dr1_m1 || dr1 > dr1_p1) continue;
 								const auto w = w1(dr1);
 								ww += w;
-								ret[fp] += w * u[q];
+								ret[fp] += w * phi[q];
 							}
 						}
 					}
@@ -392,7 +335,7 @@ namespace SIM {
 			return ret[3] - (dmove.mag() / dx)* (0.125* ret[1] - 0.875* ret[2] + 0.375* ret[3] + 0.375* ret[4]);
 		}
 
-		const Vec func_mafl_mmt(const std::vector<Vec>& u, const unsigned& p, const Vec& p_new) const {
+		const Vec func_mafl_mmt(const std::vector<Vec>& phi, const unsigned& p, const Vec& p_new) const {
 			const auto re = 1.5* dp;
 			const auto dx = 1.5* dp;
 			const auto p_i = pos[p];
@@ -404,24 +347,24 @@ namespace SIM {
 #endif
 			Vec pLocal[6];
 
-			for (int i = -3; i <= 2; i++) {
+			for (auto i = -3; i <= 2; i++) {
 				pLocal[i + 3] = p_i - i*dx*up;
 			}
 
 			Vec ret[6];
-			ret[3] = u[p];
-			for (int fp = 1; fp <= 4; fp++) {
+			ret[3] = phi[p];
+			for (auto fp = 1; fp <= 4; fp++) {
 				if (fp == 3) continue;
-				ret[fp] = Vec(0.);
-				auto ww = R(0.);
+				ret[fp] = Vec::Zero();
+				auto ww = static_cast<R>(0);
 				auto c = cell->iCoord(pLocal[fp]);
-				for (int k = -1; k <= 1; k++) {
-					for (int j = -1; j <= 1; j++) {
-						for (int i = -1; i <= 1; i++) {
+				for (auto k = -1; k <= 1; k++) {
+					for (auto j = -1; j <= 1; j++) {
+						for (auto i = -1; i <= 1; i++) {
 							const auto ne = c + iVec(i, j, k);
 							const auto key = cell->hash(ne);
-							for (unsigned m = 0; m < cell->linkList[key].size(); m++) {
-								const unsigned q = cell->linkList[key][m];
+							for (auto m = 0; m < cell->linkList[key].size(); m++) {
+								const auto q = cell->linkList[key][m];
 								if (type[q] == BD2) continue;
 #if BD_OPT
 								if (bdOpt(q)) continue;
@@ -433,7 +376,7 @@ namespace SIM {
 								if (dr1 > dr1_m1 || dr1 > dr1_p1) continue;
 								const auto w = w1(dr1);
 								ww += w;
-								ret[fp] += w * u[q];
+								ret[fp] += w * phi[q];
 							}
 						}
 					}
@@ -453,9 +396,9 @@ namespace SIM {
 			return ret_mmt;
 		}
 
-		const Vec func_mls_a(const std::vector<Vec>& u, const unsigned& p, const Vec& p_new) const {
-			Matpp mm = Matpp::Zero();
-			MatPD vv = MatPD::Zero();
+		const Vec func_lsA(const std::vector<Vec>& phi, const unsigned& p, const Vec& p_new) const {
+			auto mm = MatPP::Zero();
+			auto vv = MatPD::Zero();
 			const auto c = cell->iCoord(pos[p]);
 			for (auto k = -1; k <= 1; k++) {
 				for (auto j = -1; j <= 1; j++) {
@@ -471,20 +414,15 @@ namespace SIM {
 							const auto dr1 = dr.mag();
 							if (dr1 > r0) continue;
 							const auto w = w3(dr1);
-							const auto npq = poly(dr);
-							mm.block<1, 5>(0, 0) += w * npq[0] * npq;
-							mm.block<1, 5>(1, 0) += w * npq[1] * npq;
-							mm.block<1, 5>(2, 0) += w * npq[2] * npq;
-							mm.block<1, 5>(3, 0) += w * npq[3] * npq;
-							mm.block<1, 5>(4, 0) += w * npq[4] * npq;
-							vv.block<5, 1>(0, 0) += w * (u[q].x - u[p].x) * npq;
-							vv.block<5, 1>(0, 1) += w * (u[q].y - u[p].y) * npq;
-							vv.block<5, 1>(0, 2) += w * (u[q].z - u[p].z) * npq;
+							VecP npq;
+							poly(dr, npq);
+							mm += (w* npq)* npq.compose();
+							vv += (w* npq)* (phi[q] - phi[p]).compose();
 						}
 					}
 				}
 			}
-			Matpp inv = Matpp::Zero();
+			const auto inv = MatPP::Zero();
 			if (abs(mm.determinant()) < eps_Mat) {
 #if DEBUG
 				std::cout << mm.determinant() << std::endl;
@@ -498,31 +436,31 @@ namespace SIM {
 			else inv = mm.inverse();
 
 			const auto a = inv * vv;
-			const auto ax = a.block<5, 1>(0, 0);
-			const auto az = a.block<5, 1>(0, 2);
-			const auto px = poly_px_0;
-			const auto pz = poly_pz_0;
-			const auto pxx = poly_pxx_0;
-			const auto pzz = poly_pzz_0;
-			const auto pxz = poly_pxz_0;
+			const auto gd = pn_p_o * a;
+			const auto mgd = pn_pp_o * a;
+			const Mat hes[D];
+			for (auto d = 0; d < D; d++) {
+				for (auto i = 0; i < D; i++) {
+					for (auto j = i; j < D; j++) {
+						hes[d](i, j) = mgd.block<mMath::H<D,2>,1>(0, d);
+					}
+				}
+				for (auto i = 0; i < D; i++) {
+					for (auto j = 0; j < D; j++) {
+						hes[d](i, j) = hes[d](j, i);
+					}
+				}
+			}
 			const auto dp = p_new - pos[p];
-			auto ret = u[p];
-			ret.x += dp.x* (px.dot(ax)) + dp.z* (pz.dot(ax))
-				+ 0.5* dp.x* dp.x* (pxx.dot(ax)) + dp.x* dp.z* (pxz.dot(ax)) + 0.5* dp.z* dp.z* (pzz.dot(ax));
-			ret.z += dp.x* (px.dot(az)) + dp.z* (pz.dot(az))
-				+ 0.5* dp.x* dp.x* (pxx.dot(az)) + dp.x* dp.z* (pxz.dot(az)) + 0.5* dp.z* dp.z* (pzz.dot(az));
+			const auto dpt = dp.compose();
+			auto ret = phi[p];
+			for (auto d = 0; d < D; d++) ret[d] += (dpt*gd).compose() + 0.5*dpt*hes[d]*dp;
 			return ret;
 		}
 
-		const Vec func_mls_a_upwind(const std::vector<Vec>& u, const unsigned& p, const Vec& p_new) const {
-			const auto dp = p_new - pos[p];
-#if UPWIND_VEL
-			const auto up = -(u[p].norm());
-#else
-			const auto up = dp.norm();
-#endif
-			Matpp mm = Matpp::Zero();
-			MatPD vv = MatPD::Zero();
+		const Vec func_lsA_upwind(const std::vector<Vec>& phi, const unsigned& p, const Vec& p_new) const {
+			auto mm = MatPP::Zero();
+			auto vv = MatPD::Zero();
 			const auto c = cell->iCoord(pos[p]);
 			for (auto k = -1; k <= 1; k++) {
 				for (auto j = -1; j <= 1; j++) {
@@ -539,20 +477,15 @@ namespace SIM {
 							const auto dr1 = dr.mag();
 							if (dr1 > r0) continue;
 							const auto w = w3(dr1);
-							const auto npq = poly(dr);
-							mm.block<1, 5>(0, 0) += w * npq[0] * npq;
-							mm.block<1, 5>(1, 0) += w * npq[1] * npq;
-							mm.block<1, 5>(2, 0) += w * npq[2] * npq;
-							mm.block<1, 5>(3, 0) += w * npq[3] * npq;
-							mm.block<1, 5>(4, 0) += w * npq[4] * npq;
-							vv.block<5, 1>(0, 0) += w * (u[q].x - u[p].x) * npq;
-							vv.block<5, 1>(0, 1) += w * (u[q].y - u[p].y) * npq;
-							vv.block<5, 1>(0, 2) += w * (u[q].z - u[p].z) * npq;
+							VecP npq;
+							poly(dr, npq);
+							mm += (w* npq)* npq.compose();
+							vv += (w* npq)* (phi[q] - phi[p]).compose();
 						}
 					}
 				}
 			}
-			Matpp inv = Matpp::Zero();
+			const auto inv = MatPP::Zero();
 			if (abs(mm.determinant()) < eps_Mat) {
 #if DEBUG
 				std::cout << mm.determinant() << std::endl;
@@ -566,91 +499,31 @@ namespace SIM {
 			else inv = mm.inverse();
 
 			const auto a = inv * vv;
-			const auto ax = a.block<5, 1>(0, 0);
-			const auto az = a.block<5, 1>(0, 2);
-			const auto px = poly_px_0;
-			const auto pz = poly_pz_0;
-			const auto pxx = poly_pxx_0;
-			const auto pzz = poly_pzz_0;
-			const auto pxz = poly_pxz_0;
-			auto ret = u[p];
-			ret.x += dp.x* (px.dot(ax)) + dp.z* (pz.dot(ax))
-				+ 0.5* dp.x* dp.x* (pxx.dot(ax)) + dp.x* dp.z* (pxz.dot(ax)) + 0.5* dp.z* dp.z* (pzz.dot(ax));
-			ret.z += dp.x* (px.dot(az)) + dp.z* (pz.dot(az))
-				+ 0.5* dp.x* dp.x* (pxx.dot(az)) + dp.x* dp.z* (pxz.dot(az)) + 0.5* dp.z* dp.z* (pzz.dot(az));
-			return ret;
-		}
-
-		const Vec func_mls_a_downwind(const std::vector<Vec>& u, const unsigned& p, const Vec& p_new) const {
+			const auto gd = pn_p_o * a;
+			const auto mgd = pn_pp_o * a;
+			const Mat hes[D];
+			for (auto d = 0; d < D; d++) {
+				for (auto i = 0; i < D; i++) {
+					for (auto j = i; j < D; j++) {
+						hes[d](i, j) = mgd.block<mMath::H<D, 2>, 1>(0, d);
+					}
+				}
+				for (auto i = 0; i < D; i++) {
+					for (auto j = 0; j < D; j++) {
+						hes[d](i, j) = hes[d](j, i);
+					}
+				}
+			}
 			const auto dp = p_new - pos[p];
-#if UPWIND_VEL
-			const auto up = -(u[p].norm());
-#else
-			const auto up = dp.norm();
-#endif
-			Matpp mm = Matpp::Zero();
-			MatPD vv = MatPD::Zero();
-			const auto c = cell->iCoord(pos[p]);
-			for (auto k = -1; k <= 1; k++) {
-				for (auto j = -1; j <= 1; j++) {
-					for (auto i = -1; i <= 1; i++) {
-						const auto ne = c + iVec(i, j, k);
-						const auto key = cell->hash(ne);
-						for (auto m = 0; m < cell->linkList[key].size(); m++) {
-							const auto q = cell->linkList[key][m];
-#if BD_OPT
-							if (bdOpt(p, q)) continue;
-#endif
-							const auto dr = pos[q] - pos[p];
-							if (dr*up > 0) continue;
-							const auto dr1 = dr.mag();
-							if (dr1 > r0) continue;
-							const auto w = w3(dr1);
-							const auto npq = poly(dr);
-							mm.block<1, 5>(0, 0) += w * npq[0] * npq;
-							mm.block<1, 5>(1, 0) += w * npq[1] * npq;
-							mm.block<1, 5>(2, 0) += w * npq[2] * npq;
-							mm.block<1, 5>(3, 0) += w * npq[3] * npq;
-							mm.block<1, 5>(4, 0) += w * npq[4] * npq;
-							vv.block<5, 1>(0, 0) += w * (u[q].x - u[p].x) * npq;
-							vv.block<5, 1>(0, 1) += w * (u[q].y - u[p].y) * npq;
-							vv.block<5, 1>(0, 2) += w * (u[q].z - u[p].z) * npq;
-						}
-					}
-				}
-			}
-			Matpp inv = Matpp::Zero();
-			if (abs(mm.determinant()) < eps_Mat) {
-#if DEBUG
-				std::cout << mm.determinant() << std::endl;
-#endif
-				auto mm_ = mm.block<2, 2>(0, 0);
-				if (abs(mm_.determinant()) < eps_Mat) {
-					inv = Matpp::Zero();
-				}
-				else inv.block<2, 2>(0, 0) = mm_.inverse();
-			}
-			else inv = mm.inverse();
-
-			const auto a = inv * vv;
-			const auto ax = a.block<5, 1>(0, 0);
-			const auto az = a.block<5, 1>(0, 2);
-			const auto px = poly_px_0;
-			const auto pz = poly_pz_0;
-			const auto pxx = poly_pxx_0;
-			const auto pzz = poly_pzz_0;
-			const auto pxz = poly_pxz_0;
-			auto ret = u[p];
-			ret.x += dp.x* (px.dot(ax)) + dp.z* (pz.dot(ax))
-				+ 0.5* dp.x* dp.x* (pxx.dot(ax)) + dp.x* dp.z* (pxz.dot(ax)) + 0.5* dp.z* dp.z* (pzz.dot(ax));
-			ret.z += dp.x* (px.dot(az)) + dp.z* (pz.dot(az))
-				+ 0.5* dp.x* dp.x* (pxx.dot(az)) + dp.x* dp.z* (pxz.dot(az)) + 0.5* dp.z* dp.z* (pzz.dot(az));
+			const auto dpt = dp.compose();
+			auto ret = phi[p];
+			for (auto d = 0; d < D; d++) ret[d] += (dpt*gd).compose() + 0.5*dpt*hes[d] * dp;
 			return ret;
 		}
 
-		const Vec func_mls_b(const std::vector<Vec>& u, const unsigned& p, const Vec& p_new) const {}
+		//const Vec func_lsB(const std::vector<Vec>& u, const unsigned& p, const Vec& p_new) const {}
 
-		const Vec func_mls_b_upwind(const std::vector<Vec>& u, const unsigned& p, const Vec& p_new) const {}
+		//const Vec func_lsB_upwind(const std::vector<Vec>& u, const unsigned& p, const Vec& p_new) const {}
 
 		void updateInvMat() {
 #if OMP
@@ -658,7 +531,7 @@ namespace SIM {
 #endif
 			for (int p = 0; p < int(np); p++) {
 				if (type[p] == BD2) continue;
-				Matpp mm = Matpp::Zero();
+				MatPP mm = MatPP::Zero();
 				const auto c = cell->iCoord(pos[p]);
 				for (auto k = -1; k <= 1; k++) {
 					for (auto j = -1; j <= 1; j++) {
@@ -674,17 +547,14 @@ namespace SIM {
 								const auto dr1 = dr.mag();
 								if (dr1 > r0) continue;
 								const auto w = w3(dr1);
-								const auto npq = poly(dr);
-								mm.block<1, 5>(0, 0) += w * npq[0] * npq;
-								mm.block<1, 5>(1, 0) += w * npq[1] * npq;
-								mm.block<1, 5>(2, 0) += w * npq[2] * npq;
-								mm.block<1, 5>(3, 0) += w * npq[3] * npq;
-								mm.block<1, 5>(4, 0) += w * npq[4] * npq;
+								VecP npq;
+								poly(dr, npq);
+								mm += (w* npq) * npq.compose();
 							}
 						}
 					}
 				}
-				invMat[p] = Matpp::Zero();
+				invMat[p] = MatPP::Zero();
 				if (abs(mm.determinant()) < eps_Mat) {
 #if DEBUG
 					std::cout << mm.determinant() << std::endl;
@@ -698,15 +568,6 @@ namespace SIM {
 					continue;
 				}
 				invMat[p] = mm.inverse();
-			}
-		}
-
-		void updateDiver() {
-#if OMP
-#pragma omp parallel for
-#endif
-			for (int p = 0; p<int(np); p++) {
-				diver[p] = div(part->vel1, p);
 			}
 		}
 
