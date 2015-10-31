@@ -16,12 +16,11 @@
 
 namespace SIM {
 
-	template <typename real, enum Dim dim, typename Derived>
+	template <typename R, unsigned D, typename Derived>
 	class Simulator {
-		typedef Vec3<real> vec;
-		typedef Mat3<real> mat;
-		typedef Eigen::Matrix<real, dim, dim> matEi;
-		typedef Eigen::Triplet<real> tpl;
+		typedef Eigen::Matrix<R,D,1> Vec;
+		typedef Eigen::Matrix<R,D,D> Mat;
+		typedef Eigen::Triplet<R> tpl;
 	public:
 		Simulator() { timeStep = 0; }
 		~Simulator() {}
@@ -34,22 +33,29 @@ namespace SIM {
 		}
 		void operator << (const std::string& str) {
 			std::ifstream file(str);
-			if (!file.is_open()) std::cout << " no file Para. found ! " << std::endl;
+			if (!file.is_open()) std::cout << " No file Para. found ! " << std::endl;
 			file >> para.k >> para.rho >> para.niu >> para.dtMax >> para.cfl >> para.tt >> para.eps >> para.beta >> para.alpha >> para.c;
-			std::cout << para.k << " " << para.rho << " " << para.niu << std::endl;
-			std::cout << para.dtMax << " " << para.cfl << " " << para.tt << " " << para.eps << " " << para.beta << std::endl;
-			std::cout << para.alpha << " " << para.c << std::endl;
-			std::cout << " reading Para. done " << std::endl;
+			std::cout << "	Effective radius (times of dp)	:	" << para.k << std::endl;
+			std::cout << "	Density (kg/m3)					:	" << para.rho << std::endl;
+			std::cout << "	Kinematic viscosity (m2/s)		:	" << para.niu << std::endl;
+			std::cout << "	Maximum time step (s)			:	" << para.dtMax << std::endl;
+			std::cout << "	CFL number						:	" << para.cfl << std::endl;
+			std::cout << "	Total time (s)					:	" << para.tt << std::endl;
+			std::cout << "	EPS								:	" << para.eps << std::endl;
+			std::cout << "	Beta of surface detection		:	" << para.beta << std::endl;
+			std::cout << "	Re-meshing effective radius		:	" << para.alpha << std::endl;
+			std::cout << "	Scaling of re-meshing strength	:	" << para.c << std::endl;
+			std::cout << " Reading Para. done " << std::endl;
 			file.close();
 		}
 
 		void init() {
 			derived().init_();
-			mSol = new MatSolver<real, dim>(unsigned(derived().part->np), para.eps);
-			bvp = new Bvp<real>(sinu_b);
-			std::cout << " part num " << derived().part->np << std::endl;
+			mSol = new MatSolver<R, D>(unsigned(derived().part->np), para.eps);
+			//bvp = new Bvp<R>(sinu_b);
+			std::cout << "	Particle number	:	" << derived().part->np << std::endl;
 			sen << "Sensor.in";
-			real tmp = cfl();
+			R tmp = cfl();
 			para.dt = tmp < para.dtMax ? tmp : para.dtMax;
 			timeStep = int(derived().part->ct / para.dt);
 		}
@@ -58,7 +64,7 @@ namespace SIM {
 			auto* const part = derived().part;
 			while (part->ct <= para.tt) {
 				std::cout << " step ----------------------------------> " << timeStep << std::endl;
-				real tmp = cfl();
+				R tmp = cfl();
 				para.dt = tmp < para.dtMax ? tmp : para.dtMax;
 				part->updateCell();
 				derived().step();
@@ -68,14 +74,14 @@ namespace SIM {
 			}
 		}
 
-		real stepGL() {
+		R stepGL() {
 			auto* const part = derived().part;
 			if (part->ct > para.tt) {
 				saveData();
 				std::exit(0);
 			}
 			std::cout << " step ----------------------------------> " << timeStep << std::endl;
-			real tmp = cfl();
+			R tmp = cfl();
 			para.dt = tmp < para.dtMax ? tmp : para.dtMax;
 			part->updateCell();
 			derived().step();
@@ -117,7 +123,7 @@ namespace SIM {
 				<< std::setprecision(6) << std::scientific << sum
 				<< std::endl;
 			file.close();
-			std::cout << " writing profile. done " << std::endl;
+			std::cout << " Writing profile. done " << std::endl;
 		}
 
 		void saveData() const {
@@ -133,10 +139,10 @@ namespace SIM {
 		void fina() {}
 
 	public:
-		Parameter<real> para;
-		MatSolver<real, dim>* mSol;
-		Shifter<real, dim> shi;
-		Sensor<real> sen;
+		Parameter<R> para;
+		MatSolver<R, D>* mSol;
+		Shifter<R, D> shi;
+		Sensor<R> sen;
 
 	protected:
 		void step() {}
@@ -157,7 +163,7 @@ namespace SIM {
 
 		void makeDirichlet_p_avg() {
 			auto* const part = derived().part;
-			Eigen::SparseMatrix<real> d(part->np, part->np);
+			Eigen::SparseMatrix<R> d(part->np, part->np);
 			std::vector<tpl> coef;
 			for (int p = 0; p<int(part->np); p++) {
 				if (part->type[p] != BD1) continue;
@@ -219,15 +225,15 @@ namespace SIM {
 #endif
 			for (int p = 0; p < int(part->np); p++) {
 				if (part->type[p] != FLUID) continue;
-				switch (dim) {
+				switch (D) {
 				case TWOD:
-					part->vel2[p].x = mSol->u[dim*p];
-					part->vel2[p].z = mSol->u[dim*p + 1];
+					part->vel2[p].x = mSol->u[D*p];
+					part->vel2[p].z = mSol->u[D*p + 1];
 					break;
 				case THREED:
-					part->vel2[p].x = mSol->u[dim*p];
-					part->vel2[p].y = mSol->u[dim*p + 1];
-					part->vel2[p].z = mSol->u[dim*p + 2];
+					part->vel2[p].x = mSol->u[D*p];
+					part->vel2[p].y = mSol->u[D*p + 1];
+					part->vel2[p].z = mSol->u[D*p + 2];
 					break;
 				default:
 					break;
@@ -235,11 +241,11 @@ namespace SIM {
 			}
 		}
 
-		real cfl() {
-			real umax = 0.;
+		R cfl() {
+			R umax = 0.;
 			const auto* const part = derived().part;
-			for (unsigned p = 0; p < part->np; p++) {
-				real tmp = part->vel1[p].mag();
+			for (auto p = 0; p < part->np; p++) {
+				R tmp = part->vel1[p].mag();
 				if (tmp > umax) umax = tmp;
 			}
 			para.umax = umax;
@@ -430,11 +436,11 @@ namespace SIM {
 
 		void check() const {
 			const auto* const part = derived().part;
-			real dis = std::numeric_limits<real>::max();
-			real vel = std::numeric_limits<real>::min();
-			real phi = std::numeric_limits<real>::min();
-			//real premi = std::numeric_limits<real>::max();
-			//real prema = std::numeric_limits<real>::min();
+			R dis = std::numeric_limits<R>::max();
+			R vel = std::numeric_limits<R>::min();
+			R phi = std::numeric_limits<R>::min();
+			//R premi = std::numeric_limits<R>::max();
+			//R prema = std::numeric_limits<R>::min();
 			unsigned iv = 0, id = 0;
 			for (unsigned p = 0; p < part->np; p++) {
 				//const iVec3 c = part->cell->iCoord(part->pos[p]);
@@ -446,18 +452,18 @@ namespace SIM {
 				//			for (unsigned m = 0; m < part->cell->linkList[key].size(); m++) {
 				//				const unsigned q = part->cell->linkList[key][m];
 				//				if (q == p) continue;
-				//				const real dr1 = (part->pos[q] - part->pos[p]).mag();
+				//				const R dr1 = (part->pos[q] - part->pos[p]).mag();
 				//				dis = dr1 < dis ? dr1 : dis;
 				//			}
 				//		}
 				//	}
 				//}
-				const real v = part->vel1[p].mag();
+				const R v = part->vel1[p].mag();
 				if (v > vel) {
 					vel = v;
 					iv = p;
 				}
-				real d = part->phi[p];
+				R d = part->phi[p];
 				if (abs(d) > phi) {
 					phi = abs(d);
 					id = p;
@@ -474,7 +480,7 @@ namespace SIM {
 
 		void bvpSource() {
 			const auto* const part = derived().part;
-			for (unsigned p = 0; p < part->np; p++) {
+			for (auto p = 0; p < part->np; p++) {
 				if (part->type[p] == BD2) {
 					mSol->b[p] = 0.;
 					continue;
@@ -490,10 +496,10 @@ namespace SIM {
 		void bvpAvgError() {
 			const auto* const part = derived().part;
 			int n = 0;
-			real err = 0.;
-			for (unsigned p = 0; p < part->np; p++) {
+			R err = 0.;
+			for (auto p = 0; p < part->np; p++) {
 				if (part->type[p] != FLUID || part->isFs(p)) continue;
-				real ext = bvp->func(part->pos[p]);
+				R ext = bvp->func(part->pos[p]);
 				err += abs(part->pres[p] - ext);
 				n++;
 			}
@@ -505,11 +511,11 @@ namespace SIM {
 
 		void bvpMaxError() {
 			const auto* const part = derived().part;
-			real err = 0.;
-			for (unsigned p = 0; p < part->np; p++) {
+			R err = 0.;
+			for (auto p = 0; p < part->np; p++) {
 				if (part->type[p] != FLUID || part->isFs(p)) continue;
-				real ext = bvp->func(part->pos[p]);
-				real tmp = abs(part->pres[p] - ext);
+				R ext = bvp->func(part->pos[p]);
+				R tmp = abs(part->pres[p] - ext);
 				if (tmp > err) err = tmp;
 			}
 			std::cout << " bvp --- max Error: " << err << std::endl;
@@ -520,13 +526,13 @@ namespace SIM {
 
 		void gradMaxError() {
 			auto* const part = derived().part;
-			for (unsigned p = 0; p < part->np; p++) {
+			for (auto p = 0; p < part->np; p++) {
 				part->pres[p] = bvp->func(part->pos[p]);
 			}
-			real err = 0.;
-			for (unsigned p = 0; p < part->np; p++) {
+			R err = 0.;
+			for (auto p = 0; p < part->np; p++) {
 				vec ext = bvp->grad(part->pos[p]);
-				real tmp = (part->grad(part->pres, p) - ext).mag();
+				R tmp = (part->grad(part->pres, p) - ext).mag();
 				if (tmp > err) err = tmp;
 			}
 			std::cout << " |grad| --- max Error: " << err << std::endl;
@@ -537,13 +543,13 @@ namespace SIM {
 
 		void lapMaxError() {
 			auto* const part = derived().part;
-			for (unsigned p = 0; p < part->np; p++) {
+			for (auto p = 0; p < part->np; p++) {
 				part->pres[p] = bvp->func(part->pos[p]);
 			}
-			real err = 0.;
-			for (unsigned p = 0; p < part->np; p++) {
-				real ext = bvp->lap(part->pos[p]);
-				real tmp = abs(part->lap(part->pres, p) - ext);
+			R err = 0.;
+			for (auto p = 0; p < part->np; p++) {
+				R ext = bvp->lap(part->pos[p]);
+				R tmp = abs(part->lap(part->pres, p) - ext);
 				if (tmp > err) err = tmp;
 			}
 			std::cout << " lap --- max Error: " << err << std::endl;
@@ -554,10 +560,10 @@ namespace SIM {
 
 		void insertRand() {
 			auto* const part = derived().part;
-			real coef = 0.1;
+			R coef = 0.1;
 			std::default_random_engine gen;
-			std::normal_distribution<real> dis(0., 0.5);
-			for (unsigned p = 0; p < part->np; p++) {
+			std::normal_distribution<R> dis(0., 0.5);
+			for (auto p = 0; p < part->np; p++) {
 				if (part->type[p] != FLUID) continue;
 				vec dr = coef* part->dp* vec(dis(gen), 0., dis(gen));
 				part->pos[p] += dr;
@@ -567,7 +573,7 @@ namespace SIM {
 	protected:
 		int timeStep;
 		Timer tim;
-		Bvp<real>* bvp;
+		Bvp<R>* bvp;
 
 	};
 
