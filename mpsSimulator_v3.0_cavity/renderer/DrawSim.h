@@ -6,12 +6,12 @@
  * Released under CC BY-NC
 */
 #pragma once
+#include <Eigen/Dense>
 #include "Header.h"
 #include "Draw_.h"
 #include "Shader.h"
 #include "Controller.h"
-#include "../common/typedef/Vec3.h"
-#include "../common/typedef/BBox.h"
+#include "BBox.h"
 
 namespace REN {
 

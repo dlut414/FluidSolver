@@ -29,25 +29,20 @@ namespace SIM {
 		const Vec grad(const std::vector<R>& phi, const unsigned& p) const {
 			VecP  vv = VecP::Zero();
 			const auto c = cell->iCoord(pos[p]);
-			for (auto k = -1; k <= 1; k++) {
-				for (auto j = -1; j <= 1; j++) {
-					for (auto i = -1; i <= 1; i++) {
-						const auto ne = c + iVec(i, j, k);
-						const auto key = cell->hash(ne);
-						for (auto m = 0; m < cell->linkList[key].size(); m++) {
-							const auto q = cell->linkList[key][m];
+			for (auto i = 0; i < cell->blockSize::value; i++) {
+				const auto key = cell->hash(c, i);
+				for (auto m = 0; m < cell->linkList[key].size(); m++) {
+					const auto q = cell->linkList[key][m];
 #if BD_OPT
-							if (bdOpt(p, q)) continue;
+					if (bdOpt(p, q)) continue;
 #endif
-							const auto dr = pos[q] - pos[p];
-							const auto dr1 = dr.mag();
-							if (dr1 > r0) continue;
-							const auto w = w3(dr1);
-							VecP npq;
-							poly(dr, npq);
-							vv += w * (phi[q] - phi[p]) * npq;
-						}
-					}
+					const auto dr = pos[q] - pos[p];
+					const auto dr1 = dr.mag();
+					if (dr1 > r0) continue;
+					const auto w = w3(dr1);
+					VecP npq;
+					poly(dr, npq);
+					vv += w * (phi[q] - phi[p]) * npq;
 				}
 			}
 			const auto a = invMat[p] * vv;
@@ -57,25 +52,20 @@ namespace SIM {
 		const Mat grad(const std::vector<Vec>& u, const unsigned& p) const {
 			MatPD vv = MatPD::Zero();
 			const auto c = cell->iCoord(pos[p]);
-			for (auto k = -1; k <= 1; k++) {
-				for (auto j = -1; j <= 1; j++) {
-					for (auto i = -1; i <= 1; i++) {
-						const auto ne = c + iVec(i, j, k);
-						const auto key = cell->hash(ne);
-						for (auto m = 0; m < cell->linkList[key].size(); m++) {
-							const auto q = cell->linkList[key][m];
+			for (auto i = 0; i < cell->blockSize::value; i++) {
+				const auto key = cell->hash(c, i);
+				for (auto m = 0; m < cell->linkList[key].size(); m++) {
+					const auto q = cell->linkList[key][m];
 #if BD_OPT
-							if (bdOpt(p, q)) continue;
+					if (bdOpt(p, q)) continue;
 #endif
-							const auto dr = pos[q] - pos[p];
-							const auto dr1 = dr.mag();
-							if (dr1 > r0) continue;
-							const auto w = w3(dr1);
-							VecP npq;
-							poly(dr, npq);
-							vv += (w* npq)* (u[q] - u[p]).transpose();
-						}
-					}
+					const auto dr = pos[q] - pos[p];
+					const auto dr1 = dr.mag();
+					if (dr1 > r0) continue;
+					const auto w = w3(dr1);
+					VecP npq;
+					poly(dr, npq);
+					vv += (w* npq)* (u[q] - u[p]).transpose();
 				}
 			}
 			const auto a = invMat[p] * vv;
@@ -89,55 +79,45 @@ namespace SIM {
 		const R div(const std::vector<Vec>& u, const unsigned& p) const {
 			MatPD vv = MatPD::Zero();
 			const auto c = cell->iCoord(pos[p]);
-			for (auto k = -1; k <= 1; k++) {
-				for (auto j = -1; j <= 1; j++) {
-					for (auto i = -1; i <= 1; i++) {
-						const auto ne = c + iVec(i, j, k);
-						const auto key = cell->hash(ne);
-						for (auto m = 0; m < cell->linkList[key].size(); m++) {
-							const auto q = cell->linkList[key][m];
+			for (auto i = 0; i < cell->blockSize::value; i++) {
+				const auto key = cell->hash(c, i);
+				for (auto m = 0; m < cell->linkList[key].size(); m++) {
+					const auto q = cell->linkList[key][m];
 #if BD_OPT
-							if (bdOpt(p, q)) continue;
+					if (bdOpt(p, q)) continue;
 #endif
-							const auto dr = pos[q] - pos[p];
-							const auto dr1 = dr.mag();
-							if (dr1 > r0) continue;
-							const auto w = w3(dr1);
-							VecP npq;
-							poly(dr, npq);
-							vv += (w* npq)* (u[q] - u[p]);
-						}
-					}
+					const auto dr = pos[q] - pos[p];
+					const auto dr1 = dr.mag();
+					if (dr1 > r0) continue;
+					const auto w = w3(dr1);
+					VecP npq;
+					poly(dr, npq);
+					vv += (w* npq)* (u[q] - u[p]);
 				}
 			}
 			const auto a = invMat[p] * vv;
 			auto R ret = static_cast<R>(0);
-			for (auto d = 0; d < D; d++) ret += pn_p_o.block<1,PN::value>(d, 0) * a.block<PN::value>(0, d);
+			for (auto d = 0; d < D; d++) ret += pn_p_o.block<1, PN::value>(d, 0) * a.block<PN::value>(0, d);
 			return ret;
 		}
 
 		const R lap(const std::vector<R>& phi, const unsigned& p) const {
 			VecP vv = VecP::Zero();
 			const auto c = cell->iCoord(pos[p]);
-			for (auto k = -1; k <= 1; k++) {
-				for (auto j = -1; j <= 1; j++) {
-					for (auto i = -1; i <= 1; i++) {
-						const auto ne = c + iVec(i, j, k);
-						const auto key = cell->hash(ne);
-						for (auto m = 0; m < cell->linkList[key].size(); m++) {
-							const auto q = cell->linkList[key][m];
+			for (auto i = 0; i < cell->blockSize::value; i++) {
+				const auto key = cell->hash(c, i);
+				for (auto m = 0; m < cell->linkList[key].size(); m++) {
+					const auto q = cell->linkList[key][m];
 #if BD_OPT
-							if (bdOpt(p, q)) continue;
+					if (bdOpt(p, q)) continue;
 #endif
-							const auto dr = pos[q] - pos[p];
-							const auto dr1 = dr.mag();
-							if (dr1 > r0) continue;
-							const auto w = w3(dr1);
-							VecP	npq;
-							poly(dr, npq);
-							vv += w * (phi[q] - phi[p])* npq;
-						}
-					}
+					const auto dr = pos[q] - pos[p];
+					const auto dr1 = dr.mag();
+					if (dr1 > r0) continue;
+					const auto w = w3(dr1);
+					VecP	npq;
+					poly(dr, npq);
+					vv += w * (phi[q] - phi[p])* npq;
 				}
 			}
 			const auto a = invMat[p] * vv;
@@ -147,25 +127,20 @@ namespace SIM {
 		const Vec lap(const std::vector<Vec>& u, const unsigned& p) const {
 			MatPD vv = MatPD::Zero();
 			const auto c = cell->iCoord(pos[p]);
-			for (auto k = -1; k <= 1; k++) {
-				for (auto j = -1; j <= 1; j++) {
-					for (auto i = -1; i <= 1; i++) {
-						const auto ne = c + iVec(i, j, k);
-						const auto key = cell->hash(ne);
-						for (auto m = 0; m < cell->linkList[key].size(); m++) {
-							const auto q = cell->linkList[key][m];
+			for (auto i = 0; i < cell->blockSize::value; i++) {
+				const auto key = cell->hash(c, i);
+				for (auto m = 0; m < cell->linkList[key].size(); m++) {
+					const auto q = cell->linkList[key][m];
 #if BD_OPT
-							if (bdOpt(p, q)) continue;
+					if (bdOpt(p, q)) continue;
 #endif
-							const auto dr = pos[q] - pos[p];
-							const auto dr1 = dr.mag();
-							if (dr1 > r0) continue;
-							const auto w = w3(dr1);
-							VecP npq;
-							poly(dr, npq);
-							vv += (w * npq) * (u[q] - [p]);
-						}
-					}
+					const auto dr = pos[q] - pos[p];
+					const auto dr1 = dr.mag();
+					if (dr1 > r0) continue;
+					const auto w = w3(dr1);
+					VecP npq;
+					poly(dr, npq);
+					vv += (w * npq) * (u[q] - [p]);
 				}
 			}
 			const auto a = invMat[p] * vv;
@@ -176,25 +151,20 @@ namespace SIM {
 		const T rot(const std::vector<Vec>& u, const unsigned& p) const {
 			MatPD vv = MatPD::Zero();
 			const auto c = cell->iCoord(pos[p]);
-			for (auto k = -1; k <= 1; k++) {
-				for (auto j = -1; j <= 1; j++) {
-					for (auto i = -1; i <= 1; i++) {
-						const auto ne = c + iVec(i, j, k);
-						const auto key = cell->hash(ne);
-						for (auto m = 0; m < cell->linkList[key].size(); m++) {
-							const auto q = cell->linkList[key][m];
+			for (auto i = 0; i < cell->blockSize::value; i++) {
+				const auto key = cell->hash(c, i);
+				for (auto m = 0; m < cell->linkList[key].size(); m++) {
+					const auto q = cell->linkList[key][m];
 #if BD_OPT
-							if (bdOpt(p, q)) continue;
+					if (bdOpt(p, q)) continue;
 #endif
-							const auto dr = pos[q] - pos[p];
-							const auto dr1 = dr.mag();
-							if (dr1 > r0) continue;
-							const auto w = w3(dr1);
-							VecP npq;
-							poly(dr, npq);
-							vv += (w * npq) * (u[q] - u[p]);
-						}
-					}
+					const auto dr = pos[q] - pos[p];
+					const auto dr1 = dr.mag();
+					if (dr1 > r0) continue;
+					const auto w = w3(dr1);
+					VecP npq;
+					poly(dr, npq);
+					vv += (w * npq) * (u[q] - u[p]);
 				}
 			}
 			const auto a = invMat[p] * vv;
@@ -204,7 +174,7 @@ namespace SIM {
 				return R(0);
 				break;
 			case 2:
-				return R(der(0,1)-der(1,0));
+				return R(der(0, 1) - der(1, 0));
 				break;
 			case 3:
 				return R(0);
@@ -227,29 +197,24 @@ namespace SIM {
 			auto isNear = 0;
 			auto rr = std::numeric_limits<R>::max();
 			auto c = cell->iCoord(p);
-			for (auto k = -1; k <= 1; k++) {
-				for (auto j = -1; j <= 1; j++) {
-					for (auto i = -1; i <= 1; i++) {
-						const auto ne = c + iVec(i, j, k);
-						const auto key = cell->hash(ne);
-						for (auto m = 0; m < cell->linkList[key].size(); m++) {
-							const auto q = cell->linkList[key][m];
-							const auto dr = pos[q] - p;
-							const auto dr1 = dr.mag();
-							if (dr1 > r0) continue;
-							else {
-								isNear = 1;
-								if (dr1 < rr) {
-									rr = dr1;
-									rid = q;
-								}
-							}
+			for (auto i = 0; i < cell->blockSize::value; i++) {
+				const auto key = cell->hash(c, i);
+				for (auto m = 0; m < cell->linkList[key].size(); m++) {
+					const auto q = cell->linkList[key][m];
+					const auto dr = pos[q] - p;
+					const auto dr1 = dr.mag();
+					if (dr1 > r0) continue;
+					else {
+						isNear = 1;
+						if (dr1 < rr) {
+							rr = dr1;
+							rid = q;
 						}
 					}
 				}
 			}
 			if (!isNear) return R(0);
-			else return phi[rid] + (p - pos[rid]).compose()*grad(phi,rid);
+			else return phi[rid] + (p - pos[rid]).compose()*grad(phi, rid);
 		}
 
 		const Vec func(const std::vector<Vec>& phi, const Vec& p) const {
@@ -257,23 +222,18 @@ namespace SIM {
 			auto isNear = 0;
 			auto rr = std::numeric_limits<R>::max();
 			auto c = cell->iCoord(p);
-			for (auto k = -1; k <= 1; k++) {
-				for (auto j = -1; j <= 1; j++) {
-					for (auto i = -1; i <= 1; i++) {
-						const auto ne = c + iVec(i, j, k);
-						const auto key = cell->hash(ne);
-						for (auto m = 0; m < cell->linkList[key].size(); m++) {
-							const auto q = cell->linkList[key][m];
-							const auto dr = pos[q] - p;
-							const auto dr1 = dr.mag();
-							if (dr1 > r0) continue;
-							else {
-								isNear = 1;
-								if (dr1 < rr) {
-									rr = dr1;
-									rid = q;
-								}
-							}
+			for (auto i = 0; i < cell->blockSize::value; i++) {
+				const auto key = cell->hash(c, i);
+				for (auto m = 0; m < cell->linkList[key].size(); m++) {
+					const auto q = cell->linkList[key][m];
+					const auto dr = pos[q] - p;
+					const auto dr1 = dr.mag();
+					if (dr1 > r0) continue;
+					else {
+						isNear = 1;
+						if (dr1 < rr) {
+							rr = dr1;
+							rid = q;
 						}
 					}
 				}
@@ -306,27 +266,22 @@ namespace SIM {
 				ret[fp] = Vec::Zero();
 				auto ww = static_cast<R>(0);
 				auto c = cell->iCoord(pLocal[fp]);
-				for (auto k = -1; k <= 1; k++) {
-					for (auto j = -1; j <= 1; j++) {
-						for (auto i = -1; i <= 1; i++) {
-							const auto ne = c + iVec(i, j, k);
-							const auto key = cell->hash(ne);
-							for (auto m = 0; m < cell->linkList[key].size(); m++) {
-								const auto q = cell->linkList[key][m];
-								if (type[q] == BD2) continue;
+				for (auto i = 0; i < cell->blockSize::value; i++) {
+					const auto key = cell->hash(c, i);
+					for (auto m = 0; m < cell->linkList[key].size(); m++) {
+						const auto q = cell->linkList[key][m];
+						if (type[q] == BD2) continue;
 #if BD_OPT
-								if (bdOpt(q)) continue;
+						if (bdOpt(q)) continue;
 #endif
-								const auto dr1 = (pos[q] - pLocal[fp]).mag();
-								const auto dr1_m1 = (pos[q] - pLocal[fp - 1]).mag();
-								const auto dr1_p1 = (pos[q] - pLocal[fp + 1]).mag();
-								if (dr1 > re) continue;
-								if (dr1 > dr1_m1 || dr1 > dr1_p1) continue;
-								const auto w = w1(dr1);
-								ww += w;
-								ret[fp] += w * phi[q];
-							}
-						}
+						const auto dr1 = (pos[q] - pLocal[fp]).mag();
+						const auto dr1_m1 = (pos[q] - pLocal[fp - 1]).mag();
+						const auto dr1_p1 = (pos[q] - pLocal[fp + 1]).mag();
+						if (dr1 > re) continue;
+						if (dr1 > dr1_m1 || dr1 > dr1_p1) continue;
+						const auto w = w1(dr1);
+						ww += w;
+						ret[fp] += w * phi[q];
 					}
 				}
 				if (abs(ww) < eps) ww = 1.;
@@ -358,27 +313,22 @@ namespace SIM {
 				ret[fp] = Vec::Zero();
 				auto ww = static_cast<R>(0);
 				auto c = cell->iCoord(pLocal[fp]);
-				for (auto k = -1; k <= 1; k++) {
-					for (auto j = -1; j <= 1; j++) {
-						for (auto i = -1; i <= 1; i++) {
-							const auto ne = c + iVec(i, j, k);
-							const auto key = cell->hash(ne);
-							for (auto m = 0; m < cell->linkList[key].size(); m++) {
-								const auto q = cell->linkList[key][m];
-								if (type[q] == BD2) continue;
+				for (auto i = 0; i < cell->blockSize::value; i++) {
+					const auto key = cell->hash(c, i);
+					for (auto m = 0; m < cell->linkList[key].size(); m++) {
+						const auto q = cell->linkList[key][m];
+						if (type[q] == BD2) continue;
 #if BD_OPT
-								if (bdOpt(q)) continue;
+						if (bdOpt(q)) continue;
 #endif
-								const auto dr1 = (pos[q] - pLocal[fp]).mag();
-								const auto dr1_m1 = (pos[q] - pLocal[fp - 1]).mag();
-								const auto dr1_p1 = (pos[q] - pLocal[fp + 1]).mag();
-								if (dr1 > re) continue;
-								if (dr1 > dr1_m1 || dr1 > dr1_p1) continue;
-								const auto w = w1(dr1);
-								ww += w;
-								ret[fp] += w * phi[q];
-							}
-						}
+						const auto dr1 = (pos[q] - pLocal[fp]).mag();
+						const auto dr1_m1 = (pos[q] - pLocal[fp - 1]).mag();
+						const auto dr1_p1 = (pos[q] - pLocal[fp + 1]).mag();
+						if (dr1 > re) continue;
+						if (dr1 > dr1_m1 || dr1 > dr1_p1) continue;
+						const auto w = w1(dr1);
+						ww += w;
+						ret[fp] += w * phi[q];
 					}
 				}
 				if (abs(ww) < eps) continue;
@@ -400,26 +350,21 @@ namespace SIM {
 			auto mm = MatPP::Zero();
 			auto vv = MatPD::Zero();
 			const auto c = cell->iCoord(pos[p]);
-			for (auto k = -1; k <= 1; k++) {
-				for (auto j = -1; j <= 1; j++) {
-					for (auto i = -1; i <= 1; i++) {
-						const auto ne = c + iVec(i, j, k);
-						const auto key = cell->hash(ne);
-						for (auto m = 0; m < cell->linkList[key].size(); m++) {
-							const auto q = cell->linkList[key][m];
+			for (auto i = 0; i < cell->blockSize::value; i++) {
+				const auto key = cell->hash(c, i);
+				for (auto m = 0; m < cell->linkList[key].size(); m++) {
+					const auto q = cell->linkList[key][m];
 #if BD_OPT
-							if (bdOpt(p, q)) continue;
+					if (bdOpt(p, q)) continue;
 #endif
-							const auto dr = pos[q] - pos[p];
-							const auto dr1 = dr.mag();
-							if (dr1 > r0) continue;
-							const auto w = w3(dr1);
-							VecP npq;
-							poly(dr, npq);
-							mm += (w* npq)* npq.compose();
-							vv += (w* npq)* (phi[q] - phi[p]).compose();
-						}
-					}
+					const auto dr = pos[q] - pos[p];
+					const auto dr1 = dr.mag();
+					if (dr1 > r0) continue;
+					const auto w = w3(dr1);
+					VecP npq;
+					poly(dr, npq);
+					mm += (w* npq)* npq.compose();
+					vv += (w* npq)* (phi[q] - phi[p]).compose();
 				}
 			}
 			const auto inv = MatPP::Zero();
@@ -462,27 +407,22 @@ namespace SIM {
 			auto mm = MatPP::Zero();
 			auto vv = MatPD::Zero();
 			const auto c = cell->iCoord(pos[p]);
-			for (auto k = -1; k <= 1; k++) {
-				for (auto j = -1; j <= 1; j++) {
-					for (auto i = -1; i <= 1; i++) {
-						const auto ne = c + iVec(i, j, k);
-						const auto key = cell->hash(ne);
-						for (auto m = 0; m < cell->linkList[key].size(); m++) {
-							const auto q = cell->linkList[key][m];
+			for (auto i = 0; i < cell->blockSize::value; i++) {
+				const auto key = cell->hash(c, i);
+				for (auto m = 0; m < cell->linkList[key].size(); m++) {
+					const auto q = cell->linkList[key][m];
 #if BD_OPT
-							if (bdOpt(p, q)) continue;
+					if (bdOpt(p, q)) continue;
 #endif
-							const auto dr = pos[q] - pos[p];
-							if (dr*up < 0) continue;
-							const auto dr1 = dr.mag();
-							if (dr1 > r0) continue;
-							const auto w = w3(dr1);
-							VecP npq;
-							poly(dr, npq);
-							mm += (w* npq)* npq.compose();
-							vv += (w* npq)* (phi[q] - phi[p]).compose();
-						}
-					}
+					const auto dr = pos[q] - pos[p];
+					if (dr*up < 0) continue;
+					const auto dr1 = dr.mag();
+					if (dr1 > r0) continue;
+					const auto w = w3(dr1);
+					VecP npq;
+					poly(dr, npq);
+					mm += (w* npq)* npq.compose();
+					vv += (w* npq)* (phi[q] - phi[p]).compose();
 				}
 			}
 			const auto inv = MatPP::Zero();
@@ -533,25 +473,20 @@ namespace SIM {
 				if (type[p] == BD2) continue;
 				MatPP mm = MatPP::Zero();
 				const auto c = cell->iCoord(pos[p]);
-				for (auto k = -1; k <= 1; k++) {
-					for (auto j = -1; j <= 1; j++) {
-						for (auto i = -1; i <= 1; i++) {
-							const auto ne = c + iVec(i, j, k);
-							const auto key = cell->hash(ne);
-							for (auto m = 0; m < cell->linkList[key].size(); m++) {
-								const auto q = cell->linkList[key][m];
+				for (auto i = 0; i < cell->blockSize::value; i++) {
+					const auto key = cell->hash(c, i);
+					for (auto m = 0; m < cell->linkList[key].size(); m++) {
+						const auto q = cell->linkList[key][m];
 #if BD_OPT
-								if (bdOpt(p, q)) continue;
+						if (bdOpt(p, q)) continue;
 #endif
-								const auto dr = pos[q] - pos[p];
-								const auto dr1 = dr.mag();
-								if (dr1 > r0) continue;
-								const auto w = w3(dr1);
-								VecP npq;
-								poly(dr, npq);
-								mm += (w* npq) * npq.compose();
-							}
-						}
+						const auto dr = pos[q] - pos[p];
+						const auto dr1 = dr.mag();
+						if (dr1 > r0) continue;
+						const auto w = w3(dr1);
+						VecP npq;
+						poly(dr, npq);
+						mm += (w* npq) * npq.compose();
 					}
 				}
 				invMat[p] = MatPP::Zero();

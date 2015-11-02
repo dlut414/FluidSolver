@@ -3,15 +3,17 @@
 #pragma once
 #include <iostream>
 #include <vector>
+#include <unordered_map>
 #include <cassert>
 #include <Eigen/Dense>
 #include "Header.h"
+#include "mMath.h"
 
 namespace SIM {
 
 	template <typename R, unsigned D>
 	class LinkCell {
-		typedef Eigen::Matrix<R,D,1>	vecD;
+		typedef Eigen::Matrix<R,D,1>	VecD;
 		typedef Eigen::Matrix<int,D,1>	iVecD;
 	public:
 		template <typename T>
@@ -24,18 +26,23 @@ namespace SIM {
 		{ template <typename U, typename V> static __forceinline void Gen(const U* const in, V* const out) { out[D_] = static_cast<V>(in[D_]); } };
 
 		template <unsigned D_ = D>	__forceinline const unsigned hash		(const iVecD& c)	const {}
-		template <>					__forceinline const unsigned hash<1>	(const iVecD& c)	const { return unsigned((c.x + 100000) % cNum); }
-		template <>					__forceinline const unsigned hash<2>	(const iVecD& c)	const { return unsigned((c.x + dv.x* c.y + 100000) % cNum); }
-		template <>					__forceinline const unsigned hash<3>	(const iVecD& c)	const { return unsigned((c.x + dv.x* c.y + sheet* c.z + 100000) % cNum); }
+		template <>					__forceinline const unsigned hash<1>	(const iVecD& c)	const { return unsigned((c[0]) % cNum); }
+		template <>					__forceinline const unsigned hash<2>	(const iVecD& c)	const { return unsigned((c[0] + dv[0]* c[1] + 100000) % cNum); }
+		template <>					__forceinline const unsigned hash<3>	(const iVecD& c)	const { return unsigned((c[0] + dv[0]* c[1] + sheet* c[2] + 100000) % cNum); }
 		
-		__forceinline const unsigned hash(const vecD& p) const { return hash( iCoord(p) ); }
-		__forceinline const iVecD iCoord(const vecD& p) const { iVecD ret; Convert<>::Gen(p.data(), ret.data()); return ret; }
+		__forceinline const iVecD iCoord(const VecD& p) const { iVecD ret; Convert<>::Gen(p.data(), ret.data()); return ret; }
+		__forceinline const unsigned hash(const iVecD& c) const { return hash<>(c); }
+		__forceinline const unsigned hash(const VecD& p) const { return hash<>(iCoord(p)); }
+		
+		struct blockSize { enum { value = mMath::Power<3,D>::value, }; };
+		
+		__forceinline const unsigned hash(const iVecD& c, const unsigned& i) const { return hash(c+loopTable.at(i)); }
 
-		void update(const std::vector<vecD>& pos) {
-			for (unsigned i = 0; i < linkList.size(); i++) {
+		void update(const std::vector<VecD>& pos) {
+			for (auto i = 0; i < linkList.size(); i++) {
 				linkList[i].clear();
 			}
-			for (unsigned i = 0; i < pos.size(); i++) {
+			for (auto i = 0; i < pos.size(); i++) {
 				linkList[hash(pos[i])].push_back(i);
 			}
 		}
@@ -46,7 +53,7 @@ namespace SIM {
 
 	private:
 		void init() {
-			vecD v = vecD(box.pMax - box.pMin);
+			VecD v = VecD(box.pMax - box.pMin);
 			for (int d = 0; d < int(D); d++) { dv[d] = int(v[d] / cSize) + 1; dv[d] = dv[d] > 3 ? dv[d] : 3; }
 			cNum = 1;
 			for (int d = 0; d < int(D); d++) { cNum *= unsigned(dv[d]); }
@@ -60,6 +67,30 @@ namespace SIM {
 			linkList.clear();
 			linkList = std::vector< std::vector<unsigned> >(cNum);
 			std::cout << " cell num: " << cNum << std::endl;
+
+			loopTable.clear();
+			switch (D) {
+			case 1:
+				for (auto i = 0; i < 3; i++) {
+					loopTable[i] = iVecD(i - 1);
+				}
+				break;
+			case 2:
+				for (auto i = 0; i < 9; i++) {
+					loopTable[i] = iVecD(i % 3 - 1, i / 3 - 1);
+				}
+				break;
+			case 3:
+				for (auto i = 0; i < 27; i++) {
+					const unsigned z = i / 9;
+					const unsigned y = (i % 9) / 3;
+					const unsigned x = (i % 9) % 3;
+					loopTable[i] = iVecD(x - 1, y - 1, z - 1);
+				}
+				break;
+			default:
+				break;
+			}
 		}
 		void fina() { linkList.clear(); }
 
@@ -68,6 +99,7 @@ namespace SIM {
 		unsigned sheet;
 		unsigned cNum;
 		R cSize;
+		std::unordered_map<unsigned, iVecD> loopTable;
 	};
 
 }

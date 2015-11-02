@@ -14,6 +14,7 @@ namespace SIM {
 	
 	template <typename R, unsigned D, typename Derived>
 	class Particle : public ConsValue<R, D> {
+		typedef Eigen::Matrix<int, D, 1>	iVec;
 		typedef Eigen::Matrix<R, D, 1> vec;
 		typedef Eigen::Matrix<R, 1, 3> vec13;
 		typedef Eigen::Matrix<R, 5, 1> vec5;
@@ -60,7 +61,7 @@ namespace SIM {
 				}
 				file << std::endl;
 			}
-			std::cout << " writing Geo. done " << std::endl;
+			std::cout << " Writing Geo. done. " << std::endl;
 			file.close();
 		}
 		void operator << (std::string str) {
@@ -85,27 +86,22 @@ namespace SIM {
 			pnd.push_back(0.);	pres.push_back(0.);
 			pn.push_back(0);	nbd.push_back(0);
 			fs.push_back(0);	team.push_back(0);	
-			phi.push_back(0.); vort.push_back(vec(0.));
+			phi.push_back(0.); vort.push_back(0.);
 			dash.push_back(vec(0.));
 			norm.push_back(vec(0.));
 		}
 
 		const R cPnd(const unsigned& p) const {
 			R ret = 0.;
-			const iVec3 c = cell->iCoord(pos[p]);
-			for (int k = -1; k <= 1; k++) {
-				for (int j = -1; j <= 1; j++) {
-					for (int i = -1; i <= 1; i++) {
-						const iVec3 ne = c + iVec3(i, j, k);
-						const unsigned key = cell->hash(ne);
-						for (unsigned m = 0; m < cell->linkList[key].size(); m++) {
-							const unsigned q = cell->linkList[key][m];
-							//if (q == p) continue;
-							//if (type[q]==FLUID && (team[p]!=team[q])) continue;
-							const R dr1 = (pos[q] - pos[p]).mag();
-							ret += w1(dr1);
-						}
-					}
+			const iVec c = cell->iCoord(pos[p]);
+			for (auto i = 0; i < cell->blockSize::value; i++) {
+				const auto key = cell->hash(c, i);
+				for (unsigned m = 0; m < cell->linkList[key].size(); m++) {
+					const unsigned q = cell->linkList[key][m];
+					//if (q == p) continue;
+					//if (type[q]==FLUID && (team[p]!=team[q])) continue;
+					const R dr1 = (pos[q] - pos[p]).mag();
+					ret += w1(dr1);
 				}
 			}
 			return ret;
@@ -113,18 +109,13 @@ namespace SIM {
 
 		const R cPnd(const vec& p) const {
 			R ret = 0.;
-			const iVec3 c = cell->iCoord(p);
-			for (int k = -1; k <= 1; k++) {
-				for (int j = -1; j <= 1; j++) {
-					for (int i = -1; i <= 1; i++) {
-						const iVec3 ne = c + iVec3(i, j, k);
-						const unsigned key = cell->hash(ne);
-						for (unsigned m = 0; m < cell->linkList[key].size(); m++) {
-							const unsigned q = cell->linkList[key][m];
-							const R dr1 = (pos[q] - p).norm();
-							ret += w1(dr1);
-						}
-					}
+			const iVec c = cell->iCoord(p);
+			for (auto i = 0; i < cell->blockSize::value; i++) {
+				const auto key = cell->hash(c, i);
+				for (unsigned m = 0; m < cell->linkList[key].size(); m++) {
+					const unsigned q = cell->linkList[key][m];
+					const R dr1 = (pos[q] - p).norm();
+					ret += w1(dr1);
 				}
 			}
 			return ret;
@@ -132,20 +123,15 @@ namespace SIM {
 
 		const R cPn(const unsigned& p) const {
 			R ret = 0;
-			const iVec3 c = cell->iCoord(pos[p]);
-			for (int k = -1; k <= 1; k++) {
-				for (int j = -1; j <= 1; j++) {
-					for (int i = -1; i <= 1; i++) {
-						const iVec3 ne = c + iVec3(i, j, k);
-						const unsigned key = cell->hash(ne);
-						for (unsigned m = 0; m < cell->linkList[key].size(); m++) {
-							const unsigned q = cell->linkList[key][m];
-							if (q == p) continue;
-							const R	dr1 = (pos[q] - pos[p]).norm();
-							//if (dr1 < r0) ret += (isFs(q) ? 0.7 : 1.);
-							if (dr1 < r0) ret += 1.;
-						}
-					}
+			const iVec c = cell->iCoord(pos[p]);
+			for (auto i = 0; i < cell->blockSize::value; i++) {
+				const auto key = cell->hash(c, i);
+				for (unsigned m = 0; m < cell->linkList[key].size(); m++) {
+					const unsigned q = cell->linkList[key][m];
+					if (q == p) continue;
+					const R	dr1 = (pos[q] - pos[p]).norm();
+					//if (dr1 < r0) ret += (isFs(q) ? 0.7 : 1.);
+					if (dr1 < r0) ret += 1.;
 				}
 			}
 			return ret;
@@ -153,19 +139,14 @@ namespace SIM {
 
 		const unsigned cNbd(const unsigned& p) const {
 			unsigned ret = 0;
-			const iVec3 c = cell->iCoord(pos[p]);
-			for (int k = -1; k <= 1; k++) {
-				for (int j = -1; j <= 1; j++) {
-					for (int i = -1; i <= 1; i++) {
-						const iVec3 ne = c + iVec3(i, j, k);
-						const unsigned key = cell->hash(ne);
-						for (unsigned m = 0; m < cell->linkList[key].size(); m++) {
-							const unsigned q = cell->linkList[key][m];
-							const R	dr1 = (pos[q] - pos[p]).norm();
-							if (q == p || dr1 > r0) continue;
-							if (isFs(q)) ret++;
-						}
-					}
+			const iVec c = cell->iCoord(pos[p]);
+			for (auto i = 0; i < cell->blockSize::value; i++) {
+				const auto key = cell->hash(c, i);
+				for (unsigned m = 0; m < cell->linkList[key].size(); m++) {
+					const unsigned q = cell->linkList[key][m];
+					const R	dr1 = (pos[q] - pos[p]).norm();
+					if (q == p || dr1 > r0) continue;
+					if (isFs(q)) ret++;
 				}
 			}
 			return ret;
@@ -198,19 +179,14 @@ namespace SIM {
 			if (team[p] != 0) return;
 			if (type[p] == BD1) { team[p] = t; return; }
 			team[p] = t;
-			const iVec3 c = cell->iCoord(pos[p]);
-			for (int k = -1; k <= 1; k++) {
-				for (int j = -1; j <= 1; j++) {
-					for (int i = -1; i <= 1; i++) {
-						const iVec3 ne = c + iVec3(i, j, k);
-						const unsigned key = cell->hash(ne);
-						for (unsigned m = 0; m < cell->linkList[key].size(); m++) {
-							const unsigned q = cell->linkList[key][m];
-							const R	dr1 = (pos[q] - pos[p]).norm();
-							if (q == p || dr1 > 2.*dp) continue;
-							dfs(q, t);
-						}
-					}
+			const iVec c = cell->iCoord(pos[p]);
+			for (auto i = 0; i < cell->blockSize::value; i++) {
+				const auto key = cell->hash(c, i);
+				for (unsigned m = 0; m < cell->linkList[key].size(); m++) {
+					const unsigned q = cell->linkList[key][m];
+					const R	dr1 = (pos[q] - pos[p]).norm();
+					if (q == p || dr1 > 2.*dp) continue;
+					dfs(q, t);
 				}
 			}
 			return;
@@ -222,21 +198,16 @@ namespace SIM {
 				if (type[p] != BD2) continue;
 				auto tmpdr = std::numeric_limits<R>::infinity();
 				unsigned tmpbb = 0;
-				const iVec3 c = cell->iCoord(pos[p]);
-				for (int k = -1; k <= 1; k++) {
-					for (int j = -1; j <= 1; j++) {
-						for (int i = -1; i <= 1; i++) {
-							const iVec3 ne = c + iVec3(i, j, k);
-							const unsigned key = cell->hash(ne);
-							for (unsigned m = 0; m < cell->linkList[key].size(); m++) {
-								const unsigned q = cell->linkList[key][m];
-								if (q == p || type[q] != BD1) continue;
-								const auto dr1 = (pos[q] - pos[p]).norm();
-								if (dr1 < tmpdr) {
-									tmpdr = dr1;
-									tmpbb = q;
-								}
-							}
+				const iVec c = cell->iCoord(pos[p]);
+				for (auto i = 0; i < cell->blockSize::value; i++) {
+					const auto key = cell->hash(c, i);
+					for (unsigned m = 0; m < cell->linkList[key].size(); m++) {
+						const unsigned q = cell->linkList[key][m];
+						if (q == p || type[q] != BD1) continue;
+						const auto dr1 = (pos[q] - pos[p]).norm();
+						if (dr1 < tmpdr) {
+							tmpdr = dr1;
+							tmpbb = q;
 						}
 					}
 				}
@@ -284,25 +255,20 @@ namespace SIM {
 			if (type[p] == BD2) return 0;
 			if (pnd[p] > (beta * n0)) return 0;
 			mat mm = mat(0.);
-			const iVec3 c = cell->iCoord(pos[p]);
-			for (int k = -1; k <= 1; k++) {
-				for (int j = -1; j <= 1; j++) {
-					for (int i = -1; i <= 1; i++) {
-						const iVec3 ne = c + iVec3(i, j, k);
-						const unsigned key = cell->hash(ne);
-						for (unsigned m = 0; m < cell->linkList[key].size(); m++) {
-							const unsigned q = cell->linkList[key][m];
-							if (q == p) continue;
-							const vec	dr = pos[q] - pos[p];
-							const R	dr1 = dr.norm();
-							if (dr1 > r0) continue;
-							const R  w = w2(dr1);
-							const vec	npq = dr / dr1;
-							mm.x += w * npq.x * npq;
-							mm.y += w * npq.y * npq;
-							mm.z += w * npq.z * npq;
-						}
-					}
+			const iVec c = cell->iCoord(pos[p]);
+			for (auto i = 0; i < cell->blockSize::value; i++) {
+				const auto key = cell->hash(c, i);
+				for (unsigned m = 0; m < cell->linkList[key].size(); m++) {
+					const unsigned q = cell->linkList[key][m];
+					if (q == p) continue;
+					const vec	dr = pos[q] - pos[p];
+					const R	dr1 = dr.norm();
+					if (dr1 > r0) continue;
+					const R  w = w2(dr1);
+					const vec	npq = dr / dr1;
+					mm.x += w * npq.x * npq;
+					mm.y += w * npq.y * npq;
+					mm.z += w * npq.z * npq;
 				}
 			}
 			mm = (D / n0) * mm;
@@ -322,7 +288,7 @@ namespace SIM {
 			for (int k = -1; k <= 1; k++) {
 				for (int j = -1; j <= 1; j++) {
 					for (int i = -1; i <= 1; i++) {
-						const iVec3 ne = c + iVec3(i, j, k);
+						const iVec ne = c + iVec(i, j, k);
 						const unsigned key = cell->hash(ne);
 						for (unsigned m = 0; m < cell->linkList[key].size(); m++) {
 							const unsigned q = cell->linkList[key][m];
@@ -419,7 +385,7 @@ namespace SIM {
 		std::vector<int> fs;
 		std::vector<int> team;
 		std::vector<R> phi;
-		std::vector<vec> vort;
+		std::vector<R> vort;
 		std::map<unsigned, vec> bdnorm;
 		std::map<unsigned, R> neumann;
 		std::map<unsigned, unsigned> bbMap;

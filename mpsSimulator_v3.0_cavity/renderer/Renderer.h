@@ -7,22 +7,8 @@
 */
 #pragma once
 #include <cstdio>
-//#include "Mps.h"
-//#include "DFMps.h"
-//#include "Mls_2d_a.h"
-//#include "Mls_2d_b.h"
-//#include "Mls_2d_c.h"
-//#include "Mls_2d_d.h"
-//#include "Mls_2d_e.h"
-//#include "Mls_2d_f.h"
-//#include "Mls_2d_g.h"
-//#include "Mls_2d_h.h"
-//#include "Mls_2d_i.h"
-#include "Mls_2d_i_euler.h"
-//#include "Mls_2d_j_euler.h"
-//#include "Mls_2d_i_cst.h"
-//#include "Mls_2d_j.h"
 //#include "Mls_2d_e_exp.h"
+#include "FractionalStep_x.h"
 #include "Header.h"
 #include "Controller.h"
 #include "DrawSim.h"
@@ -30,7 +16,7 @@
 
 namespace REN {
 
-	typedef SIM::Mls_2d_i_euler<double, TWOD> Sim;
+	typedef SIM::FractionalStep_x<double,2,2> Sim;
 	Sim* simObj;
 	DrawSim* renObj;
 	Controller stateObj;

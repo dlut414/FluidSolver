@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 #include <random>
-#include "header.h"
+#include "Header.h"
 #include "Parameter.h"
 #include "Particle.h"
 #include "MatSolver.h"
@@ -52,7 +52,9 @@ namespace SIM {
 		void init() {
 			derived().init_();
 			mSol = new MatSolver<R, D>(unsigned(derived().part->np), para.eps);
-			//bvp = new Bvp<R>(sinu_b);
+#if BVP
+			bvp = new Bvp<R>(sinu_b);
+#endif
 			std::cout << "	Particle number	:	" << derived().part->np << std::endl;
 			sen << "Sensor.in";
 			R tmp = cfl();
@@ -151,7 +153,7 @@ namespace SIM {
 		void visTerm_i() {}
 		void presTerm_e() {}
 		void presTerm_i() {}
-
+#if LEGACY
 		void makeDirichlet_p_op() {
 			auto* const part = derived().part;
 			for (int p = 0; p<int(part->np); p++) {
@@ -176,7 +178,7 @@ namespace SIM {
 			d.setFromTriplets(coef.begin(), coef.end());
 			mSol->a = mSol->a + d;
 		}
-
+#endif
 		void makeDirchlet_v() {}
 
 		void makeNeumann_p() {
@@ -225,18 +227,8 @@ namespace SIM {
 #endif
 			for (int p = 0; p < int(part->np); p++) {
 				if (part->type[p] != FLUID) continue;
-				switch (D) {
-				case TWOD:
-					part->vel2[p].x = mSol->u[D*p];
-					part->vel2[p].z = mSol->u[D*p + 1];
-					break;
-				case THREED:
-					part->vel2[p].x = mSol->u[D*p];
-					part->vel2[p].y = mSol->u[D*p + 1];
-					part->vel2[p].z = mSol->u[D*p + 2];
-					break;
-				default:
-					break;
+				for (auto d = 0; d < D; d++) {
+					part->vel2[p][d] = mSol->u[D*p + d];
 				}
 			}
 		}
@@ -339,24 +331,19 @@ namespace SIM {
 			for (int p = 0; p < int(part->np); p++) {
 				if (part->type[p] != FLUID || !part->isFs(p)) continue;
 				const auto c = part->cell->iCoord(part->pos[p]);
-				for (auto k = -1; k <= 1; k++) {
-					for (auto j = -1; j <= 1; j++) {
-						for (auto i = -1; i <= 1; i++) {
-							const auto ne = c + iVec3(i, j, k);
-							const auto key = part->cell->hash(ne);
-							for (auto m = 0; m < part->cell->linkList[key].size(); m++) {
-								const auto q = part->cell->linkList[key][m];
-								if (!part->isFs(q)) continue;
-								if (q == p) continue;
-								const auto dr = part->pos[q] - part->pos[p];
-								const auto dv = part->vel1[q] - part->vel1[p];
-								const auto dr1 = dr.mag();
-								if (dr1 > part->r0) continue;
-								const auto pro = dv*dr / dr1;
-								if (abs(pro) > 0.8*para.umax) {
-									cor[p] += 0.5* abs(pro)* dv.norm();
-								}
-							}
+				for (auto i = 0; i < cell->blockSize::value; i++) {
+					const auto key = cell->hash(c, i);
+					for (auto m = 0; m < part->cell->linkList[key].size(); m++) {
+						const auto q = part->cell->linkList[key][m];
+						if (!part->isFs(q)) continue;
+						if (q == p) continue;
+						const auto dr = part->pos[q] - part->pos[p];
+						const auto dv = part->vel1[q] - part->vel1[p];
+						const auto dr1 = dr.mag();
+						if (dr1 > part->r0) continue;
+						const auto pro = dv*dr / dr1;
+						if (abs(pro) > 0.8*para.umax) {
+							cor[p] += 0.5* abs(pro)* dv.norm();
 						}
 					}
 				}
@@ -375,27 +362,22 @@ namespace SIM {
 #if OMP
 #pragma omp parallel for
 #endif
-			for(int p = 0; p<int(part->np); p++) {
+			for (int p = 0; p<int(part->np); p++) {
 				if (part->type[p] != FLUID) continue;
 				const auto c = part->cell->iCoord(part->pos[p]);
-				for (int k = -1; k <= 1; k++) {
-					for (int j = -1; j <= 1; j++) {
-						for (int i = -1; i <= 1; i++) {
-							const auto ne = c + iVec3(i, j, k);
-							const auto key = part->cell->hash(ne);
-							for (unsigned m = 0; m < part->cell->linkList[key].size(); m++) {
-								const auto q = part->cell->linkList[key][m];
-								if (p == q) continue;
-								const auto dr = part->pos[q] - part->pos[p];
-								const auto dr1 = dr.mag();
-								if (dr1 < 0.5*part->dp) {
-									const auto dv = part->vel1[q] - part->vel1[p];
-									const auto tmp = dr*dv;
-									if (tmp < 0.) {
-										const auto coef = (0.5 / (dr1*dr1)*tmp*(1. + 0.2));
-										cor[p] += coef* dr;
-									}
-								}
+				for (auto i = 0; i < cell->blockSize::value; i++) {
+					const auto key = cell->hash(c, i);
+					for (unsigned m = 0; m < part->cell->linkList[key].size(); m++) {
+						const auto q = part->cell->linkList[key][m];
+						if (p == q) continue;
+						const auto dr = part->pos[q] - part->pos[p];
+						const auto dr1 = dr.mag();
+						if (dr1 < 0.5*part->dp) {
+							const auto dv = part->vel1[q] - part->vel1[p];
+							const auto tmp = dr*dv;
+							if (tmp < 0.) {
+								const auto coef = (0.5 / (dr1*dr1)*tmp*(1. + 0.2));
+								cor[p] += coef* dr;
 							}
 						}
 					}
@@ -477,7 +459,7 @@ namespace SIM {
 			std::cout << " max phi: " << phi << " --- id: " << id << std::endl;
 			//std::cout << " max pres: " << prema << " --- min pres: " << premi << std::endl;
 		}
-
+#if BVP
 		void bvpSource() {
 			const auto* const part = derived().part;
 			for (auto p = 0; p < part->np; p++) {
@@ -557,6 +539,7 @@ namespace SIM {
 			file << part->dp << " " << err << std::endl;
 			file.close();
 		}
+#endif
 
 		void insertRand() {
 			auto* const part = derived().part;
@@ -573,7 +556,9 @@ namespace SIM {
 	protected:
 		int timeStep;
 		Timer tim;
+#if BVP
 		Bvp<R>* bvp;
+#endif
 
 	};
 
