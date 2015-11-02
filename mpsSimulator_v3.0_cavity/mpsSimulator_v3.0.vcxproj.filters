@@ -159,6 +159,9 @@
     <ClInclude Include="src\Header.h">
       <Filter>Header Files\SIM</Filter>
     </ClInclude>
+    <ClInclude Include="src\FractionalStep_x.h">
+      <Filter>Header Files\SIM\Simulator</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="renderer\shader0\fragment.glsl">
