@@ -45,13 +45,13 @@ namespace SIM {
 			pnd.clear(); pres.clear(); pn.clear(); nbd.clear(); fs.clear();
 			team.clear(); phi.clear(); vort.clear(); dash.clear(); norm.clear();
 		}
-		void operator >> (std::string str) const {
+		void operator >> (const std::string str) const {
 			std::ofstream file(str, std::ofstream::out);
 			file << std::scientific << std::setprecision(6) << ct << std::endl;
 			file << std::scientific << std::setprecision(6) << dp << std::endl;
 			file << np << " " << bd1 << " " << bd2 << std::endl;
 			for (unsigned p = 0; p < np; p++) {
-				filt << std::scientific << std::setprecision(6);
+				file << std::scientific << std::setprecision(6);
 				file << type[p] << " ";
 				for (int d = 0; d < D; d++) {
 					file << pos[p][d] << " ";
@@ -64,10 +64,10 @@ namespace SIM {
 			std::cout << " Writing Geo. done. " << std::endl;
 			file.close();
 		}
-		void operator << (std::string str) {
+		void operator << (const std::string str) {
 			int n;	 int t;		vec p;		vec	v;
 			std::ifstream file(str);
-			if (!file.is_open()) std::cout << " no file Geo. found ! " << std::endl;
+			if (!file.is_open()) std::cout << " File Geo. not found ! " << std::endl;
 			file >> ct >> dp >> np >> bd1 >> bd2;
 			n = np;
 			while (n-- > 0) {
@@ -87,8 +87,8 @@ namespace SIM {
 			pn.push_back(0);	nbd.push_back(0);
 			fs.push_back(0);	team.push_back(0);	
 			phi.push_back(0.); vort.push_back(0.);
-			dash.push_back(vec(0.));
-			norm.push_back(vec(0.));
+			dash.push_back(vec::Zero());
+			norm.push_back(vec::Zero());
 		}
 
 		const R cPnd(const unsigned& p) const {
@@ -100,7 +100,7 @@ namespace SIM {
 					const unsigned q = cell->linkList[key][m];
 					//if (q == p) continue;
 					//if (type[q]==FLUID && (team[p]!=team[q])) continue;
-					const R dr1 = (pos[q] - pos[p]).mag();
+					const R dr1 = (pos[q] - pos[p]).norm();
 					ret += w1(dr1);
 				}
 			}
@@ -158,7 +158,7 @@ namespace SIM {
 				b += pos[p];
 			}
 			b.Expand(0.1);
-			cell = new LinkCell<R>(b, r0);
+			cell = new LinkCell<R,D>(b, r0);
 			updateCell();
 		}
 		inline void updateCell() {
@@ -224,7 +224,7 @@ namespace SIM {
 			for (const auto& p : bbMap) {
 				const auto n = pos[p.second] - pos[p.first];
 				const auto tmp = bdnorm.at(p.second);
-				if(tmp.mag() < n.mag())bdnorm[p.second] = n;
+				if(tmp.norm() < n.norm())bdnorm[p.second] = n;
 			}
 			for (const auto& p : bbMap) {
 				bdnorm[p.second] = bdnorm.at(p.second).normalized();
@@ -390,7 +390,7 @@ namespace SIM {
 		std::map<unsigned, R> neumann;
 		std::map<unsigned, unsigned> bbMap;
 
-		LinkCell<R>*		cell;
+		LinkCell<R,D>* cell;
 
 	private:
 	};

@@ -93,15 +93,6 @@
     <ClInclude Include="common\Bitmap.h">
       <Filter>Header Files\common</Filter>
     </ClInclude>
-    <ClInclude Include="common\iVec3.h">
-      <Filter>Header Files\common</Filter>
-    </ClInclude>
-    <ClInclude Include="common\Mat3.h">
-      <Filter>Header Files\common</Filter>
-    </ClInclude>
-    <ClInclude Include="common\Point.h">
-      <Filter>Header Files\common</Filter>
-    </ClInclude>
     <ClInclude Include="common\Timer.h">
       <Filter>Header Files\common</Filter>
     </ClInclude>
@@ -109,12 +100,6 @@
       <Filter>Header Files\common</Filter>
     </ClInclude>
     <ClInclude Include="common\TypeX.h">
-      <Filter>Header Files\common</Filter>
-    </ClInclude>
-    <ClInclude Include="common\Vec3.h">
-      <Filter>Header Files\common</Filter>
-    </ClInclude>
-    <ClInclude Include="common\Vector.h">
       <Filter>Header Files\common</Filter>
     </ClInclude>
     <ClInclude Include="src\Particle_2d_i.h">

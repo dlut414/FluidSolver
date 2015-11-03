@@ -176,14 +176,9 @@
   <ItemGroup>
     <ClInclude Include="common\BBox.h" />
     <ClInclude Include="common\Bitmap.h" />
-    <ClInclude Include="common\iVec3.h" />
-    <ClInclude Include="common\Mat3.h" />
-    <ClInclude Include="common\Point.h" />
     <ClInclude Include="common\Timer.h" />
     <ClInclude Include="common\TimeX.h" />
     <ClInclude Include="common\TypeX.h" />
-    <ClInclude Include="common\Vec3.h" />
-    <ClInclude Include="common\Vector.h" />
     <ClInclude Include="renderer\Camera.h" />
     <ClInclude Include="renderer\Controller.h" />
     <ClInclude Include="renderer\DrawSim.h" />

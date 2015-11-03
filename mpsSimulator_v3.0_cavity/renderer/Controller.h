@@ -22,8 +22,8 @@ namespace REN {
 			m_rotation = m_initRotation = glm::angleAxis<float>(-glm::pi<float>() * 0.f, glm::vec3(1, 0, 0));;
 			m_pan = m_initPan = glm::vec3(0.f, 0.f, 0.f);
 
-			m_initCameraPosition = glm::vec3(0.5f, -1.5f, 0.5f);
-			m_initCameraRotation = glm::angleAxis<float>(glm::pi<float>() * 0.5f, glm::vec3(1, 0, 0));
+			m_initCameraPosition = glm::vec3(0.5f, 0.5f, 1.5f);
+			m_initCameraRotation = glm::angleAxis<float>(glm::pi<float>() * 0.0f, glm::vec3(1, 0, 0));
 
 			f_pointRadius = 2.0f;
 			f_pointScale = 1.0f;

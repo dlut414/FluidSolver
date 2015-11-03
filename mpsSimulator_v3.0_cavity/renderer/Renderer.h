@@ -14,12 +14,20 @@
 #include "DrawSim.h"
 #include "Bitmap.h"
 
-namespace REN {
+struct Parameters {
+	typedef double DataType;
+	enum { Dim = 2, };
+	enum { Order = 2, };
+};
 
-	typedef SIM::FractionalStep_x<double,2,2> Sim;
-	Sim* simObj;
-	DrawSim* renObj;
-	Controller stateObj;
+typedef SIM::FractionalStep_x<Parameters::DataType, Parameters::Dim, Parameters::Order> Sim;
+typedef REN::DrawSim<Parameters::DataType, Parameters::Dim> Ren;
+
+Ren* renObj;
+Sim* simObj;
+REN::Controller stateObj;
+
+namespace REN {
 
 	void InitGL(int argc, char** argv);
 	void MainLoop();
@@ -72,7 +80,7 @@ namespace REN {
 		simObj = new Sim;
 		*simObj << "para.txt";
 		simObj->init();
-		renObj = new DrawSim(&stateObj);
+		renObj = new Ren(&stateObj);
 		renObj->init();
 	}
 
@@ -154,13 +162,7 @@ namespace REN {
 		stateObj.m_mvp = stateObj.m_projectionMat * stateObj.m_viewModelMat;
 		stateObj.m_mvpInv = glm::inverse(stateObj.m_mvp);
 
-		renObj->draw(
-			unsigned(simObj->part->pos.size()), 
-			(int*)(simObj->part->type.data()), 
-			simObj->part->pos.data(), 
-			simObj->part->vort.data(), 
-			simObj->part->pres.data()
-			);
+		renObj->draw(simObj->part->type, simObj->part->pos, simObj->part->vort, simObj->part->pres);
 
 		glutSwapBuffers();
 		glutReportErrors();

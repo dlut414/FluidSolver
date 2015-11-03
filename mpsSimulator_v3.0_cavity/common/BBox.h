@@ -86,7 +86,7 @@ public:
 		return ret;
     }
 
-    void Expand(const real& s) {
+    void Expand(const R& s) {
         vec v = s * (pMax - pMin);
         pMax += v;
         pMin -= v;

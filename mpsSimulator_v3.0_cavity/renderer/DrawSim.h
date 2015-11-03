@@ -15,8 +15,12 @@
 
 namespace REN {
 
+	template <typename R, unsigned D>
 	class DrawSim : public Draw_ {
-		typedef Vec3<double> vec;
+		typedef Eigen::Matrix<R,D,1> VecD;
+		template <typename R_ = R>	struct DataType {};
+		template <>					struct DataType<float>	{ enum { value = GL_FLOAT, }; };
+		template <>					struct DataType<double>	{ enum { value = GL_DOUBLE, }; };
 	public:
 		DrawSim(Controller* state) : Draw_(state) {}
 		~DrawSim() {}
@@ -32,7 +36,9 @@ namespace REN {
 			initShader();
 		}
 
-		void draw(unsigned numVert, int* type, vec* vert, vec* vel, double* scal) {
+		template <typename I, typename T1, typename T2>
+		void draw(const std::vector<I>& type, const std::vector<VecD>& vert, const std::vector<T1>& s1, const std::vector<T2>& s2) const {
+			auto num = vert.size();
 			///clear framebuffer
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) printf("fbo_def not ready\n");
@@ -59,27 +65,27 @@ namespace REN {
 			glUniformMatrix4fv(shaderObj.matrixID[1], 1, GL_FALSE, &(Draw_::stateObj->m_mvpInv[0][0]));
 
 			glBindBuffer(GL_ARRAY_BUFFER, Draw_::vbo[0]);
-			glBufferData(GL_ARRAY_BUFFER, numVert*sizeof(int), type, GL_STATIC_DRAW);
-			glVertexAttribPointer(0, 1, GL_FLOAT, GL_FALSE, 0, (void*)0);
+			glBufferData(GL_ARRAY_BUFFER, num*sizeof(I), type.data(), GL_STATIC_DRAW);
+			glVertexAttribPointer(0, 1, GL_INT, GL_FALSE, 0, (void*)0);
 
 			glBindBuffer(GL_ARRAY_BUFFER, Draw_::vbo[1]);
-			glBufferData(GL_ARRAY_BUFFER, numVert*sizeof(vec), vert, GL_STATIC_DRAW);
-			glVertexAttribPointer(1, 3, GL_DOUBLE, GL_FALSE, 0, (void*)0);
+			glBufferData(GL_ARRAY_BUFFER, num*sizeof(VecD), vert.data(), GL_STATIC_DRAW);
+			glVertexAttribPointer(1, D, DataType<>::value, GL_FALSE, 0, (void*)0);
 
 			glBindBuffer(GL_ARRAY_BUFFER, Draw_::vbo[2]);
-			glBufferData(GL_ARRAY_BUFFER, numVert*sizeof(vec), vel, GL_STATIC_DRAW);
-			glVertexAttribPointer(2, 3, GL_DOUBLE, GL_FALSE, 0, (void*)0);
+			glBufferData(GL_ARRAY_BUFFER, num*sizeof(T1), s1.data(), GL_STATIC_DRAW);
+			glVertexAttribPointer(2, sizeof(T1)/sizeof(R), DataType<>::value, GL_FALSE, 0, (void*)0);
 
 			glBindBuffer(GL_ARRAY_BUFFER, Draw_::vbo[3]);
-			glBufferData(GL_ARRAY_BUFFER, numVert*sizeof(double), scal, GL_STATIC_DRAW);
-			glVertexAttribPointer(3, 1, GL_DOUBLE, GL_FALSE, 0, (void*)0);
+			glBufferData(GL_ARRAY_BUFFER, num*sizeof(T2), s2.data(), GL_STATIC_DRAW);
+			glVertexAttribPointer(3, sizeof(T1)/sizeof(R), DataType<>::value, GL_FALSE, 0, (void*)0);
 
 			glEnableVertexAttribArray(0);
 			glEnableVertexAttribArray(1);
 			glEnableVertexAttribArray(2);
 			glEnableVertexAttribArray(3);
 
-			glDrawArrays(GL_POINTS, 0, numVert);
+			glDrawArrays(GL_POINTS, 0, (GLsizei)num);
 
 			glDisableVertexAttribArray(0);
 			glDisableVertexAttribArray(1);
