@@ -8,24 +8,24 @@
 #include <Eigen/OrderingMethods>
 #include "header.h"
 
-#define AUGMENT 1
+#define AUGMENT (1)
 #define AG AUGMENT
 
 namespace SIM {
 
-	template <typename real, enum Dim dim>
+	template <typename R, unsigned D>
 	class MatSolver {
-		typedef Eigen::Triplet<real> tpl;
-		typedef Eigen::Matrix<real, Eigen::Dynamic, 1> dVec;
-		typedef Eigen::SparseMatrix<real, Eigen::RowMajor> sMat;
+		typedef Eigen::Triplet<R> tpl;
+		typedef Eigen::Matrix<R,Eigen::Dynamic,1> dVec;
+		typedef Eigen::SparseMatrix<R, Eigen::RowMajor> sMat;
 #if AUGMENT
-		typedef Eigen::IncompleteLUT<real> preconditioner;
+		typedef Eigen::IncompleteLUT<R> preconditioner;
 #else
-		typedef Eigen::DiagonalPreconditioner<real> preconditioner;
+		typedef Eigen::DiagonalPreconditioner<R> preconditioner;
 #endif
 	public:
-		MatSolver(const unsigned& _n, const real& e) 
-			: n(_n), a(_n+AG,_n+AG), x(_n+AG), b(_n+AG), au(dim*_n,dim*_n), u(dim*_n), rhs(dim*_n), eps(e)
+		MatSolver(const unsigned& _n, const R& e) 
+			: n(_n), a(_n+AG,_n+AG), x(_n+AG), b(_n+AG), au(D*_n,D*_n), u(D*_n), rhs(D*_n), eps(e)
 		{ 
 			init();
 		}
@@ -121,7 +121,7 @@ namespace SIM {
 	public:
 		unsigned n;
 		int maxIter;
-		real eps;
+		R eps;
 		sMat a, au;
 		dVec x, b, u, rhs;
 		Eigen::BiCGSTAB< sMat, preconditioner > solverBiCg;
@@ -133,7 +133,7 @@ namespace SIM {
 			for (unsigned i = 0; i < n; i++) {
 				x[i] = b[i] = 0.;
 			}
-			for (unsigned i = 0; i < dim*n; i++) {
+			for (unsigned i = 0; i < D*n; i++) {
 				u[i] = rhs[i] = 0.;
 			}
 #if AUGMENT

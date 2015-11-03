@@ -6,8 +6,7 @@
 #include <tchar.h>
 #include <omp.h>
 #include <Eigen/Core>
-#include "header.h"
-#include "Mps.h"
+#include "Header.h"
 #include "renderer/Renderer.h"
 
 int _tmain(int argc, _TCHAR* argv[]) {
@@ -16,7 +15,7 @@ int _tmain(int argc, _TCHAR* argv[]) {
 
 	omp_set_num_threads(NTHREAD);
 	Eigen::setNbThreads(NTHREAD);
-	std::cout << Eigen::nbThreads() << std::endl;
+	std::cout << "	Working Cores:	" << Eigen::nbThreads() << std::endl;
 
 	REN::InitGL(argc, (char**)argv);
 	REN::initOBJ();

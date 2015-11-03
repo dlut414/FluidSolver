@@ -35,16 +35,16 @@ namespace SIM {
 			std::ifstream file(str);
 			if (!file.is_open()) std::cout << " No file Para. found ! " << std::endl;
 			file >> para.k >> para.rho >> para.niu >> para.dtMax >> para.cfl >> para.tt >> para.eps >> para.beta >> para.alpha >> para.c;
-			std::cout << "	Effective radius (times of dp)	:	" << para.k << std::endl;
-			std::cout << "	Density (kg/m3)					:	" << para.rho << std::endl;
-			std::cout << "	Kinematic viscosity (m2/s)		:	" << para.niu << std::endl;
-			std::cout << "	Maximum time step (s)			:	" << para.dtMax << std::endl;
-			std::cout << "	CFL number						:	" << para.cfl << std::endl;
-			std::cout << "	Total time (s)					:	" << para.tt << std::endl;
-			std::cout << "	EPS								:	" << para.eps << std::endl;
-			std::cout << "	Beta of surface detection		:	" << para.beta << std::endl;
-			std::cout << "	Re-meshing effective radius		:	" << para.alpha << std::endl;
-			std::cout << "	Scaling of re-meshing strength	:	" << para.c << std::endl;
+			std::cout << " Effective radius (times of dp)   : " << para.k << std::endl;
+			std::cout << " Density (kg/m3)                  : " << para.rho << std::endl;
+			std::cout << " Kinematic viscosity (m2/s)       : " << para.niu << std::endl;
+			std::cout << " Maximum time step (s)            : " << para.dtMax << std::endl;
+			std::cout << " CFL number                       : " << para.cfl << std::endl;
+			std::cout << " Total time (s)                   : " << para.tt << std::endl;
+			std::cout << " EPS                              : " << para.eps << std::endl;
+			std::cout << " Beta of surface detection        : " << para.beta << std::endl;
+			std::cout << " Re-meshing effective radius      : " << para.alpha << std::endl;
+			std::cout << " Scaling of re-meshing strength   : " << para.c << std::endl;
 			std::cout << " Reading Para. done " << std::endl;
 			file.close();
 		}
@@ -115,7 +115,7 @@ namespace SIM {
 			auto count = 0;
 			for (int p = 0; p<int(part->np); p++) {
 				if (part->type[p] == FLUID || part->type[p] == BD1) {
-					sum += part->vel2[p].mag2();
+					sum += part->vel2[p].squaredNorm();
 					count++;
 				}
 			}
@@ -141,10 +141,10 @@ namespace SIM {
 		void fina() {}
 
 	public:
-		Parameter<R> para;
-		MatSolver<R, D>* mSol;
-		Shifter<R, D> shi;
-		Sensor<R> sen;
+		Parameter<R,D> para;
+		MatSolver<R,D>* mSol;
+		Shifter<R,D> shi;
+		Sensor<R,D> sen;
 
 	protected:
 		void step() {}
@@ -236,8 +236,8 @@ namespace SIM {
 		R cfl() {
 			R umax = 0.;
 			const auto* const part = derived().part;
-			for (auto p = 0; p < part->np; p++) {
-				R tmp = part->vel1[p].mag();
+			for (unsigned p = 0; p < part->np; p++) {
+				R tmp = part->vel1[p].norm();
 				if (tmp > umax) umax = tmp;
 			}
 			para.umax = umax;
@@ -440,7 +440,7 @@ namespace SIM {
 				//		}
 				//	}
 				//}
-				const R v = part->vel1[p].mag();
+				const R v = part->vel1[p].norm();
 				if (v > vel) {
 					vel = v;
 					iv = p;

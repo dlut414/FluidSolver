@@ -12,7 +12,7 @@ namespace mMath {
 	template <typename R, unsigned N>	struct PowerR		{ static __forceinline R Gen(const R& x) { return x*PowerR<R,N-1>::Gen(x); } };
 	template <typename R>				struct PowerR<R,0>	{ static __forceinline R Gen(const R& x) { return 1; } };
 
-	template <unsigned N>	struct Factorial	{ enum { value = N* Factorial<N - 1>::value, }; };
+	template <unsigned N>	struct Factorial	{ enum { value = N* Factorial<N-1>::value, }; };
 	template <>				struct Factorial<0> { enum { value = 1, }; };
 
 	template <unsigned N, unsigned M>

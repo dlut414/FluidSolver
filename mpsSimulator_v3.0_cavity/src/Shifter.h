@@ -9,29 +9,28 @@
 
 namespace SIM {
 
-	template <class real, enum Dim dim>
+	template <class R, unsigned D>
 	class Shifter {
-		typedef Vec3<real> vec;
-		typedef Mat3<real> mat;
-		typedef Eigen::Matrix<real, dim, dim> matEi;
+		typedef Eigen::Matrix<R,D,1> Vec;
+		typedef Eigen::Matrix<R,D,D> Mat;
 	public:
 		Shifter() {}
 		~Shifter() {}
 
-		template <class R, enum Dim D, class Der>
-		void shiftNearest2d(Particle<R, D, Der>* const part, const Parameter<R>& para) const {
-			std::vector<vec> dp(part->pos);
-			std::vector<vec> tmp(part->np, vec(0.));
+		template <class R, unsigned D, class Der>
+		void shiftNearest2d(Particle<R,D,Der>* const part, const Parameter<R,D>& para) const {
+			std::vector<Vec> dp(part->pos);
+			std::vector<Vec> tmp(part->np, Vec(0));
 			for (int loop = 0; loop < 1; loop++) {
 #if OMP
 #pragma omp parallel for
 #endif
 				for (int p = 0; p < int(part->np); p++) {
 					if (part->type[p] != FLUID) continue;
-					const auto inf = std::numeric_limits<real>::max();
+					const auto inf = std::numeric_limits<R>::max();
 					std::list<int> knn(8, 0);
-					std::list<real> knd(8, inf);
-					//auto gc = vec(0., 0., 0.);
+					std::list<R> knd(8, inf);
+					//auto gc = Vec(0., 0., 0.);
 					const auto c = part->cell->iCoord(part->pos[p]);
 					for (auto k = -1; k <= 1; k++) {
 						for (auto j = -1; j <= 1; j++) {
@@ -45,7 +44,7 @@ namespace SIM {
 									const auto dr2 = dr.mag2();
 									if (dr2 > part->r0*part->r0) continue;
 									std::list<int>::iterator it1 = knn.begin();
-									std::list<real>::iterator it2 = knd.begin();
+									std::list<R>::iterator it2 = knd.begin();
 									for (; it1 != knn.end(); ++it1, ++it2) {
 										if (dr2 < *it2) {
 											knn.insert(it1, q);
@@ -59,7 +58,7 @@ namespace SIM {
 							}
 						}
 					}
-					auto dpq = vec(0., 0., 0.);
+					auto dpq = Vec(0., 0., 0.);
 					for (std::list<int>::iterator it = knn.begin(); it != knn.end(); ++it) {
 						const auto dr = part->pos[*it] - part->pos[p];
 						const auto dr1 = dr.mag();
@@ -100,19 +99,19 @@ namespace SIM {
 			}
 		}
 
-		template <class R, enum Dim D, class Der>
-		void shiftPnd(Particle<R, D, Der>* part, Parameter<R>& para) const {
-			std::vector<vec> dn(part->np, vec(0.));
+		template <class R, unsigned D, class Der>
+		void shiftPnd(Particle<R,D,Der>* part, Parameter<R,D>& para) const {
+			std::vector<Vec> dn(part->np, Vec(0.));
 			for (unsigned p = 0; p < part->pnd.size(); p++) {
 				dn[p] = part->grad_suzuki_pnd(part->pnd, p);
 			}
-			real nn = 0.;
+			R nn = 0.;
 			for (unsigned p = 0; p < dn.size(); p++) {
 				nn += dn[p] * dn[p];
 			}
 			for (unsigned p = 0; p < part->pos.size(); p++) {
 				if (part->type[p] != FLUID) continue;
-				vec gc = vec(0., 0., 0.);
+				Vec gc = Vec(0., 0., 0.);
 				const iVec3 c = part->cell->iCoord(part->pos[p]);
 				for (int k = -1; k <= 1; k++) {
 					for (int j = -1; j <= 1; j++) {
@@ -122,16 +121,16 @@ namespace SIM {
 							for (unsigned m = 0; m < part->cell->linkList[key].size(); m++) {
 								const unsigned q = part->cell->linkList[key][m];
 								if (q == p) continue;
-								const vec	dr = part->pos[p] - part->pos[q];
-								const real  dr1 = dr.mag();
+								const Vec	dr = part->pos[p] - part->pos[q];
+								const R  dr1 = dr.mag();
 								if (dr1 > part->r0) continue;
 								gc += ( /*part->w1(dr1)*/1. / dr1)* dr;
 							}
 						}
 					}
 				}
-				const real corr = part->nbd[p] > 0 ? real(part->pn0) / real(part->pn[p]) : 1.;
-				vec dp = (part->n0 - part->pnd[p]*corr) / nn * dn[p];
+				const R corr = part->nbd[p] > 0 ? R(part->pn0) / R(part->pn[p]) : 1.;
+				Vec dp = (part->n0 - part->pnd[p]*corr) / nn * dn[p];
 				if ((part->type[p] == FLUID) && part->isFs(p)) {
 					gc = gc.norm();
 					//dp = dp - (dp*gc)*gc;
@@ -142,14 +141,14 @@ namespace SIM {
 			}
 		}
 
-		template <class R, enum Dim D, class Der>
-		void shiftPbf(Particle<R, D, Der>* part, Parameter<R>& para) const {
-			std::vector<vec> dp(part->pos.size());
+		template <class R, unsigned D, class Der>
+		void shiftPbf(Particle<R,D,Der>* part, Parameter<R,D>& para) const {
+			std::vector<Vec> dp(part->pos.size());
 			for (unsigned p = 0; p < part->pos.size(); p++) {
 				if (part->type[p] != FLUID) continue;
-				vec dpq = vec(0., 0., 0.);
-				vec gc = vec(0., 0., 0.);
-				real lam = 0.;
+				Vec dpq = Vec(0., 0., 0.);
+				Vec gc = Vec(0., 0., 0.);
+				R lam = 0.;
 				const iVec3 c = part->cell->iCoord(part->pos[p]);
 				for (int k = -1; k <= 1; k++) {
 					for (int j = -1; j <= 1; j++) {
@@ -159,11 +158,11 @@ namespace SIM {
 							for (unsigned m = 0; m < part->cell->linkList[key].size(); m++) {
 								const unsigned q = part->cell->linkList[key][m];
 								if (q == p) continue;
-								const vec	dr = part->pos[q] - part->pos[p];
-								const real	dr2 = dr.mag2();
-								const real  dr1 = sqrt(dr2);
+								const Vec	dr = part->pos[q] - part->pos[p];
+								const R	dr2 = dr.mag2();
+								const R  dr1 = sqrt(dr2);
 								if (dr1 > part->r0) continue;
-								const vec cp = (-part->r0 / (dr2 * dr1)) * dr;
+								const Vec cp = (-part->r0 / (dr2 * dr1)) * dr;
 								lam += cp*cp;
 								dpq -= cp;
 
@@ -191,15 +190,15 @@ namespace SIM {
 			}
 		}
 
-		template <class R, enum Dim D, class Der>
-		void shiftXu(Particle<R, D, Der>* const part, const Parameter<R>& para) const {
-			std::vector<vec> dp(part->pos.size());
+		template <class R, unsigned D, class Der>
+		void shiftXu(Particle<R,D,Der>* const part, const Parameter<R,D>& para) const {
+			std::vector<Vec> dp(part->pos.size());
 			for (unsigned p = 0; p < part->pos.size(); p++) {
 				if ((part->type[p] != FLUID)) continue;
-				real pa = 0.;
+				R pa = 0.;
 				unsigned count = 0;
-				vec dpq = vec(0., 0., 0.);
-				vec gc = vec(0., 0., 0.);
+				Vec dpq = Vec(0., 0., 0.);
+				Vec gc = Vec(0., 0., 0.);
 				const iVec3 c = part->cell->iCoord(part->pos[p]);
 				for (int k = -1; k <= 1; k++) {
 					for (int j = -1; j <= 1; j++) {
@@ -209,9 +208,9 @@ namespace SIM {
 							for (unsigned m = 0; m < part->cell->linkList[key].size(); m++) {
 								const unsigned q = part->cell->linkList[key][m];
 								if (q == p) continue;
-								const vec	dr = part->pos[q] - part->pos[p];
-								const real	dr2 = dr.mag2();
-								const real  dr1 = sqrt(dr2);
+								const Vec	dr = part->pos[q] - part->pos[p];
+								const R	dr2 = dr.mag2();
+								const R  dr1 = sqrt(dr2);
 								if (dr1 > part->r0) continue;
 								pa += dr1;
 								count++;
@@ -243,36 +242,32 @@ namespace SIM {
 			}
 		}
 
-		template <class R, enum Dim D, class Der>
-		void shiftSpring(Particle<R, D, Der>* const part, const Parameter<R>& para) const {
-			std::vector<vec> dp(part->np, vec(0.));
-			std::vector<vec> tmp1(part->np, vec(0.));
-			std::vector<vec> tmp2(part->np, vec(0.));
+		template <class R, unsigned D, class Der>
+		void shiftSpring(Particle<R,D,Der>* const part, const Parameter<R,D>& para) const {
+			std::vector<Vec> dp(part->np, Vec::Zero());
+			std::vector<Vec> tmp1(part->np, Vec::Zero());
+			std::vector<Vec> tmp2(part->np, Vec::Zero());
 #if OMP
 #pragma omp parallel for
 #endif
 			for (int p = 0; p < int(part->np); p++) {
 				if (part->type[p] != FLUID) continue;
-				auto dpq = vec(0., 0., 0.);
-				auto gc = vec(0., 0., 0.);
-				const auto c = part->cell->iCoord(part->pos[p]);
-				for (auto k = -1; k <= 1; k++) {
-					for (auto j = -1; j <= 1; j++) {
-						for (auto i = -1; i <= 1; i++) {
-							const auto ne = c + iVec3(i, j, k);
-							const auto key = part->cell->hash(ne);
-							for (auto m = 0; m < part->cell->linkList[key].size(); m++) {
-								const auto q = part->cell->linkList[key][m];
-								if (q == p) continue;
-								const auto dr = part->pos[q] - part->pos[p];
-								const auto dr1 = dr.mag();
-								const auto re = part->dp*para.alpha;
-								//gc -= w2(dr1, part->r0)* (dr / dr1);
-								if (dr1 > re) continue;
-								const auto ww = w2(dr1, re);
-								dpq -= ww * (dr / dr1);
-							}
-						}
+				Vec dpq = Vec::Zero();
+				Vec gc = Vec::Zero();
+				const auto cell = part->cell;
+				const auto c = cell->iCoord(part->pos[p]);
+				for (auto i = 0; i < cell->blockSize::value; i++) {
+					const auto key = cell->hash(c, i);
+					for (auto m = 0; m < cell->linkList[key].size(); m++) {
+						const auto q = cell->linkList[key][m];
+						if (q == p) continue;
+						const auto dr = part->pos[q] - part->pos[p];
+						const auto dr1 = dr.norm();
+						const auto re = part->dp*para.alpha;
+						//gc -= w2(dr1, part->r0)* (dr / dr1);
+						if (dr1 > re) continue;
+						const auto ww = w2(dr1, re);
+						dpq -= ww * (dr / dr1);
 					}
 				}
 				//if (part->isFs(p)) {
@@ -289,8 +284,8 @@ namespace SIM {
 				if (part->type[p] != FLUID) continue;
 				if (part->isFs(p)) continue;
 				dp[p] = part->pos[p] + dp[p];
-				tmp1[p] = part->derived().func_mls_a_upwind(part->vel1, p, dp[p]);
-				tmp2[p] = part->derived().func_mls_a_upwind(part->vel2, p, dp[p]);
+				tmp1[p] = part->derived().func_lsA_upwind(part->vel1, p, dp[p]);
+				tmp2[p] = part->derived().func_lsA_upwind(part->vel2, p, dp[p]);
 			}
 #if OMP
 #pragma omp parallel for
@@ -305,16 +300,16 @@ namespace SIM {
 			/*second order Ronge-Kuta*/
 			/*fourth order Ronge-Kuta*/
 		}
-
-		template <class R, enum Dim D, class Der>
-		void shiftLs(Particle<R, D, Der>* const part, const Parameter<R>& para) const {
+#if 0
+		template <class R, unsigned D, class Der>
+		void shiftLs(Particle<R, D, Der>* const part, const Parameter<R,D>& para) const {
 			std::vector<int> nearb(part->pos.size(), 0);
-			std::vector<vec> dp(part->pos.size());
+			std::vector<Vec> dp(part->pos.size());
 			for (unsigned p = 0; p < part->pos.size(); p++) {
 				if ((part->type[p] != FLUID)) continue;
-				vec dpq = vec(0., 0., 0.);
-				vec gc = vec(0., 0., 0.);
-				mat m3 = mat(vec(0., 0., 0.), vec(0., 0., 0.), vec(0., 0., 0.));
+				Vec dpq = Vec(0., 0., 0.);
+				Vec gc = Vec(0., 0., 0.);
+				mat m3 = mat(Vec(0., 0., 0.), Vec(0., 0., 0.), Vec(0., 0., 0.));
 				const iVec3 c = part->cell->iCoord(part->pos[p]);
 				for (int k = -1; k <= 1; k++) {
 					for (int j = -1; j <= 1; j++) {
@@ -324,12 +319,12 @@ namespace SIM {
 							for (unsigned m = 0; m < part->cell->linkList[key].size(); m++) {
 								const unsigned q = part->cell->linkList[key][m];
 								if (q == p) continue;
-								const vec	dr = part->pos[q] - part->pos[p];
-								const real	dr2 = dr.mag2();
-								const real  dr1 = sqrt(dr2);
+								const Vec	dr = part->pos[q] - part->pos[p];
+								const R	dr2 = dr.mag2();
+								const R  dr1 = sqrt(dr2);
 								if (dr1 > part->r0) continue;
-								const real  w = part->w1(dr1);
-								const vec	npq = dr / dr1;
+								const R  w = part->w1(dr1);
+								const Vec	npq = dr / dr1;
 								m3.x += w * npq.x * npq;
 								m3.y += w * npq.y * npq;
 								m3.z += w * npq.z * npq;
@@ -339,28 +334,28 @@ namespace SIM {
 						}
 					}
 				}
-				m3 = (dim / part->n0) * m3;
+				m3 = (D / part->n0) * m3;
 				gc = gc.norm();
 
 				matEi mi;
-				switch (dim) {
+				switch (D) {
 				case 2:
 					mi << m3.x.x, m3.x.z, m3.z.x, m3.z.z; break;
 				case 3:
 					mi << m3.x.x, m3.x.y, m3.x.z, m3.y.x, m3.y.y, m3.y.z, m3.z.x, m3.z.y, m3.z.z; break;
 				}
 				Eigen::SelfAdjointEigenSolver<matEi> sol(mi);
-				Eigen::Matrix<real, dim, 1> eig = sol.eigenvalues();
-				Eigen::Matrix<real, dim, dim> eigvs = sol.eigenvectors();
-				switch (dim) {
+				Eigen::Matrix<R, D, 1> eig = sol.eigenvalues();
+				Eigen::Matrix<R, D, D> eigvs = sol.eigenvectors();
+				switch (D) {
 				case 2:
-					for (int d = 0; d < dim; d++) {
+					for (int d = 0; d < D; d++) {
 						dpq.x += eig[d] * eigvs.col(d)[0];
 						dpq.z += eig[d] * eigvs.col(d)[1];
 					}
 					break;
 				case 3:
-					for (int d = 0; d < dim; d++) {
+					for (int d = 0; d < D; d++) {
 						dpq.x += eig[d] * eigvs.col(d)[0];
 						dpq.y += eig[d] * eigvs.col(d)[1];
 						dpq.z += eig[d] * eigvs.col(d)[2];
@@ -385,12 +380,12 @@ namespace SIM {
 			}
 		}
 
-		template <class R, enum Dim D, class Der>
-		void shiftPndLs(Particle<R, D, Der>* const part, const Parameter<R>& para) const {
+		template <class R, unsigned D, class Der>
+		void shiftPndLs(Particle<R, D, Der>* const part, const Parameter<R,D>& para) const {
 			std::vector<int> nearb(part->pos.size(), 0);
-			std::vector<vec> dp(part->pos.size());
+			std::vector<Vec> dp(part->pos.size());
 			for (unsigned p = 0; p < part->pos.size(); p++) {
-				vec dpq = -1.*part->grad_suzuki_dm(part->pnd, p);
+				Vec dpq = -1.*part->grad_suzuki_dm(part->pnd, p);
 				dp[p] = 0.05*para.dp* /*para.umax * para.dt*/para.dp*para.cfl * dpq;
 			}
 			for (unsigned p = 0; p < part->pos.size(); p++) {
@@ -404,12 +399,12 @@ namespace SIM {
 			}
 		}
 
-		template <class R, enum Dim D, class Der>
-		void shiftCo(Particle<R, D, Der>* part, Parameter<R>& para) const {
-			std::vector<vec> dp(part->pos.size());
+		template <class R, unsigned D, class Der>
+		void shiftCo(Particle<R, D, Der>* part, Parameter<R,D>& para) const {
+			std::vector<Vec> dp(part->pos.size());
 			for (unsigned p = 0; p < part->pos.size(); p++) {
 				if (part->type[p] != FLUID) continue;
-				vec dpq = vec(0., 0., 0.);
+				Vec dpq = Vec(0., 0., 0.);
 				const iVec3 c = part->cell->iCoord(part->pos[p]);
 				for (int k = -1; k <= 1; k++) {
 					for (int j = -1; j <= 1; j++) { 
@@ -419,10 +414,10 @@ namespace SIM {
 							for (unsigned m = 0; m < part->cell->linkList[key].size(); m++) {
 								const unsigned q = part->cell->linkList[key][m];
 								if (q == p) continue;
-								const vec	dr = part->pos[q] - part->pos[p];
-								const vec	dv = part->vel1[q] - part->vel1[p];
-								const real	dr2 = dr.mag2();
-								const real  dr1 = sqrt(dr2);
+								const Vec	dr = part->pos[q] - part->pos[p];
+								const Vec	dv = part->vel1[q] - part->vel1[p];
+								const R	dr2 = dr.mag2();
+								const R  dr1 = sqrt(dr2);
 								if ((dr1 < 0.5* part->dp) && (dr*dv < 0.)) {
 									dpq += (1. / dr2) * (dv* dr) * dr;
 								}
@@ -441,18 +436,18 @@ namespace SIM {
 		}
 
 		void shiftRep() const {}
-
+#endif
 	private:
-		inline const real w_spline(const real& r, const real& r0) const {
+		inline const R w_spline(const R& r, const R& r0) const {
 			/*cubic spline*/
-			const real q = r / r0;
+			const R q = r / r0;
 			if (q <= 0.5) return (1. - 6 * q*q + 6 * q*q*q);
 			else if (q <= 1.) return (2.*pow((1. - q), 3));
 			else return 0.;
 			/*inverse r2*/
 			//return pow(r0 / r, 3);
 		}
-		inline const real w2(const real& r, const real& r0) const {
+		inline const R w2(const R& r, const R& r0) const {
 			if (r >= r0) {
 				return 0.;
 			}
@@ -461,13 +456,13 @@ namespace SIM {
 				return pow((1 - r / r0), 2);
 			}
 		}
-		inline const real w3(const real& r, const real& r0) const {
+		inline const R w3(const R& r, const R& r0) const {
 			/*parabolic*/
-			const real q = r / r0;
+			const R q = r / r0;
 			if (q < 1.) return 2.5*(1. - q*q);
 			else return 0.;
 		}
-		inline const real w_spring(const real&r, const real& r0) const {
+		inline const R w_spring(const R&r, const R& r0) const {
 			if (r >= r0) return 0.;
 			return 1. - r / r0;
 		}

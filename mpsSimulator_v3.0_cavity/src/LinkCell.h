@@ -32,18 +32,18 @@ namespace SIM {
 		
 		__forceinline const iVecD iCoord(const VecD& p) const { iVecD ret; Convert<>::Gen(p.data(), ret.data()); return ret; }
 		__forceinline const unsigned hash(const iVecD& c) const { return hash<>(c); }
-		__forceinline const unsigned hash(const VecD& p) const { return hash<>(iCoord(p)); }
+		__forceinline const unsigned hash_(const VecD& p) const { return hash<>(iCoord(p)); }
 		
 		struct blockSize { enum { value = mMath::Power<3,D>::value, }; };
 		
 		__forceinline const unsigned hash(const iVecD& c, const unsigned& i) const { return hash(c+loopTable.at(i)); }
 
 		void update(const std::vector<VecD>& pos) {
-			for (auto i = 0; i < linkList.size(); i++) {
+			for (unsigned i = 0; i < linkList.size(); i++) {
 				linkList[i].clear();
 			}
-			for (auto i = 0; i < pos.size(); i++) {
-				linkList[hash(pos[i])].push_back(i);
+			for (unsigned i = 0; i < pos.size(); i++) {
+				linkList[hash_(pos[i])].push_back(i);
 			}
 		}
 
@@ -72,12 +72,12 @@ namespace SIM {
 			switch (D) {
 			case 1:
 				for (auto i = 0; i < 3; i++) {
-					loopTable[i] = iVecD(i - 1);
+					loopTable[i] << (i - 1);
 				}
 				break;
 			case 2:
 				for (auto i = 0; i < 9; i++) {
-					loopTable[i] = iVecD(i % 3 - 1, i / 3 - 1);
+					loopTable[i] << (i % 3 - 1), (i / 3 - 1);
 				}
 				break;
 			case 3:
@@ -85,7 +85,7 @@ namespace SIM {
 					const unsigned z = i / 9;
 					const unsigned y = (i % 9) / 3;
 					const unsigned x = (i % 9) % 3;
-					loopTable[i] = iVecD(x - 1, y - 1, z - 1);
+					loopTable[i] << (x - 1), (y - 1), (z - 1);
 				}
 				break;
 			default:

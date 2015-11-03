@@ -97,7 +97,8 @@ namespace SIM {
 				v.clear();
 				for (int i = 0; i < k * 2 + 1; i++) {
 					for (int j = 0; j < k * 2 + 1; j++) {
-						vec p = vec(R(i), R(j), 0.);
+						vec p;
+						p << R(i), R(j);
 						v.push_back(p);
 					}
 				}
@@ -112,9 +113,9 @@ namespace SIM {
 					unsigned pn = 0;
 					for (unsigned j = 0; j < v.size(); j++) {
 						//if (j == i) continue;
-						R w = w1((v[i] - v[j]).mag(), k);
+						R w = w1((v[i] - v[j]).norm(), k);
 						n += w;
-						lam += (v[i] - v[j]).mag2() * w;
+						lam += (v[i] - v[j]).squaredNorm() * w;
 						if (w > 0.) pn++;
 					}
 					lam = lam / n;
@@ -128,7 +129,8 @@ namespace SIM {
 				for (int i = 0; i < k * 2 + 1; i++) {
 					for (int j = 0; j < k * 2 + 1; j++) {
 						for (int k = 0; k < k * 2 + 1; k++) {
-							vec p = vec(R(i), R(j), R(k));
+							vec p;
+							p << R(i), R(j), R(k);
 							v.push_back(p);
 						}
 					}
@@ -144,9 +146,9 @@ namespace SIM {
 					unsigned pn = 0;
 					for (unsigned j = 0; j < v.size(); j++) {
 						//if (j == i) continue;
-						R w = w1((v[i] - v[j]).mag(), k);
+						R w = w1((v[i] - v[j]).norm(), k);
 						n += w;
-						lam += (v[i] - v[j]).mag2() * w;
+						lam += (v[i] - v[j]).squaredNorm() * w;
 						if (w > 0.) pn++;
 					}
 					lam = lam / n;
