@@ -66,7 +66,7 @@ namespace SIM {
 			}
 			linkList.clear();
 			linkList = std::vector< std::vector<unsigned> >(cNum);
-			std::cout << " cell num: " << cNum << std::endl;
+			std::cout << " Cell num: " << cNum << std::endl;
 
 			loopTable.clear();
 			switch (D) {

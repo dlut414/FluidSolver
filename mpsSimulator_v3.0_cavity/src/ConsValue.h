@@ -158,7 +158,7 @@ namespace SIM {
 				}
 			}
 			else {
-				std::cout << "wrong dimension number !" << std::endl;
+				std::cout << " Wrong dimension number ! " << std::endl;
 			}
 			v.clear();
 		}

@@ -178,7 +178,6 @@
     <ClInclude Include="common\Bitmap.h" />
     <ClInclude Include="common\Timer.h" />
     <ClInclude Include="common\TimeX.h" />
-    <ClInclude Include="common\TypeX.h" />
     <ClInclude Include="renderer\Camera.h" />
     <ClInclude Include="renderer\Controller.h" />
     <ClInclude Include="renderer\DrawSim.h" />
