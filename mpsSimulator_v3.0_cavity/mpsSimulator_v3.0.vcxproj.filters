@@ -99,9 +99,6 @@
     <ClInclude Include="common\TimeX.h">
       <Filter>Header Files\common</Filter>
     </ClInclude>
-    <ClInclude Include="common\TypeX.h">
-      <Filter>Header Files\common</Filter>
-    </ClInclude>
     <ClInclude Include="src\Particle_2d_i.h">
       <Filter>Header Files\SIM\Particle</Filter>
     </ClInclude>

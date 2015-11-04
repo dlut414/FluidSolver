@@ -22,7 +22,7 @@ namespace SIM {
 			calInvMat();
 
 			visTerm_i_q2r0();
-			calPnd();
+			//calPnd();
 			presTerm_i_q2();
 
 			convect_q2r0s2();
@@ -42,6 +42,16 @@ namespace SIM {
 			//profileOut();
 			//sensorOut();
 			//pthOrderVelSpatialFilter();
+			for (auto p = 0; p < part->np; p++) part->pres[p] = 0;
+			const auto cell = part->cell;
+			const auto c = cell->iCoord(part->pos[4000]);
+			for (auto i = 0; i < cell->blockSize::value; i++) {
+				const auto key = cell->hash(c, i);
+				for (auto m = 0; m < cell->linkList[key].size(); m++) {
+					const auto q = cell->linkList[key][m];
+					part->pres[q] = 1e5;
+				}
+			}
 		}
 
 		void visTerm_e() {

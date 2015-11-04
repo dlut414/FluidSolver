@@ -1,6 +1,6 @@
 -- rewrite Geo.txt
 
-file = io.open("Geo.in","r")
+file = io.open("Geo.txt","r")
 
 if(file==nil) then
 	print(" No file \n")

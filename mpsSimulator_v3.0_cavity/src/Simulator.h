@@ -55,7 +55,7 @@ namespace SIM {
 #if BVP
 			bvp = new Bvp<R>(sinu_b);
 #endif
-			std::cout << "	Particle number	:	" << derived().part->np << std::endl;
+			std::cout << " Particle number : " << derived().part->np << std::endl;
 			sen << "Sensor.in";
 			R tmp = cfl();
 			para.dt = tmp < para.dtMax ? tmp : para.dtMax;
