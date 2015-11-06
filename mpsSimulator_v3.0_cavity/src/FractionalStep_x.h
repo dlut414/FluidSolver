@@ -7,13 +7,13 @@
 namespace SIM {
 
 	template <typename R, unsigned D, unsigned P>
-	class FractionalStep_x : public Simulator < R, D, FractionalStep_x<R,D,P> > {
+	class FractionalStep_x : public Simulator <R,D,FractionalStep_x<R,D,P>> {
 		typedef mMath::Polynomial_A<R,D,P> PN;
 		typedef mMath::Derivative_A<R,D,P> DR;
 		typedef Eigen::Matrix<R,PN::value,1> VecP;
 		typedef Eigen::Matrix<int,D,1>	iVec;
 		typedef Eigen::Matrix<R,D,1>	Vec;
-		typedef Eigen::Triplet<R>		tpl;
+		typedef Eigen::Triplet<R>		Tpl;
 	public:
 		FractionalStep_x() {}
 		~FractionalStep_x() {}
@@ -22,9 +22,10 @@ namespace SIM {
 			calInvMat();
 
 			visTerm_i_q2r0();
-			calPnd();
+			//calPnd();
 			presTerm_i_q2();
 
+			syncPos();
 			convect_q2r0s2();
 
 			calInvMat();
@@ -37,7 +38,7 @@ namespace SIM {
 
 			sync();
 
-			if (timeStep % 100 == 0) profileOut_avgVel2();
+			//if (timeStep % 100 == 0) profileOut_avgVel2();
 			//calInvMat(); //for sensor
 			//profileOut();
 			//sensorOut();
@@ -199,6 +200,7 @@ namespace SIM {
 			part->buildCell();
 			part->b2b();
 			part->b2norm();
+			part->b2neumann();
 			//part->updateTeam();
 			part->init_x();
 		}
@@ -207,12 +209,12 @@ namespace SIM {
 		Particle_x<R,D,P>* part;
 
 	private:
-		void makeLhs_v_q2() {
+		__forceinline void makeLhs_v_q2() {
 			coef.clear();
 			for (unsigned p = 0; p < part->np; p++) {
 				if (part->type[p] == BD1 || part->type[p] == BD2) {
 					for (int d = 0; d < D; d++) {
-						coef.push_back(tpl(D*p + d, D*p + d, 1.));
+						coef.push_back(Tpl(D*p + d, D*p + d, 1.));
 					}
 					continue;
 				}
@@ -239,24 +241,24 @@ namespace SIM {
 						pp -= pq;
 						if (q == p) continue;
 						for (auto d = 0; d < D; d++) {
-							coef.push_back(tpl(D*p + d, D*q + d, pq));
+							coef.push_back(Tpl(D*p + d, D*q + d, pq));
 						}
 					}
 				}
 				pp += 3. / (2. * para.dt);
 				for (auto d = 0; d < D; d++) {
-					coef.push_back(tpl(D*p + d, D*p + d, pp));
+					coef.push_back(Tpl(D*p + d, D*p + d, pp));
 				}
 			}
 			mSol->au.setFromTriplets(coef.begin(), coef.end());
 		}
 
-		void makeLhs_v_q1() {
+		__forceinline void makeLhs_v_q1() {
 			coef.clear();
 			for (auto p = 0; p < part->np; p++) {
 				if (part->type[p] == BD1 || part->type[p] == BD2) {
 					for (auto d = 0; d < D; d++) {
-						coef.push_back(tpl(D*p + d, D*p + d, 1.));
+						coef.push_back(Tpl(D*p + d, D*p + d, 1.));
 					}
 					continue;
 				}
@@ -282,20 +284,20 @@ namespace SIM {
 						const auto pq = -para.niu* lp.dot(a);
 						pp -= pq;
 						for (auto d = 0; d < D; d++) {
-							coef.push_back(tpl(D*p + d, D*q + d, pq));
+							coef.push_back(Tpl(D*p + d, D*q + d, pq));
 						}
 					}
 				}
 				pp += 1. / para.dt;
 				for (auto d = 0; d < D; d++) {
-					coef.push_back(tpl(D*p + d, D*p + d, pp));
+					coef.push_back(Tpl(D*p + d, D*p + d, pp));
 				}
 			}
 			mSol->au.setFromTriplets(coef.begin(), coef.end());
 		}
 
 
-		void makeRhs_v_q2r1() {
+		__forceinline void makeRhs_v_q2r1() {
 #if OMP
 #pragma omp parallel for
 #endif
@@ -316,7 +318,7 @@ namespace SIM {
 			}
 		}
 
-		void makeRhs_v_q1r0() {
+		__forceinline void makeRhs_v_q1r0() {
 #if OMP
 #pragma omp parallel for
 #endif
@@ -334,7 +336,7 @@ namespace SIM {
 			}
 		}
 
-		void makeRhs_v_q2r0() {
+		__forceinline void makeRhs_v_q2r0() {
 #if OMP
 #pragma omp parallel for
 #endif
@@ -353,16 +355,16 @@ namespace SIM {
 		}
 
 
-		void makeLhs_p() {
+		__forceinline void makeLhs_p() {
 			coef.clear();
 			for (unsigned p = 0; p < part->np; p++) {
 				if (part->type[p] == BD2) {
-					coef.push_back(tpl(p, p, 1.));
-					coef.push_back(tpl(p, part->bbMap.at(p), -1.));
+					coef.push_back(Tpl(p, p, 1.));
+					coef.push_back(Tpl(p, part->bbMap.at(p), -1.));
 					continue;
 				}
 				if (part->isFs(p)) {
-					coef.push_back(tpl(p, p, 1.));
+					coef.push_back(Tpl(p, p, 1.));
 					continue;
 				}
 				auto pqsum = 0.;
@@ -392,17 +394,17 @@ namespace SIM {
 						const auto pq = lp.dot(a);
 						pp -= pq;
 						if (q == p) continue;
-						coef.push_back(tpl(p, q, pq));
+						coef.push_back(Tpl(p, q, pq));
 						pqsum += abs(pq);
 					}
 				}
-				coef.push_back(tpl(p, p, pp));
-				if (pqsum < para.eps) coef.push_back(tpl(p, p, 1.));
+				coef.push_back(Tpl(p, p, pp));
+				if (pqsum < para.eps) coef.push_back(Tpl(p, p, 1.));
 			}
 			mSol->a.setFromTriplets(coef.begin(), coef.end());
 		}
 
-		void makeRhs_p_q2() {
+		__forceinline void makeRhs_p_q2() {
 			const auto coefL = (3.* para.rho) / (2.* para.dt);
 #if OMP
 #pragma omp parallel for
@@ -421,7 +423,7 @@ namespace SIM {
 			}
 		}
 
-		void makeRhs_p_q1() {
+		__forceinline void makeRhs_p_q1() {
 			const auto coefL = para.rho / para.dt;
 #if OMP
 #pragma omp parallel for
@@ -440,7 +442,7 @@ namespace SIM {
 		}
 
 
-		void sync() {
+		__forceinline void sync() {
 #if OMP
 #pragma omp parallel for
 #endif
@@ -449,9 +451,17 @@ namespace SIM {
 				part->vel1[p] = part->vel2[p];
 			}
 		}
+		__forceinline void syncPos() {
+#if OMP
+#pragma omp parallel for
+#endif
+			for (int p = 0; p < int(part->np); p++) {
+				part->pos_m1[p] = part->pos[p];
+			}
+		}
 
 	private:
-		std::vector<tpl> coef;
+		std::vector<Tpl> coef;
 	};
 
 }

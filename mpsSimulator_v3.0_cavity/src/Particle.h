@@ -41,7 +41,7 @@ namespace SIM {
 		const Derived& derived() const { return *static_cast<const Derived*>(this); }
 
 		void clean() {
-			type.clear(); pos.clear(); vel1.clear(); vel2.clear(); vel_m1.clear();
+			type.clear(); pos.clear(); pos_m1.clear(); vel1.clear(); vel2.clear(); vel_m1.clear();
 			pnd.clear(); pres.clear(); pn.clear(); nbd.clear(); fs.clear();
 			team.clear(); phi.clear(); vort.clear(); dash.clear(); norm.clear();
 		}
@@ -81,7 +81,7 @@ namespace SIM {
 		}
 
 		void addPart (const pType& t, const vec& p, const vec& v) {
-			type.push_back(t);	pos.push_back(p);
+			type.push_back(t);	pos.push_back(p); pos_m1.push_back(p);
 			vel1.push_back(v);	vel2.push_back(v); vel_m1.push_back(v);
 			pnd.push_back(0.);	pres.push_back(0.);
 			pn.push_back(0);	nbd.push_back(0);
@@ -371,6 +371,7 @@ namespace SIM {
 		R ct;
 		unsigned np, bd1, bd2;
 		std::vector<vec> pos;
+		std::vector<vec> pos_m1;
 		std::vector<vec> vel1;
 		std::vector<vec> vel2;
 		std::vector<vec> vel_m1;
