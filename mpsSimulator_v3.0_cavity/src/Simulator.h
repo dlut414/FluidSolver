@@ -20,7 +20,7 @@ namespace SIM {
 	class Simulator {
 		typedef Eigen::Matrix<R,D,1> Vec;
 		typedef Eigen::Matrix<R,D,D> Mat;
-		typedef Eigen::Triplet<R> tpl;
+		typedef Eigen::Triplet<R> Tpl;
 	public:
 		Simulator() { timeStep = 0; }
 		~Simulator() {}
@@ -166,12 +166,12 @@ namespace SIM {
 		void makeDirichlet_p_avg() {
 			auto* const part = derived().part;
 			Eigen::SparseMatrix<R> d(part->np, part->np);
-			std::vector<tpl> coef;
+			std::vector<Tpl> coef;
 			for (int p = 0; p<int(part->np); p++) {
 				if (part->type[p] != BD1) continue;
 				for (int q = 0; q<int(part->np); q++) {
 					if (part->type[q] == BD2) continue;
-					coef.push_back(tpl(p, q, 1.));
+					coef.push_back(Tpl(p, q, 1.));
 				}
 				break;
 			}
@@ -418,46 +418,30 @@ namespace SIM {
 
 		void check() const {
 			const auto* const part = derived().part;
-			R dis = std::numeric_limits<R>::max();
-			R vel = std::numeric_limits<R>::min();
-			R phi = std::numeric_limits<R>::min();
-			//R premi = std::numeric_limits<R>::max();
-			//R prema = std::numeric_limits<R>::min();
-			unsigned iv = 0, id = 0;
+			R velMax = std::numeric_limits<R>::min();
+			R phiMax = std::numeric_limits<R>::min();
+			R divMax = std::numeric_limits<R>::min();
+			unsigned idv = 0, idp = 0, idd = 0;
 			for (unsigned p = 0; p < part->np; p++) {
-				//const iVec3 c = part->cell->iCoord(part->pos[p]);
-				//for (int k = -1; k <= 1; k++) {
-				//	for (int j = -1; j <= 1; j++) {
-				//		for (int i = -1; i <= 1; i++) {
-				//			const iVec3 ne = c + iVec3(i, j, k);
-				//			const unsigned key = part->cell->hash(ne);
-				//			for (unsigned m = 0; m < part->cell->linkList[key].size(); m++) {
-				//				const unsigned q = part->cell->linkList[key][m];
-				//				if (q == p) continue;
-				//				const R dr1 = (part->pos[q] - part->pos[p]).mag();
-				//				dis = dr1 < dis ? dr1 : dis;
-				//			}
-				//		}
-				//	}
-				//}
-				const R v = part->vel1[p].norm();
-				if (v > vel) {
-					vel = v;
-					iv = p;
+				const R vel = part->vel1[p].norm();
+				const R phi = part->phi[p];
+				const R div = part->div(part->vel1, p);
+				if (vel > velMax) {
+					velMax = vel;
+					idv = p;
 				}
-				R d = part->phi[p];
-				if (abs(d) > phi) {
-					phi = abs(d);
-					id = p;
+				if (abs(phi) > abs(phiMax)) {
+					phiMax = phi;
+					idp = p;
 				}
-				//if (part->pres[p] < premi) premi = part->pres[p];
-				//if (part->pres[p] > prema) prema = part->pres[p];
-				//if (part->isFs(p)) part->pres[p] = 0.;
+				if (abs(div) > abs(divMax)) {
+					divMax = div;
+					idd = p;
+				}
 			}
-			//std::cout << " min dis: " << dis / part->dp << std::endl;
-			std::cout << " max vel: " << vel << " --- id: " << iv << std::endl;
-			std::cout << " max phi: " << phi << " --- id: " << id << std::endl;
-			//std::cout << " max pres: " << prema << " --- min pres: " << premi << std::endl;
+			std::cout << " max vel: " << velMax << " --- id: " << idv << std::endl;
+			std::cout << " max phi: " << phiMax << " --- id: " << idp << std::endl;
+			std::cout << " max Div: " << divMax << " --- id: " << idd << std::endl;
 		}
 #if BVP
 		void bvpSource() {

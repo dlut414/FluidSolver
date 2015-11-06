@@ -15,7 +15,7 @@ namespace SIM {
 
 	template <typename R, unsigned D>
 	class MatSolver {
-		typedef Eigen::Triplet<R> tpl;
+		typedef Eigen::Triplet<R> Tpl;
 		typedef Eigen::Matrix<R,Eigen::Dynamic,1> dVec;
 		typedef Eigen::SparseMatrix<R, Eigen::RowMajor> sMat;
 #if AUGMENT
@@ -67,11 +67,11 @@ namespace SIM {
 		}
 		void ccBiCg_augment(const std::vector<enum pType>& type) {
 			sMat d(n + AG, n + AG);
-			std::vector<tpl> coef;
+			std::vector<Tpl> coef;
 			for (unsigned p = 0; p<n; p++) {
 				if (type[p] == BD2) continue;
-				coef.push_back(tpl(n, p, 1.));
-				coef.push_back(tpl(p, n, 1.));
+				coef.push_back(Tpl(n, p, 1.));
+				coef.push_back(Tpl(p, n, 1.));
 			}
 			d.setFromTriplets(coef.begin(), coef.end());
 			a = a + d;
