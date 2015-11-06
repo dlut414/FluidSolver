@@ -22,7 +22,7 @@ namespace SIM {
 			calInvMat();
 
 			visTerm_i_q2r0();
-			//calPnd();
+			calPnd();
 			presTerm_i_q2();
 
 			convect_q2r0s2();
@@ -42,16 +42,6 @@ namespace SIM {
 			//profileOut();
 			//sensorOut();
 			//pthOrderVelSpatialFilter();
-			for (auto p = 0; p < part->np; p++) part->pres[p] = 0;
-			const auto cell = part->cell;
-			const auto c = cell->iCoord(part->pos[4000]);
-			for (auto i = 0; i < cell->blockSize::value; i++) {
-				const auto key = cell->hash(c, i);
-				for (auto m = 0; m < cell->linkList[key].size(); m++) {
-					const auto q = cell->linkList[key][m];
-					part->pres[q] = 1e5;
-				}
-			}
 		}
 
 		void visTerm_e() {
@@ -227,7 +217,7 @@ namespace SIM {
 					continue;
 				}
 				auto pp = 0.;
-				const auto mm = part->invMat[p];
+				const auto& mm = part->invMat[p];
 				const auto& cell = part->cell;
 				const auto c = cell->iCoord(part->pos[p]);
 				for (auto i = 0; i < cell->blockSize::value; i++) {
@@ -244,7 +234,7 @@ namespace SIM {
 						VecP npq;
 						part->poly(dr, npq);
 						const auto a = mm * (w* npq);
-						const auto lp = part->pn_lap_o;
+						const auto& lp = part->pn_lap_o;
 						const auto pq = -para.niu* lp.dot(a);
 						pp -= pq;
 						if (q == p) continue;
@@ -271,8 +261,8 @@ namespace SIM {
 					continue;
 				}
 				auto pp = 0.;
-				const auto mm = part->invMat[p];
-				const auto c = part->cell->iCoord(part->pos[p]);
+				const auto& mm = part->invMat[p];
+				const auto& c = part->cell->iCoord(part->pos[p]);
 				for (auto i = 0; i < cell->blockSize::value; i++) {
 					const auto key = cell->hash(c, i);
 					for (auto m = 0; m < part->cell->linkList[key].size(); m++) {
@@ -288,7 +278,7 @@ namespace SIM {
 						VecP npq;
 						part->poly(dr, npq);
 						const auto a = mm * (w* npq);
-						const auto lp = part->pn_lap_o;
+						const auto& lp = part->pn_lap_o;
 						const auto pq = -para.niu* lp.dot(a);
 						pp -= pq;
 						for (auto d = 0; d < D; d++) {
@@ -351,13 +341,13 @@ namespace SIM {
 			for (int p = 0; p < int(part->np); p++) {
 				if (part->type[p] == BD1 || part->type[p] == BD2) {
 					for (auto d = 0; d < D; d++) {
-						mSol->rhs[d*p + d] = part->vel1[p][d];
+						mSol->rhs[D*p + d] = part->vel1[p][d];
 					}
 					continue;
 				}
 				const auto rhs = 1. / (2.* para.dt)* (4.* part->vel1[p] - part->vel_m1[p]) + para.g;
 				for (auto d = 0; d < D; d++) {
-					mSol->rhs[d*p + d] = rhs[d];
+					mSol->rhs[D*p + d] = rhs[d];
 				}
 			}
 		}
@@ -378,10 +368,10 @@ namespace SIM {
 				auto pqsum = 0.;
 				auto pp = 0.;
 				//std::vector<unsigned> used;
-				const auto mm = part->invMat[p];
-				const auto cell = part->cell;
+				const auto& mm = part->invMat[p];
+				const auto& cell = part->cell;
 				const auto c = cell->iCoord(part->pos[p]);
-				//if (abs(mm.determinant()) > part->eps_mat) {
+				//if (abs(mm.determinant()) > part->eps_mat) {}
 				for (auto i = 0; i < cell->blockSize::value; i++) {
 					const auto key = cell->hash(c, i);
 					//for (unsigned us = 0; us < used.size(); us++) { if (key == used[us]) std::cout << "used!!!!!!!!!!" << std::endl; }
@@ -398,7 +388,7 @@ namespace SIM {
 						VecP npq;
 						part->poly(dr, npq);
 						const auto a = mm * (w* npq);
-						const auto lp = part->pn_lap_o;
+						const auto& lp = part->pn_lap_o;
 						const auto pq = lp.dot(a);
 						pp -= pq;
 						if (q == p) continue;

@@ -17,20 +17,24 @@ namespace SIM {
 		typedef Eigen::Matrix<int,D,1>	iVecD;
 	public:
 		template <typename T>
-		LinkCell(const BBox<T,D>& b, const R& c) : box(b), cSize(c) { init(); }
+		LinkCell(const BBox<T,D>& b, const R& s) : box(b), cSize(s) { init(); }
 		~LinkCell() { fina(); }
 
-		template <unsigned D_ = 0, bool Over = (D_==(D-1))> struct Convert
-		{ template <typename U, typename V> static __forceinline void Gen(const U* const in, V* const out) { out[D_] = static_cast<V>(in[D_]); Convert<D_+1>::Gen(in,out); } };
-		template <unsigned D_>								struct Convert<D_,true>
-		{ template <typename U, typename V> static __forceinline void Gen(const U* const in, V* const out) { out[D_] = static_cast<V>(in[D_]); } };
+		template <unsigned D_ = 0, bool Over = (D_==(D-1))> struct Convert {
+			template <typename U, typename V> static __forceinline void Gen(const U* const in, V* const out)				{ out[D_] = static_cast<V>(in[D_]); Convert<D_+1>::Gen(in,out); } 
+			template <typename U, typename V> static __forceinline void Gen(const R& s, const U* const in, V* const out)	{ out[D_] = static_cast<V>(s*in[D_]); Convert<D_+1>::Gen(s, in, out); }
+		};
+		template <unsigned D_>								struct Convert<D_,true> { 
+			template <typename U, typename V> static __forceinline void Gen(const U* const in, V* const out)				{ out[D_] = static_cast<V>(in[D_]); } 
+			template <typename U, typename V> static __forceinline void Gen(const R& s, const U* const in, V* const out)	{ out[D_] = static_cast<V>(s*in[D_]); }
+		};
 
 		template <unsigned D_ = D>	__forceinline const unsigned hash		(const iVecD& c)	const {}
 		template <>					__forceinline const unsigned hash<1>	(const iVecD& c)	const { return unsigned((c[0]) % cNum); }
-		template <>					__forceinline const unsigned hash<2>	(const iVecD& c)	const { return unsigned((c[0] + dv[0]* c[1] + 100000) % cNum); }
+		template <>					__forceinline const unsigned hash<2>	(const iVecD& c)	const { return unsigned((c[0] + dv[0]* c[1]) % cNum); }
 		template <>					__forceinline const unsigned hash<3>	(const iVecD& c)	const { return unsigned((c[0] + dv[0]* c[1] + sheet* c[2] + 100000) % cNum); }
 		
-		__forceinline const iVecD iCoord(const VecD& p) const { iVecD ret; Convert<>::Gen(p.data(), ret.data()); return ret; }
+		__forceinline const iVecD iCoord(const VecD& p) const { static R cSizeInv = 1. / cSize; iVecD ret; Convert<>::Gen(cSizeInv, p.data(), ret.data()); return ret; }
 		__forceinline const unsigned hash(const iVecD& c) const { return hash<>(c); }
 		__forceinline const unsigned hash_(const VecD& p) const { return hash<>(iCoord(p)); }
 		

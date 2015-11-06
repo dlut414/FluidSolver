@@ -27,7 +27,7 @@ namespace SIM {
 		__forceinline void poly(const Vec& in, VecP& out) const { PN::Gen(varrho, in.data(), out.data()); }
 
 		const Vec grad(const std::vector<R>& phi, const unsigned& p) const {
-			VecP  vv = VecP::Zero();
+			VecP vv = VecP::Zero();
 			const auto c = cell->iCoord(pos[p]);
 			for (auto i = 0; i < cell->blockSize::value; i++) {
 				const auto key = cell->hash(c, i);
@@ -97,7 +97,9 @@ namespace SIM {
 			}
 			const auto a = invMat[p] * vv;
 			auto ret = static_cast<R>(0);
-			for (auto d = 0; d < D; d++) ret += pn_p_o.block<1, PN::value>(d, 0) * a.block<PN::value,1>(0, d);
+			for (auto d = 0; d < D; d++) {
+				ret += pn_p_o.block<1, PN::value>(d, 0) * a.block<PN::value, 1>(0, d);
+			}
 			return ret;
 		}
 
@@ -523,7 +525,7 @@ namespace SIM {
 				invMat.push_back(MatPP());
 			}
 
-			varrho = 1.*dp;
+			varrho = 1./(1.*dp);
 			Vec zero = Vec::Zero();
 			DR::Gen<1>(varrho, zero.data(), pn_p_o.data());
 			DR::Gen<2>(varrho, zero.data(), pn_pp_o.data());
@@ -537,7 +539,7 @@ namespace SIM {
 				invMat.push_back(MatPP());
 			}
 
-			varrho = 1.*dp;
+			varrho = 1./(1.*dp);
 			Vec zero = Vec::Zero();
 			DR::Gen<1, 0>(varrho, zero.data(), pn_p_o.block<1, PN::value>(0, 0).data());
 			DR::Gen<0, 1>(varrho, zero.data(), pn_p_o.block<1, PN::value>(1, 0).data());
@@ -554,7 +556,7 @@ namespace SIM {
 				invMat.push_back(MatPP());
 			}
 
-			varrho = 1.*dp;
+			varrho = 1./(1.*dp);
 			Vec zero = Vec::Zero();
 			DR::Gen<1, 0, 0>(varrho, zero.data(), pn_p_o.block<1, PN::value>(0, 0).data());
 			DR::Gen<0, 1, 0>(varrho, zero.data(), pn_p_o.block<1, PN::value>(1, 0).data());
@@ -574,9 +576,9 @@ namespace SIM {
 		std::vector<MatPP> invMat;
 
 		R varrho;
-		Eigen::Matrix<R,D,PN::value>					pn_p_o;
-		Eigen::Matrix<R,mMath::H<D,2>::value,PN::value>	pn_pp_o;
-		Eigen::Matrix<R,1,PN::value>					pn_lap_o;
+		Eigen::Matrix<R,D,PN::value,Eigen::RowMajor>					pn_p_o;
+		Eigen::Matrix<R,mMath::H<D,2>::value,PN::value,Eigen::RowMajor>	pn_pp_o;
+		Eigen::Matrix<R,1,PN::value,Eigen::RowMajor>					pn_lap_o;
 	};
 
 }
