@@ -190,6 +190,7 @@
     <ClInclude Include="src\ConsValue.h" />
     <ClInclude Include="src\Derivative.h" />
     <ClInclude Include="src\FractionalStep_x.h" />
+    <ClInclude Include="src\FractionalStep_x_cst.h" />
     <ClInclude Include="src\Header.h" />
     <ClInclude Include="src\LinkCell.h" />
     <ClInclude Include="src\MatSolver.h" />
@@ -205,6 +206,7 @@
     <ClInclude Include="src\Particle_2d_i_cst.h" />
     <ClInclude Include="src\Particle_2d_j.h" />
     <ClInclude Include="src\Particle_x.h" />
+    <ClInclude Include="src\Particle_x_cst.h" />
     <ClInclude Include="src\Polynomial.h" />
     <ClInclude Include="src\_Polynomial.h" />
     <ClInclude Include="src\Sensor.h" />
