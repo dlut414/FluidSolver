@@ -9,6 +9,7 @@
 #include <cstdio>
 //#include "Mls_2d_e_exp.h"
 #include "FractionalStep_x.h"
+#include "FractionalStep_x_cst.h"
 #include "Header.h"
 #include "Controller.h"
 #include "DrawSim.h"
@@ -20,7 +21,7 @@ struct Parameters {
 	enum { Order = 2, };
 };
 
-typedef SIM::FractionalStep_x<Parameters::DataType, Parameters::Dim, Parameters::Order> Sim;
+typedef SIM::FractionalStep_x_cst<Parameters::DataType, Parameters::Dim, Parameters::Order> Sim;
 typedef REN::DrawSim<Parameters::DataType, Parameters::Dim> Ren;
 
 Ren* renObj;

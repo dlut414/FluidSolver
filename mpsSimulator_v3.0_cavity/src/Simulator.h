@@ -423,6 +423,7 @@ namespace SIM {
 			R divMax = std::numeric_limits<R>::min();
 			unsigned idv = 0, idp = 0, idd = 0;
 			for (unsigned p = 0; p < part->np; p++) {
+				if (part->type[p] == BD2) continue;
 				const R vel = part->vel1[p].norm();
 				const R phi = part->phi[p];
 				const R div = part->div(part->vel1, p);
@@ -434,6 +435,7 @@ namespace SIM {
 					phiMax = phi;
 					idp = p;
 				}
+				if (part->type[p] == BD1) continue;
 				if (abs(div) > abs(divMax)) {
 					divMax = div;
 					idd = p;

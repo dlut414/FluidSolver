@@ -373,7 +373,7 @@ namespace SIM {
 			const auto inv = MatPP::Zero();
 			if (abs(mm.determinant()) < eps_mat) {
 #if DEBUG
-				std::cout << mm.determinant() << std::endl;
+				std::cout << " ID: " << p << " --- " << " Determinant defficiency: " << mm.determinant() << std::endl;
 #endif
 				auto mm_ = mm.block<2, 2>(0, 0);
 				if (abs(mm_.determinant()) < eps_mat) {
@@ -437,7 +437,7 @@ namespace SIM {
 			MatPP inv = MatPP::Zero();
 			if (abs(mm.determinant()) < eps_mat) {
 #if DEBUG
-				std::cout << " Determinant defficiency: " << mm.determinant() << std::endl;
+				std::cout << " ID: " << p << " --- " << " Determinant defficiency: " << mm.determinant() << std::endl;
 #endif
 				auto mm_ = mm.block<2, 2>(0, 0);
 				if (abs(mm_.determinant()) < eps_mat) {
@@ -501,7 +501,7 @@ namespace SIM {
 				invMat[p] = MatPP::Zero();
 				if (abs(mm.determinant()) < eps_mat) {
 #if DEBUG
-					std::cout << mm.determinant() << std::endl;
+					std::cout << " ID: " << p << " --- " << " Determinant defficiency: " << mm.determinant() << std::endl;
 #endif
 					auto mm_ = mm.block<2, 2>(0, 0);
 					if (abs(mm_.determinant()) < eps_mat) {
