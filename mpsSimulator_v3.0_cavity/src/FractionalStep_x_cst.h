@@ -14,6 +14,7 @@ namespace SIM {
 		typedef Eigen::Matrix<int,D,1>	iVec;
 		typedef Eigen::Matrix<R,D,1>	Vec;
 		typedef Eigen::Triplet<R>		Tpl;
+		typedef Eigen::Matrix<R, PN::value, PN::value> MatPP;
 	public:
 		FractionalStep_x_cst() {}
 		~FractionalStep_x_cst() {}
@@ -38,7 +39,7 @@ namespace SIM {
 
 			sync();
 
-			//if (timeStep % 100 == 0) profileOut_avgVel2();
+			if (timeStep % 100 == 0) profileOut_avgVel2();
 			//calInvMat(); //for sensor
 			//profileOut();
 			//sensorOut();
@@ -369,7 +370,9 @@ namespace SIM {
 				auto pqsum = 0.;
 				auto pp = 0.;
 				//std::vector<unsigned> used;
-				const auto& mm = part->invMat[p];
+				MatPP* mm;
+				if (part->type[p] != BD1)	mm = &(part->invMat[p]);
+				else						mm = &(part->invNeu[p]);
 				const auto& cell = part->cell;
 				const auto c = cell->iCoord(part->pos[p]);
 				//if (abs(mm.determinant()) > part->eps_mat) {}
@@ -391,7 +394,7 @@ namespace SIM {
 						const auto w = part->w3(dr1);
 						VecP npq;
 						part->poly(dr, npq);
-						const auto a = mm * (w* npq);
+						const auto a = (*mm) * (w* npq);
 						const auto& lp = part->pn_lap_o;
 						const auto pq = lp.dot(a);
 						pp -= pq;

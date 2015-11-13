@@ -9,10 +9,9 @@ else
 	io.input(file)
 
 		lines = {}
-		local pat = "(%S+)%s+(%S+)%s+(%S+)%s+"
+		local pat = "(%S+)%s+(%S+)%s+(%S+)%s*"
 		for n1, n2, n3 in string.gfind(io.read("*all"), pat) do
 			lines[#lines+1] = string.format("%8.6f %8.6f\n", n1, n3)
-			if not n1 then break end
 		end
 	io.close(file)
 

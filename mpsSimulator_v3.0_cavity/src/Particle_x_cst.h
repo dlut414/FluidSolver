@@ -478,7 +478,8 @@ namespace SIM {
 #endif
 				auto mm_ = mm.block<2, 2>(0, 0);
 				if (abs(mm_.determinant()) < eps_mat) {
-					inv = MatPP::Zero();
+					//inv = MatPP::Zero();
+					inv = invMat[p];
 				}
 				else inv.block<2, 2>(0, 0) = mm_.inverse();
 			}
@@ -543,10 +544,21 @@ namespace SIM {
 					const auto& inner = bdnorm.at(p);
 					MatPP nn = MatPP::Zero();
 					nn.block<D, D>(0, 0) = inner * inner.transpose();
-					mm += nn;
+					MatPP mpn = mm + nn;
+					auto& inv = invNeu.at(p);
+					inv = MatPP::Zero();
+					if (abs(mpn.determinant()) < eps_mat) {
+#if DEBUG
+						std::cout << " ID: " << p << " --- " << " Determinant defficiency: " << mpn.determinant() << std::endl;
+#endif
+						auto mpn_ = mpn.block<2, 2>(0, 0);
+						if (abs(mpn_.determinant()) < eps_mat) inv = MatPP::Zero();
+						else inv.block<2, 2>(0, 0) = mpn_.inverse();
+					}
+					else inv = mpn.inverse();
 				}
 
-				auto& invRef = invMat[p];
+				auto& invRef = invMat.at(p);
 				invRef = MatPP::Zero();
 				if (abs(mm.determinant()) < eps_mat) {
 #if DEBUG
@@ -565,11 +577,6 @@ namespace SIM {
 
 		template <>
 		void init_x<1>() {
-			invMat.clear();
-			for (int p = 0; p < int(np); p++) {
-				invMat.push_back(MatPP());
-			}
-
 			varrho = 1./(1.*dp);
 			Vec zero = Vec::Zero();
 			DR::Gen<1>(varrho, zero.data(), pn_p_o.data());
@@ -579,11 +586,6 @@ namespace SIM {
 
 		template <>
 		void init_x<2>() {
-			invMat.clear();
-			for (int p = 0; p < int(np); p++) {
-				invMat.push_back(MatPP());
-			}
-
 			varrho = 1./(1.*dp);
 			Vec zero = Vec::Zero();
 			DR::Gen<1, 0>(varrho, zero.data(), pn_p_o.block<1, PN::value>(0, 0).data());
@@ -596,12 +598,6 @@ namespace SIM {
 
 		template <>
 		void init_x<3>() {
-			invMat.clear();
-			for (int p = 0; p < int(np); p++) {
-				invMat.push_back(MatPP());
-			}
-
-			varrho = 1./(1.*dp);
 			Vec zero = Vec::Zero();
 			DR::Gen<1, 0, 0>(varrho, zero.data(), pn_p_o.block<1, PN::value>(0, 0).data());
 			DR::Gen<0, 1, 0>(varrho, zero.data(), pn_p_o.block<1, PN::value>(1, 0).data());
@@ -615,10 +611,19 @@ namespace SIM {
 			pn_lap_o = pn_pp_o.block<1, PN::value>(0, 0) + pn_pp_o.block<1, PN::value>(3, 0) + pn_pp_o.block<1, PN::value>(5, 0);
 		}
 
-		void init_x() { init_x<>(); }
+		void init_x() { 
+			invNeu.clear();
+			invMat.clear();
+			for (int p = 0; p < int(np); p++) {
+				invMat.push_back(MatPP());
+				if (type[p] == BD1) invNeu[p] = MatPP::Zero();
+			}
+			init_x<>();
+		}
 
 	public:
 		std::vector<MatPP> invMat;
+		std::unordered_map<unsigned, MatPP> invNeu;
 
 		R varrho;
 		Eigen::Matrix<R,D,PN::value,Eigen::RowMajor>					pn_p_o;
