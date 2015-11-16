@@ -66,7 +66,7 @@ namespace REN {
 
 			glBindBuffer(GL_ARRAY_BUFFER, Draw_::vbo[0]);
 			glBufferData(GL_ARRAY_BUFFER, num*sizeof(I), type.data(), GL_STATIC_DRAW);
-			glVertexAttribPointer(0, 1, GL_INT, GL_FALSE, 0, (void*)0);
+			glVertexAttribPointer(0, 1, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
 			glBindBuffer(GL_ARRAY_BUFFER, Draw_::vbo[1]);
 			glBufferData(GL_ARRAY_BUFFER, num*sizeof(VecD), vert.data(), GL_STATIC_DRAW);

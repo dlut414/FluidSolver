@@ -78,7 +78,7 @@ namespace SIM {
 				addPart(pType(t), p, v);
 			}
 			file.close();
-			std::cout << " reading Geo. done " << std::endl;
+			std::cout << " Reading Geo. done " << std::endl;
 		}
 
 		void addPart (const pType& t, const vec& p, const vec& v) {
