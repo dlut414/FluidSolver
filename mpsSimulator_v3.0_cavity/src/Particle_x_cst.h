@@ -497,7 +497,7 @@ namespace SIM {
 					}
 				}
 				for (auto i = 0; i < D; i++) {
-					for (auto j = 0; j < D; j++) {
+					for (auto j = 0; j < i; j++) {
 						hes[d](i, j) = hes[d](j, i);
 					}
 				}
