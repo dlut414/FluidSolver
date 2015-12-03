@@ -282,7 +282,8 @@ namespace SIM {
 			for (int p = 0; p < int(part->np); p++) {
 				if (part->type[p] != FLUID) continue;
 				if (part->isFs(p)) continue;
-				dp[p] = part->pos_m1[p] + dp[p];
+				//dp[p] = part->pos_m1[p] + dp[p];
+				dp[p] = part->pos_m1[p];
 				tmp1[p] = part->derived().func_lsA_upwind(part->vel1, p, dp[p]);
 				tmp2[p] = part->derived().func_lsA_upwind(part->vel2, p, dp[p]);
 			}

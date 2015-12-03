@@ -69,9 +69,6 @@
     <ClInclude Include="src\BgPart.h">
       <Filter>Header Files\SIM</Filter>
     </ClInclude>
-    <ClInclude Include="src\Bvp.h">
-      <Filter>Header Files\SIM</Filter>
-    </ClInclude>
     <ClInclude Include="src\LinkCell.h">
       <Filter>Header Files\SIM</Filter>
     </ClInclude>

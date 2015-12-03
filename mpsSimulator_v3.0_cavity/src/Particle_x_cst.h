@@ -543,7 +543,7 @@ namespace SIM {
 				if (type[p] == BD1) {
 					const auto& inner = bdnorm.at(p);
 					MatPP nn = MatPP::Zero();
-					nn.block<D, D>(0, 0) = inner * inner.transpose();
+					nn.block<D, D>(0, 0) = w3(0)* inner * inner.transpose();
 					MatPP mpn = mm + nn;
 					auto& inv = invNeu.at(p);
 					inv = MatPP::Zero();

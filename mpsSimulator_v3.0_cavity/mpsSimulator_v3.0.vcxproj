@@ -156,7 +156,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>src;C:\Users\HU FANGYUAN\Documents\Visual Studio 2013\Projects\mpsSimulator_v3.0_cavity\mpsSimulator_v3.0_cavity\common;..\..\extern\freeglut-2.8.1\include;..\..\extern\glew-1.11.0\include;..\..\extern\glm;..\..\extern\eigen</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\HU FANGYUAN\Documents\Visual Studio 2013\Projects\FluidSolver_v1.0\common;src;..\..\extern\freeglut-2.8.1\include;..\..\extern\glew-1.11.0\include;..\..\extern\glm;..\..\extern\eigen</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <OpenMPSupport>true</OpenMPSupport>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
@@ -186,7 +186,6 @@
     <ClInclude Include="renderer\Renderer.h" />
     <ClInclude Include="renderer\Shader.h" />
     <ClInclude Include="src\BgPart.h" />
-    <ClInclude Include="src\Bvp.h" />
     <ClInclude Include="src\ConsValue.h" />
     <ClInclude Include="src\Derivative.h" />
     <ClInclude Include="src\FractionalStep_x.h" />

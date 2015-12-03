@@ -197,9 +197,9 @@ namespace SIM {
 			bbMap.clear();
 			for (unsigned p = 0; p < pos.size(); p++) {
 				if (type[p] != BD2) continue;
-				auto tmpdr = std::numeric_limits<R>::infinity();
+				auto tmpdr = std::numeric_limits<R>::max();
 				unsigned tmpbb = 0;
-				const iVec c = cell->iCoord(pos[p]);
+				const auto c = cell->iCoord(pos[p]);
 				for (auto i = 0; i < cell->blockSize::value; i++) {
 					const auto key = cell->hash(c, i);
 					for (unsigned m = 0; m < cell->linkList[key].size(); m++) {
@@ -225,7 +225,7 @@ namespace SIM {
 			for (const auto& p : bbMap) {
 				const auto n = pos[p.second] - pos[p.first];
 				const auto tmp = bdnorm.at(p.second);
-				if(tmp.norm() < n.norm())bdnorm[p.second] = n;
+				if(tmp.norm() < n.norm()) bdnorm[p.second] = n;
 			}
 			for (const auto& p : bbMap) {
 				bdnorm[p.second] = bdnorm.at(p.second).normalized();
