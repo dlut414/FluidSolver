@@ -92,7 +92,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Users\HU FANGYUAN\Documents\Visual Studio 2013\Projects\mpsSimulator_v2.0_cavity\mpsSimulator_v2.0\src;..\..\extern\freeglut-2.8.1\include;..\..\extern\glew-1.11.0\include;..\..\extern\glm;..\..\extern\eigen</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\KOZUKI\Documents\Visual Studio 2013\Projects\FluidSolver_v1.0\common;C:\Users\KOZUKI\Documents\Visual Studio 2013\Projects\FluidSolver_v1.0\mpsSimulator_v3.0_cavity\src;C:\Users\HU FANGYUAN\Documents\Visual Studio 2013\Projects\mpsSimulator_v2.0_cavity\mpsSimulator_v2.0\src;..\..\extern\freeglut-2.8.1\include;..\..\extern\glew-1.11.0\include;..\..\extern\glm;..\..\extern\eigen</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <OpenMPSupport>true</OpenMPSupport>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
@@ -111,7 +111,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>src;C:\Users\HU FANGYUAN\Documents\Visual Studio 2013\Projects\mpsSimulator_v3.0_cavity\mpsSimulator_v3.0_cavity\common;..\..\extern\freeglut-2.8.1\include;..\..\extern\glew-1.11.0\include;..\..\extern\glm;..\..\extern\eigen</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\KOZUKI\Documents\Visual Studio 2013\Projects\FluidSolver_v1.0\common;C:\Users\KOZUKI\Documents\Visual Studio 2013\Projects\FluidSolver_v1.0\mpsSimulator_v3.0_cavity\src;src;C:\Users\HU FANGYUAN\Documents\Visual Studio 2013\Projects\mpsSimulator_v3.0_cavity\mpsSimulator_v3.0_cavity\common;..\..\extern\freeglut-2.8.1\include;..\..\extern\glew-1.11.0\include;..\..\extern\glm;..\..\extern\eigen</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <OpenMPSupport>true</OpenMPSupport>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -132,7 +132,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Users\HU FANGYUAN\Documents\Visual Studio 2013\Projects\mpsSimulator_v2.0_cavity\mpsSimulator_v2.0\src;..\..\extern\freeglut-2.8.1\include;..\..\extern\glew-1.11.0\include;..\..\extern\glm;..\..\extern\eigen</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\KOZUKI\Documents\Visual Studio 2013\Projects\FluidSolver_v1.0\common;C:\Users\KOZUKI\Documents\Visual Studio 2013\Projects\FluidSolver_v1.0\mpsSimulator_v3.0_cavity\src;C:\Users\HU FANGYUAN\Documents\Visual Studio 2013\Projects\mpsSimulator_v2.0_cavity\mpsSimulator_v2.0\src;..\..\extern\freeglut-2.8.1\include;..\..\extern\glew-1.11.0\include;..\..\extern\glm;..\..\extern\eigen</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <OpenMPSupport>true</OpenMPSupport>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
@@ -156,7 +156,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Users\HU FANGYUAN\Documents\Visual Studio 2013\Projects\FluidSolver_v1.0\common;src;..\..\extern\freeglut-2.8.1\include;..\..\extern\glew-1.11.0\include;..\..\extern\glm;..\..\extern\eigen</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\KOZUKI\Documents\Visual Studio 2013\Projects\FluidSolver_v1.0\common;C:\Users\KOZUKI\Documents\Visual Studio 2013\Projects\FluidSolver_v1.0\mpsSimulator_v3.0_cavity\src;C:\Users\KOZUKI\Documents\Visual Studio 2013\Projects\FluidSolver_v1.0\common;C:\Users\KOZUKI\Documents\Visual Studio 2013\Projects\FluidSolver_v1.0\mpsSimulator_v3.0_cavity\src;..\..\extern\freeglut-2.8.1\include;..\..\extern\glew-1.11.0\include;..\..\extern\glm;..\..\extern\eigen</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <OpenMPSupport>true</OpenMPSupport>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>

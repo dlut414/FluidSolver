@@ -1,7 +1,6 @@
 /*
 */
 #pragma once
-#include "Header.h"
 
 enum bvpType {
 	poly_a,
