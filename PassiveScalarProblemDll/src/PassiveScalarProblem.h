@@ -14,7 +14,7 @@ public:
 
 	template <typename U>
 	__forceinline R scalar(const U& v) const { 
-		if(initialArea(v)) return static_cast<R>(1.);
+		if(scalarArea(v)) return static_cast<R>(1.);
 		else return static_cast<R>(0.);
 	}
 
@@ -32,7 +32,7 @@ public:
 
 private:
 	template <typename U>
-	__forceinline bool initialArea(const U& v) const {
+	__forceinline bool scalarArea(const U& v) const {
 		if (v[0] >= -0.1 && v[0] <= 0.1 && v[1] >= 0.16 && v[1] <= 0.36) return true;
 		else return false;
 	}

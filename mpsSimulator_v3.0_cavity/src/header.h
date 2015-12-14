@@ -7,7 +7,6 @@
 #define NTHREAD 4
 #define OMP	1
 #define BD_OPT 0
-#define BVP	0
 
 enum pType {
 	FLUID = 0,

@@ -11,8 +11,8 @@
 #include "Particle.h"
 #include "MatSolver.h"
 #include "Shifter.h"
-#include "Bvp.h"
 #include "Sensor.h"
+#include "PassiveScalarProblem.h"
 
 namespace SIM {
 
@@ -52,9 +52,6 @@ namespace SIM {
 		void init() {
 			derived().init_();
 			mSol = new MatSolver<R, D>(unsigned(derived().part->np), para.eps);
-#if BVP
-			bvp = new Bvp<R>(sinu_b);
-#endif
 			std::cout << " Particle number : " << derived().part->np << std::endl;
 			sen << "Sensor.in";
 			R tmp = cfl();
@@ -74,6 +71,8 @@ namespace SIM {
 				std::cout << " time --------> " << part->ct << std::endl;
 				std::cout << " dt ----------> " << para.dt << std::endl;
 			}
+			saveData();
+			std::exit(0);
 		}
 
 		R stepGL() {
@@ -139,12 +138,20 @@ namespace SIM {
 		}
 
 		void fina() {}
+		
+		__forceinline const Vec* position() const {
+			return derived().part->pos.data();
+		}
+		__forceinline const R* scalar() const {
+			return derived().part->phi.data();
+		}
 
 	public:
 		Parameter<R,D> para;
 		MatSolver<R,D>* mSol;
 		Shifter<R,D> shi;
 		Sensor<R,D> sen;
+		PassiveScalarProblem<R,2> psp;
 
 	protected:
 		void step() {}
@@ -153,32 +160,6 @@ namespace SIM {
 		void visTerm_i() {}
 		void presTerm_e() {}
 		void presTerm_i() {}
-#if LEGACY
-		void makeDirichlet_p_op() {
-			auto* const part = derived().part;
-			for (int p = 0; p<int(part->np); p++) {
-				if (part->type[p] != BD1) continue;
-				part->fs[p] = 1;
-				break;
-			}
-		}
-
-		void makeDirichlet_p_avg() {
-			auto* const part = derived().part;
-			Eigen::SparseMatrix<R> d(part->np, part->np);
-			std::vector<Tpl> coef;
-			for (int p = 0; p<int(part->np); p++) {
-				if (part->type[p] != BD1) continue;
-				for (int q = 0; q<int(part->np); q++) {
-					if (part->type[q] == BD2) continue;
-					coef.push_back(Tpl(p, q, 1.));
-				}
-				break;
-			}
-			d.setFromTriplets(coef.begin(), coef.end());
-			mSol->a = mSol->a + d;
-		}
-#endif
 		void makeDirchlet_v() {}
 
 		void makeNeumann_p() {
@@ -271,17 +252,6 @@ namespace SIM {
 			derived().part->updateInvMat();
 		}
 
-		void shift() {
-			//shi.shiftPnd(part, para);
-			//shi.shiftXu(derived().part, para);
-			shi.shiftSpring(derived().part, para);
-			//shi.shiftNearest2d(derived().part, para);
-			//shi.shiftPndLs(part, para);
-			//shi.shiftLs(part, para);
-			//shi.shiftCo(part, para);
-			//shi.shiftPbf(part, para);
-		}
-
 		void makeFs() {
 			auto* const part = derived().part;
 #if OMP
@@ -319,89 +289,6 @@ namespace SIM {
 #endif
 			for (int p = 0; p<int(part->np); p++) {
 				if (part->type[p] != FLUID || part->isFs(p)) continue;
-				part->vel1[p] = part->vel2[p];
-			}
-		}
-		void surfCol() {
-			auto* const part = derived().part;
-			std::vector<vec> cor(part->np, vec(0.));
-#if OMP
-#pragma omp parallel for
-#endif
-			for (int p = 0; p < int(part->np); p++) {
-				if (part->type[p] != FLUID || !part->isFs(p)) continue;
-				const auto c = part->cell->iCoord(part->pos[p]);
-				for (auto i = 0; i < cell->blockSize::value; i++) {
-					const auto key = cell->hash(c, i);
-					for (auto m = 0; m < part->cell->linkList[key].size(); m++) {
-						const auto q = part->cell->linkList[key][m];
-						if (!part->isFs(q)) continue;
-						if (q == p) continue;
-						const auto dr = part->pos[q] - part->pos[p];
-						const auto dv = part->vel1[q] - part->vel1[p];
-						const auto dr1 = dr.mag();
-						if (dr1 > part->r0) continue;
-						const auto pro = dv*dr / dr1;
-						if (abs(pro) > 0.8*para.umax) {
-							cor[p] += 0.5* abs(pro)* dv.norm();
-						}
-					}
-				}
-			}
-#if OMP
-#pragma omp parallel for
-#endif
-			for (int p = 0; p<int(part->np); p++) {
-				part->vel1[p] += cor[p];
-				part->vel2[p] = part->vel1[p];
-			}
-		}
-		void collision() {
-			auto* const part = derived().part;
-			std::vector<vec> cor(part->np, vec(0.));
-#if OMP
-#pragma omp parallel for
-#endif
-			for (int p = 0; p<int(part->np); p++) {
-				if (part->type[p] != FLUID) continue;
-				const auto c = part->cell->iCoord(part->pos[p]);
-				for (auto i = 0; i < cell->blockSize::value; i++) {
-					const auto key = cell->hash(c, i);
-					for (unsigned m = 0; m < part->cell->linkList[key].size(); m++) {
-						const auto q = part->cell->linkList[key][m];
-						if (p == q) continue;
-						const auto dr = part->pos[q] - part->pos[p];
-						const auto dr1 = dr.mag();
-						if (dr1 < 0.5*part->dp) {
-							const auto dv = part->vel1[q] - part->vel1[p];
-							const auto tmp = dr*dv;
-							if (tmp < 0.) {
-								const auto coef = (0.5 / (dr1*dr1)*tmp*(1. + 0.2));
-								cor[p] += coef* dr;
-							}
-						}
-					}
-				}
-			}
-#if OMP
-#pragma omp parallel for
-#endif
-			for (int p = 0; p < int(part->np); p++) {
-				if (part->type[p] != FLUID) continue;
-				part->vel1[p] += cor[p];
-			}
-		}
-
-		void damping() {
-			auto* const part = derived().part;
-#if OMP
-#pragma omp parallel for
-#endif
-			for (int p = 0; p < int(part->np); p++) {
-				if (part->type[p] != FLUID || !part->isFs(p)) continue;
-				const auto n = part->vel1[p].norm();
-				const auto gd = part->grad(part->vel1, p)* n;
-				part->vel2[p] -= 0.01*part->dp* gd.mag()* n;
 				part->vel1[p] = part->vel2[p];
 			}
 		}
@@ -445,7 +332,7 @@ namespace SIM {
 			std::cout << " max phi: " << phiMax << " --- id: " << idp << std::endl;
 			std::cout << " max Div: " << divMax << " --- id: " << idd << std::endl;
 		}
-#if BVP
+#if 0
 		void bvpSource() {
 			const auto* const part = derived().part;
 			for (auto p = 0; p < part->np; p++) {
@@ -541,11 +428,6 @@ namespace SIM {
 
 	protected:
 		int timeStep;
-		Timer tim;
-#if BVP
-		Bvp<R>* bvp;
-#endif
-
 	};
 
 }

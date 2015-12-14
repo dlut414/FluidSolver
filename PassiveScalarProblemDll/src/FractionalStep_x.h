@@ -19,10 +19,12 @@ namespace SIM {
 		~FractionalStep_x() {}
 
 		void step() {
+			updateVelocity();
+
 			calInvMat();
 			syncPos();
 
-			convect_q2r0s2();
+			convect_s1();
 
 			calCell();
 			calInvMat();
@@ -35,6 +37,15 @@ namespace SIM {
 			sync();
 		}
 
+		void updateVelocity() {
+#if OMP
+#pragma omp parallel for
+#endif
+			for (int p = 0; p<int(part->np); p++) {
+				if (part->type[p] == FLUID) part->vel1[p] = part->vel2[p] = psp.velocity(part->pos[p]);
+			}
+		}
+
 		void visTerm_e() {
 			/*Euler*/
 #if OMP
@@ -44,12 +55,6 @@ namespace SIM {
 				if (part->type[p] != FLUID) continue;
 				part->vel2[p] = part->vel1[p] + para.dt * (para.g + para.niu * part->lap(part->vel1, p));
 			}
-		}
-
-		void visTerm_i_q2r1() {
-			makeLhs_v_q2();
-			makeRhs_v_q2r1();
-			solvMat_v();
 		}
 
 		void visTerm_i_q1r0() {
@@ -64,24 +69,17 @@ namespace SIM {
 			solvMat_v();
 		}
 
-		void convect_q2r1s2() {
-			const auto coefL = (2.* para.dt) / (3.* para.rho);
-			const auto miu = para.rho * para.niu;
+
+		void convect_s1() {
 #if OMP
 #pragma omp parallel for
 #endif
 			for (int p = 0; p < int(part->np); p++) {
-				if (part->type[p] == FLUID || part->type[p] == BD1) {
-					part->pres[p] += part->phi[p] - miu* part->div(part->vel2, p);
-				}
-				else if (part->type[p] == BD2) part->pres[p] += part->phi[p];
+				if (part->type[p] == FLUID) part->pos[p] += para.dt * (part->vel1[p]);
 			}
-#if OMP
-#pragma omp parallel for
-#endif
-			for (int p = 0; p < int(part->np); p++) {
-				if (part->type[p] == FLUID) part->vel2[p] += -coefL* part->grad(part->phi, p);
-			}
+		}
+
+		void convect_s2() {
 #if OMP
 #pragma omp parallel for
 #endif
@@ -90,82 +88,8 @@ namespace SIM {
 			}
 		}
 
-		void convect_q1r0s1() {
-			const auto coefL = para.dt / para.rho;
-			const auto miu = para.rho * para.niu;
-#if OMP
-#pragma omp parallel for
-#endif
-			for (int p = 0; p < int(part->np); p++) {
-				if (part->type[p] == FLUID || part->type == BD1) {
-					part->pres[p] = part->phi[p] - miu* part->div(part->vel2, p);
-				}
-				else if (part->type[p] == BD2) part->pres[p] = part->phi[p];
-			}
-#if OMP
-#pragma omp parallel for
-#endif
-			for (int p = 0; p < int(part->np); p++) {
-				if (part->type[p] == FLUID) part->vel2[p] += -coefL * part->grad(part->phi, p);
-			}
-#if OMP
-#pragma omp parallel for
-#endif
-			for (int p = 0; p < int(part->np); p++) {
-				if (part->type[p] == FLUID) part->pos[p] += 0.5* para.dt * (part->vel1[p] + part->vel2[p]);
-			}
-		}
-
-		void convect_q2r0s1() {
-			const auto coefL = (2.* para.dt) / (3.* para.rho);
-			const auto miu = para.rho * para.niu;
-#if OMP
-#pragma omp parallel for
-#endif
-			for (int p = 0; p < int(part->np); p++) {
-				if (part->type[p] == FLUID || part->type[p] == BD1) {
-					part->pres[p] = part->phi[p] - miu* part->div(part->vel2, p);
-				}
-				else if (part->type[p] == BD2) part->pres[p] = part->phi[p];
-			}
-#if OMP
-#pragma omp parallel for
-#endif
-			for (int p = 0; p < int(part->np); p++) {
-				if (part->type[p] == FLUID) part->vel2[p] += -coefL* part->grad(part->phi, p);
-			}
-#if OMP
-#pragma omp parallel for
-#endif
-			for (int p = 0; p < int(part->np); p++) {
-				if (part->type[p] == FLUID) part->pos[p] += 0.5* para.dt * (part->vel1[p] + part->vel2[p]);
-			}
-		}
-
-		void convect_q2r0s2() {
-			const auto coefL = (2.* para.dt) / (3.* para.rho);
-			const auto miu = para.rho * para.niu;
-#if OMP
-#pragma omp parallel for
-#endif
-			for (int p = 0; p < int(part->np); p++) {
-				if (part->type[p] == FLUID || part->type[p] == BD1) {
-					part->pres[p] = part->phi[p] - miu* part->div(part->vel2, p);
-				}
-				else if (part->type[p] == BD2) part->pres[p] = part->phi[p];
-			}
-#if OMP
-#pragma omp parallel for
-#endif
-			for (int p = 0; p < int(part->np); p++) {
-				if (part->type[p] == FLUID) part->vel2[p] += -coefL* part->grad(part->phi, p);
-			}
-#if OMP
-#pragma omp parallel for
-#endif
-			for (int p = 0; p < int(part->np); p++) {
-				if (part->type[p] == FLUID) part->pos[p] += 0.5* para.dt * (3.*part->vel1[p] - 1.* part->vel_m1[p]);
-			}
+		void shift() {
+			shi.shiftOrigin(part, part->phi);
 		}
 
 		void init_() {
@@ -178,12 +102,22 @@ namespace SIM {
 			part->b2norm();
 			//part->updateTeam();
 			part->init_x();
+			initialPassiveScalar();
 		}
 
 	public:
 		Particle_x<R,D,P>* part;
 
 	private:
+		__forceinline void initialPassiveScalar() {
+#if OMP
+#pragma omp parallel for
+#endif
+			for (int p = 0; p<int(part->np); p++) {
+				if (part->type[p] == FLUID) part->phi[p] = psp.scalar(part->pos[p]);
+			}
+		}
+
 		__forceinline void makeLhs_v_q2() {
 			coef.clear();
 			for (unsigned p = 0; p < part->np; p++) {

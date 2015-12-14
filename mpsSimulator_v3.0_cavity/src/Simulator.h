@@ -11,7 +11,6 @@
 #include "Particle.h"
 #include "MatSolver.h"
 #include "Shifter.h"
-#include "Bvp.h"
 #include "Sensor.h"
 
 namespace SIM {
@@ -52,9 +51,6 @@ namespace SIM {
 		void init() {
 			derived().init_();
 			mSol = new MatSolver<R, D>(unsigned(derived().part->np), para.eps);
-#if BVP
-			bvp = new Bvp<R>(sinu_b);
-#endif
 			std::cout << " Particle number : " << derived().part->np << std::endl;
 			sen << "Sensor.in";
 			R tmp = cfl();

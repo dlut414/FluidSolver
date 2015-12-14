@@ -2,6 +2,7 @@
 */
 #pragma once
 #include "Header.h"
+#include <Eigen/dense>
 
 namespace SIM {
 

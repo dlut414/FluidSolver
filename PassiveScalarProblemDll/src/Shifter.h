@@ -298,6 +298,27 @@ namespace SIM {
 			}
 		}
 
+		template <typename T, typename U>
+		void shiftOrigin(T* const part, U& phi) const {
+			U tmp(part->np);
+#if OMP
+#pragma omp parallel for
+#endif
+			for (int p = 0; p < int(part->np); p++) {
+				if (part->type[p] != FLUID) continue;
+				if (part->isFs(p)) continue;
+				tmp[p] = part->derived().func_lsA_upwind(phi, p, part->pos_m1[p]);
+			}
+#if OMP
+#pragma omp parallel for
+#endif
+			for (int p = 0; p < int(part->np); p++) {
+				if (part->type[p] != FLUID) continue;
+				part->pos[p] = part->pos_m1[p];
+				phi[p] = tmp[p];
+			}
+		}
+
 	private:
 		inline const R w_spline(const R& r, const R& r0) const {
 			/*cubic spline*/
@@ -327,7 +348,6 @@ namespace SIM {
 			if (r >= r0) return 0.;
 			return 1. - r / r0;
 		}
-
 	};
 
 }
