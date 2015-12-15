@@ -10,7 +10,7 @@
 #pragma once
 #include "Header.h"
 
-namespace REN {
+namespace VIS {
 
 	class Camera {
 	public:

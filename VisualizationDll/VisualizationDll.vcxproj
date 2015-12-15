@@ -85,7 +85,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;VISUALIZATION_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\common;C:\Users\HU FANGYUAN\Documents\Visual Studio 2013\Projects\extern\glew-1.11.0\include;C:\Users\HU FANGYUAN\Documents\Visual Studio 2013\Projects\extern\glm;C:\Users\HU FANGYUAN\Documents\Visual Studio 2013\Projects\extern\freeglut-2.8.1\include;src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -99,7 +99,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;VISUALIZATION_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\common;C:\Users\HU FANGYUAN\Documents\Visual Studio 2013\Projects\extern\glew-1.11.0\include;C:\Users\HU FANGYUAN\Documents\Visual Studio 2013\Projects\extern\glm;C:\Users\HU FANGYUAN\Documents\Visual Studio 2013\Projects\extern\freeglut-2.8.1\include;src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -115,7 +115,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;VISUALIZATION_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\common;C:\Users\HU FANGYUAN\Documents\Visual Studio 2013\Projects\extern\glew-1.11.0\include;C:\Users\HU FANGYUAN\Documents\Visual Studio 2013\Projects\extern\glm;C:\Users\HU FANGYUAN\Documents\Visual Studio 2013\Projects\extern\freeglut-2.8.1\include;src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -133,7 +133,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;VISUALIZATION_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\common;C:\Users\HU FANGYUAN\Documents\Visual Studio 2013\Projects\extern\glew-1.11.0\include;C:\Users\HU FANGYUAN\Documents\Visual Studio 2013\Projects\extern\glm;C:\Users\HU FANGYUAN\Documents\Visual Studio 2013\Projects\extern\freeglut-2.8.1\include;src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -148,10 +148,9 @@
   <ItemGroup>
     <ClInclude Include="src\Camera.h" />
     <ClInclude Include="src\Controller.h" />
-    <ClInclude Include="src\DrawSim.h" />
+    <ClInclude Include="src\DrawParticle.h" />
     <ClInclude Include="src\Draw_.h" />
     <ClInclude Include="src\Header.h" />
-    <ClInclude Include="src\Renderer.h" />
     <ClInclude Include="src\Shader.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
@@ -179,6 +178,10 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="VisualizationDll.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shader0\fragment.glsl" />
+    <None Include="shader0\vertex.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

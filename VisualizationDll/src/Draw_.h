@@ -7,15 +7,14 @@
 */
 #pragma once
 #include "Header.h"
-#include "../common/typedef/Vec3.h"
-#include "../common/typedef/BBox.h"
 #include "Controller.h"
+#include <BBox.h>
 
-namespace REN {
+namespace VIS {
 
 	class Draw_ {
 	public:
-		Draw_(Controller* state) : stateObj(state) {
+		Draw_(Controller* _controlPtr) : controlPtr(_controlPtr) {
 			r_screenData[0] = -1.0f;    r_screenData[1] = -1.0f;    r_screenData[2] = 0.0f;
 			r_screenData[3] = 1.0f;    r_screenData[4] = -1.0f;    r_screenData[5] = 0.0f;
 			r_screenData[6] = -1.0f;    r_screenData[7] = 1.0f;    r_screenData[8] = 0.0f;
@@ -141,7 +140,7 @@ namespace REN {
 		}
 
 	public:
-		Controller* stateObj;
+		Controller* controlPtr;
 
 		GLuint      vao;
 		GLuint      fbo[3];

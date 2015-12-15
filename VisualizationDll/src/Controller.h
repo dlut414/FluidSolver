@@ -9,7 +9,7 @@
 #include "Header.h"
 #include "Camera.h"
 
-namespace REN {
+namespace VIS {
 
 	class Controller {
 	public:
