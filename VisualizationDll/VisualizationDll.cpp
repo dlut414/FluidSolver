@@ -10,12 +10,6 @@
 namespace VIS {
 
 	template <typename R>
-	VisualizationDll<R>::control = Controller();
-
-	template <typename R>
-	VisualizationDll<R>::drawer = nullptr;
-
-	template <typename R>
 	void VisualizationDll<R>::Initialize(int argc, char** argv) {
 		glutInit(&argc, argv);
 		glutInitDisplayMode(GLUT_SINGLE | GLUT_RGBA | GLUT_DEPTH);
@@ -46,11 +40,12 @@ namespace VIS {
 		//glBlendFunc             (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glClearColor(1.f, 1.f, 1.f, 0.f);
 		glewInit();
-		drawer = new DPPtr(control);
+		drawer = new DP(&control);
 	}
 
 	template <typename R> 
-	void VisualizationDll<R>::Run() {
+	void VisualizationDll<R>::Run(const int& dim, const int& num, void* tp, void* pos, void* s) {
+		dimension = dim; number = num; type = tp; position = pos; scalar = s;
 		glutMainLoop();
 	}
 
@@ -95,20 +90,20 @@ namespace VIS {
 		control.m_mvp = control.m_projectionMat * control.m_viewModelMat;
 		control.m_mvpInv = glm::inverse(control.m_mvp);
 
-		drawer->draw(simObj->part->type, simObj->part->pos, simObj->part->vort, simObj->part->pres);
+		drawer->draw(dimension, number, type, position, scalar);
 
 		glutSwapBuffers();
 		glutReportErrors();
 
 		callBack();
 
-		Fps();
+		fps();
 
-		if (stateObj.b_dirty) {
+		if (control.b_dirty) {
 			glutPostRedisplay();
-			stateObj.b_dirty = false;
+			control.b_dirty = false;
 		}
-		if (stateObj.b_leave) {
+		if (control.b_leave) {
 			glutLeaveMainLoop();
 		}
 	}

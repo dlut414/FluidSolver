@@ -23,7 +23,7 @@ namespace VIS {
 		DrawParticle(Controller* _controlPtr) : Draw_(_controlPtr) { init(); }
 		~DrawParticle() {}
 
-		template <typename I, typename V typename T>
+		template <typename I, typename V, typename T>
 		void draw(const int& dim, const int& num, const I* const type, const V* const vert, const T* const s1) const {
 			///clear framebuffer
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -51,15 +51,15 @@ namespace VIS {
 			glUniformMatrix4fv(shaderObj.matrixID[1], 1, GL_FALSE, &(Draw_::controlPtr->m_mvpInv[0][0]));
 
 			glBindBuffer(GL_ARRAY_BUFFER, Draw_::vbo[0]);
-			glBufferData(GL_ARRAY_BUFFER, num*sizeof(I), type, GL_STATIC_DRAW);
+			glBufferData(GL_ARRAY_BUFFER, num*sizeof(int), type, GL_STATIC_DRAW);
 			glVertexAttribPointer(0, 1, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
 			glBindBuffer(GL_ARRAY_BUFFER, Draw_::vbo[1]);
-			glBufferData(GL_ARRAY_BUFFER, num*sizeof(V), vert, GL_STATIC_DRAW);
+			glBufferData(GL_ARRAY_BUFFER, dim*num*sizeof(R), vert, GL_STATIC_DRAW);
 			glVertexAttribPointer(1, dim, DataType<>::value, GL_FALSE, 0, (void*)0);
 
 			glBindBuffer(GL_ARRAY_BUFFER, Draw_::vbo[2]);
-			glBufferData(GL_ARRAY_BUFFER, num*sizeof(T), s1, GL_STATIC_DRAW);
+			glBufferData(GL_ARRAY_BUFFER, num*sizeof(R), s1, GL_STATIC_DRAW);
 			glVertexAttribPointer(2, 1, DataType<>::value, GL_FALSE, 0, (void*)0);
 
 			glEnableVertexAttribArray(0);
