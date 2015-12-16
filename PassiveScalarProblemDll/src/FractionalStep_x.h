@@ -29,7 +29,7 @@ namespace SIM {
 			calCell();
 			calInvMat();
 			calForVis();
-
+			
 			calCell();
 			calInvMat();
 			shift();

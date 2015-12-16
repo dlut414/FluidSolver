@@ -314,6 +314,7 @@ namespace SIM {
 #endif
 			for (int p = 0; p < int(part->np); p++) {
 				if (part->type[p] != FLUID) continue;
+				if (part->isFs(p)) continue;
 				part->pos[p] = part->pos_m1[p];
 				phi[p] = tmp[p];
 			}

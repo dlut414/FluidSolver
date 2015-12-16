@@ -155,11 +155,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Camera.h" />
-    <ClInclude Include="src\Controller.h" />
     <ClInclude Include="src\DrawParticle.h" />
     <ClInclude Include="src\Draw_.h" />
+    <ClInclude Include="src\Fragment.h" />
     <ClInclude Include="src\Header.h" />
     <ClInclude Include="src\Shader.h" />
+    <ClInclude Include="src\Vertex.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="VisualizationDll.h" />

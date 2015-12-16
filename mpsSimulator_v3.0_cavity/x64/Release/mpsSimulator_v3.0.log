@@ -1,11 +1,14 @@
-﻿Build started 2015/12/14 19:40:44.
-     1>Project "C:\Users\HU FANGYUAN\Documents\Visual Studio 2013\Projects\FluidSolver_v1.0\mpsSimulator_v3.0_cavity\mpsSimulator_v3.0.vcxproj" on node 2 (Build target(s)).
+﻿Build started 12/16/2015 8:29:37 PM.
+     1>Project "C:\Users\KOZUKI\Documents\Visual Studio 2013\Projects\FluidSolver_v1.0\mpsSimulator_v3.0_cavity\mpsSimulator_v3.0.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\CL.exe /c /I"C:\Users\KOZUKI\Documents\Visual Studio 2013\Projects\FluidSolver_v1.0\common" /I"C:\Users\KOZUKI\Documents\Visual Studio 2013\Projects\FluidSolver_v1.0\mpsSimulator_v3.0_cavity\src" /I"C:\Users\KOZUKI\Documents\Visual Studio 2013\Projects\FluidSolver_v1.0\common" /I"C:\Users\KOZUKI\Documents\Visual Studio 2013\Projects\FluidSolver_v1.0\mpsSimulator_v3.0_cavity\src" /I"..\..\extern\freeglut-2.8.1\include" /I"..\..\extern\glew-1.11.0\include" /I..\..\extern\glm /I..\..\extern\eigen /Zi /nologo /W3 /WX- /sdl /MP /O2 /Oi /GL /D WIN32 /D NDEBUG /D _CONSOLE /D _LIB /D _UNICODE /D UNICODE /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /openmp /Fo"x64\Release\\" /Fd"x64\Release\vc120.pdb" /Gd /TP /errorReport:prompt mpsSimulator_v3.0.cpp
          mpsSimulator_v3.0.cpp
-     1>mpsSimulator_v3.0.cpp(9): fatal error C1083: Cannot open include file: 'Header.h': No such file or directory
-     1>Done Building Project "C:\Users\HU FANGYUAN\Documents\Visual Studio 2013\Projects\FluidSolver_v1.0\mpsSimulator_v3.0_cavity\mpsSimulator_v3.0.vcxproj" (Build target(s)) -- FAILED.
+     1>c:\users\kozuki\documents\visual studio 2013\projects\fluidsolver_v1.0\mpssimulator_v3.0_cavity\src\Simulator.h(540): error C2146: syntax error : missing ';' before identifier 'tim'
+                 c:\users\kozuki\documents\visual studio 2013\projects\fluidsolver_v1.0\mpssimulator_v3.0_cavity\src\Simulator.h(545) : see reference to class template instantiation 'SIM::Simulator<R,D,Derived>' being compiled
+     1>c:\users\kozuki\documents\visual studio 2013\projects\fluidsolver_v1.0\mpssimulator_v3.0_cavity\src\Simulator.h(540): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
+     1>c:\users\kozuki\documents\visual studio 2013\projects\fluidsolver_v1.0\mpssimulator_v3.0_cavity\renderer\Draw_.h(10): fatal error C1083: Cannot open include file: '../common/typedef/Vec3.h': No such file or directory
+     1>Done Building Project "C:\Users\KOZUKI\Documents\Visual Studio 2013\Projects\FluidSolver_v1.0\mpsSimulator_v3.0_cavity\mpsSimulator_v3.0.vcxproj" (Build target(s)) -- FAILED.
 
 Build FAILED.
 
-Time Elapsed 00:00:02.06
+Time Elapsed 00:00:01.19

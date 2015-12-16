@@ -13,46 +13,17 @@
 #else
 #define VISUALIZATIONDLL_API __declspec(dllimport)
 #endif
-
-#include <DrawParticle.h>
+#include <Controller.h>
 
 namespace VIS {
 
-	template <typename R>
+	typedef void* NPtr;
+
 	class VisualizationDll {
-		typedef DrawParticle<R> DP;
-		typedef DrawParticle<R>* DPPtr;
 	public:
-		static VISUALIZATIONDLL_API void Initialize(int argc, char** argv);
-		static VISUALIZATIONDLL_API void Run(const int& dim, const int& num, void* tp, void* pos, void* s);
+		static VISUALIZATIONDLL_API void Initialize();
+		static VISUALIZATIONDLL_API void Run(const Controller* const controlPtr, const int& dim, const int& num, NPtr tp, NPtr pos, NPtr s);
 		static VISUALIZATIONDLL_API void Finalize();
-
-	private:
-		static void fps();
-		static void onMouse(int, int, int, int);
-		static void onMotion(int, int);
-		static void onMouseWheel(int, int, int, int);
-		static void onReshape(int, int);
-		static void onKeyboard(unsigned char, int, int);
-		static void onDisplay();
-		static void callBack();
-
-	private:
-		static Controller control;
-		static DPPtr drawer;
-		static int dimension;
-		static int number;
-		static void* type; 
-		static void* position;
-		static void* scalar;
 	};
-
-	template <typename R> Controller VisualizationDll<R>::control;
-	template <typename R> DrawParticle<R>* VisualizationDll<R>::drawer;
-	template <typename R> int VisualizationDll<R>::dimension;
-	template <typename R> int VisualizationDll<R>::number;
-	template <typename R> void* VisualizationDll<R>::type;
-	template <typename R> void* VisualizationDll<R>::position;
-	template <typename R> void* VisualizationDll<R>::scalar;
 
 }

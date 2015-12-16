@@ -50,6 +50,7 @@ namespace SIM {
 		}
 
 		void init() {
+			*this << "Para.txt";
 			derived().init_();
 			mSol = new MatSolver<R, D>(unsigned(derived().part->np), para.eps);
 			std::cout << " Particle number : " << derived().part->np << std::endl;
@@ -72,14 +73,12 @@ namespace SIM {
 				std::cout << " dt ----------> " << para.dt << std::endl;
 			}
 			saveData();
-			std::exit(0);
 		}
 
 		R stepGL() {
 			auto* const part = derived().part;
 			if (part->ct > para.tt) {
 				saveData();
-				std::exit(0);
 			}
 			std::cout << " step ----------------------------------> " << timeStep << std::endl;
 			R tmp = cfl();
@@ -144,6 +143,9 @@ namespace SIM {
 		}
 		__forceinline const R* scalar() const {
 			return derived().part->phi.data();
+		}
+		__forceinline const int* type() const {
+			return (int*)(derived().part->type.data());
 		}
 
 	public:

@@ -7,14 +7,14 @@
 */
 #pragma once
 #include "Header.h"
-#include "Controller.h"
+#include <Controller.h>
 #include <BBox.h>
 
 namespace VIS {
 
 	class Draw_ {
 	public:
-		Draw_(Controller* _controlPtr) : controlPtr(_controlPtr) {
+		Draw_() {
 			r_screenData[0] = -1.0f;    r_screenData[1] = -1.0f;    r_screenData[2] = 0.0f;
 			r_screenData[3] = 1.0f;    r_screenData[4] = -1.0f;    r_screenData[5] = 0.0f;
 			r_screenData[6] = -1.0f;    r_screenData[7] = 1.0f;    r_screenData[8] = 0.0f;
@@ -140,8 +140,6 @@ namespace VIS {
 		}
 
 	public:
-		Controller* controlPtr;
-
 		GLuint      vao;
 		GLuint      fbo[3];
 

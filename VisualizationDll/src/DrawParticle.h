@@ -9,8 +9,8 @@
 #include "Header.h"
 #include "Draw_.h"
 #include "Shader.h"
-#include "Controller.h"
-#include "BBox.h"
+#include <Controller.h>
+#include <BBox.h>
 
 namespace VIS {
 
@@ -20,15 +20,15 @@ namespace VIS {
 		template <>					struct DataType<float>	{ enum { value = GL_FLOAT, }; };
 		template <>					struct DataType<double>	{ enum { value = GL_DOUBLE, }; };
 	public:
-		DrawParticle(Controller* _controlPtr) : Draw_(_controlPtr) { init(); }
+		DrawParticle() : Draw_() { init(); }
 		~DrawParticle() {}
 
 		template <typename I, typename V, typename T>
-		void draw(const int& dim, const int& num, const I* const type, const V* const vert, const T* const s1) const {
+		void draw(const Controller* const controlPtr, const int& dim, const int& num, const I* const type, const V* const vert, const T* const s1) const {
 			///clear framebuffer
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) printf("fbo_def not ready\n");
-			glViewport(0, 0, Draw_::controlPtr->u_width, Draw_::controlPtr->u_height);
+			glViewport(0, 0, controlPtr->u_width, controlPtr->u_height);
 			glFrontFace(GL_CCW);
 			glClearDepth(1);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -36,7 +36,7 @@ namespace VIS {
 			///use program0
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) printf("0 not ready\n");
-			glViewport(0, 0, Draw_::controlPtr->u_width, Draw_::controlPtr->u_height);
+			glViewport(0, 0, controlPtr->u_width, controlPtr->u_height);
 			glFrontFace(GL_CCW);
 			glDepthFunc(GL_LESS);
 
@@ -44,21 +44,21 @@ namespace VIS {
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			glUseProgram(shaderObj.programID[0]);
 			
-			glUniform1i(shaderObj.intID[0], Draw_::controlPtr->i_visFlag);
-			glUniform1f(shaderObj.floatID[0], Draw_::controlPtr->f_visRange);
-			glUniformMatrix4fv(shaderObj.matrixID[1], 1, GL_FALSE, &(Draw_::controlPtr->m_mvpInv[0][0]));
-			glUniformMatrix4fv(shaderObj.matrixID[0], 1, GL_FALSE, &(Draw_::controlPtr->m_mvp[0][0]));
-			glUniformMatrix4fv(shaderObj.matrixID[1], 1, GL_FALSE, &(Draw_::controlPtr->m_mvpInv[0][0]));
+			glUniform1i(shaderObj.intID[0], controlPtr->i_visFlag);
+			glUniform1f(shaderObj.floatID[0], controlPtr->f_visRange);
+			glUniformMatrix4fv(shaderObj.matrixID[1], 1, GL_FALSE, &(controlPtr->m_mvpInv[0][0]));
+			glUniformMatrix4fv(shaderObj.matrixID[0], 1, GL_FALSE, &(controlPtr->m_mvp[0][0]));
+			glUniformMatrix4fv(shaderObj.matrixID[1], 1, GL_FALSE, &(controlPtr->m_mvpInv[0][0]));
 
-			glBindBuffer(GL_ARRAY_BUFFER, Draw_::vbo[0]);
+			glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
 			glBufferData(GL_ARRAY_BUFFER, num*sizeof(int), type, GL_STATIC_DRAW);
 			glVertexAttribPointer(0, 1, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
-			glBindBuffer(GL_ARRAY_BUFFER, Draw_::vbo[1]);
+			glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
 			glBufferData(GL_ARRAY_BUFFER, dim*num*sizeof(R), vert, GL_STATIC_DRAW);
 			glVertexAttribPointer(1, dim, DataType<>::value, GL_FALSE, 0, (void*)0);
 
-			glBindBuffer(GL_ARRAY_BUFFER, Draw_::vbo[2]);
+			glBindBuffer(GL_ARRAY_BUFFER, vbo[2]);
 			glBufferData(GL_ARRAY_BUFFER, num*sizeof(R), s1, GL_STATIC_DRAW);
 			glVertexAttribPointer(2, 1, DataType<>::value, GL_FALSE, 0, (void*)0);
 
@@ -107,7 +107,8 @@ namespace VIS {
 			initShader();
 		}
 		void initShader() {
-			shaderObj.programID.push_back( shaderObj.LoadShader("./renderer/shader0/vertex.glsl", "./renderer/shader0/fragment.glsl") );
+			shaderObj.programID.push_back(shaderObj.LoadShader());
+			//shaderObj.programID.push_back(shaderObj.LoadShader("../VisualizationDll/shader0/vertex.glsl", "../VisualizationDll/shader0/fragment.glsl"));
 			shaderObj.matrixID.push_back( glGetUniformLocation(shaderObj.programID[0], "vMvp") );
 			shaderObj.matrixID.push_back( glGetUniformLocation(shaderObj.programID[0], "fMvpInv") );
 

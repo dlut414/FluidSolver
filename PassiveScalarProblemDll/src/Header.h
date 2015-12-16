@@ -4,7 +4,6 @@
 
 #define DEBUG 1
 #define LEGACY 0
-#define NTHREAD 4
 #define OMP	1
 #define BD_OPT 0
 

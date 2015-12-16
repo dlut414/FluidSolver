@@ -1,22 +1,18 @@
-﻿Build started 2015/12/14 19:55:10.
-     1>Project "C:\Users\HU FANGYUAN\Documents\Visual Studio 2013\Projects\FluidSolver_v1.0\PassiveScalarProblemDll\PassiveScalarProblemDll.vcxproj" on node 2 (Build target(s)).
+﻿Build started 12/17/2015 1:56:08 AM.
+     1>Project "C:\Users\KOZUKI\Documents\Visual Studio 2013\Projects\FluidSolver_v1.0\PassiveScalarProblemDll\PassiveScalarProblemDll.vcxproj" on node 3 (Build target(s)).
      1>ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\CL.exe /c /Isrc /I"C:\Users\HU FANGYUAN\Documents\Visual Studio 2013\Projects\extern\eigen" /I..\common /Zi /nologo /W3 /WX- /sdl /O2 /Oi /GL /D WIN32 /D NDEBUG /D _WINDOWS /D _USRDLL /D PASSIVESCALARPROBLEMDLL_EXPORTS /D _WINDLL /D _UNICODE /D UNICODE /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Yc"stdafx.h" /Fp"x64\Release\PassiveScalarProblemDll.pch" /Fo"x64\Release\\" /Fd"x64\Release\vc120.pdb" /Gd /TP /errorReport:prompt stdafx.cpp
-         stdafx.cpp
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\CL.exe /c /Isrc /I"C:\Users\HU FANGYUAN\Documents\Visual Studio 2013\Projects\extern\eigen" /I..\common /Zi /nologo /W3 /WX- /sdl /O2 /Oi /GL /D WIN32 /D NDEBUG /D _WINDOWS /D _USRDLL /D PASSIVESCALARPROBLEMDLL_EXPORTS /D _WINDLL /D _UNICODE /D UNICODE /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"x64\Release\\" /Fd"x64\Release\vc120.pdb" /Gd /TP /errorReport:prompt dllmain.cpp
-         dllmain.cpp
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\CL.exe /c /Isrc /I"C:\Users\HU FANGYUAN\Documents\Visual Studio 2013\Projects\extern\eigen" /I..\common /Zi /nologo /W3 /WX- /sdl /O2 /Oi /GL /D WIN32 /D NDEBUG /D _WINDOWS /D _USRDLL /D PASSIVESCALARPROBLEMDLL_EXPORTS /D _WINDLL /D _UNICODE /D UNICODE /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Yu"stdafx.h" /Fp"x64\Release\PassiveScalarProblemDll.pch" /Fo"x64\Release\\" /Fd"x64\Release\vc120.pdb" /Gd /TP /errorReport:prompt PassiveScalarProblemDll.cpp
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\CL.exe /c /Isrc /I..\..\extern\eigen /I..\common /Zi /nologo /W3 /WX- /sdl /O2 /Oi /GL /D WIN32 /D NDEBUG /D _WINDOWS /D _USRDLL /D PASSIVESCALARPROBLEMDLL_EXPORTS /D _WINDLL /D _UNICODE /D UNICODE /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Yu"stdafx.h" /Fp"x64\Release\PassiveScalarProblemDll.pch" /Fo"x64\Release\\" /Fd"x64\Release\vc120.pdb" /Gd /TP /errorReport:prompt PassiveScalarProblemDll.cpp
          PassiveScalarProblemDll.cpp
        Link:
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\HU FANGYUAN\Documents\Visual Studio 2013\Projects\FluidSolver_v1.0\x64\Release\PassiveScalarProblemDll.dll" /INCREMENTAL:NO /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\HU FANGYUAN\Documents\Visual Studio 2013\Projects\FluidSolver_v1.0\x64\Release\PassiveScalarProblemDll.pdb" /SUBSYSTEM:WINDOWS /OPT:REF /OPT:ICF /LTCG /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\HU FANGYUAN\Documents\Visual Studio 2013\Projects\FluidSolver_v1.0\x64\Release\PassiveScalarProblemDll.lib" /MACHINE:X64 /DLL x64\Release\dllmain.obj
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\KOZUKI\Documents\Visual Studio 2013\Projects\FluidSolver_v1.0\x64\Release\PassiveScalarProblemDll.dll" /INCREMENTAL:NO /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\KOZUKI\Documents\Visual Studio 2013\Projects\FluidSolver_v1.0\x64\Release\PassiveScalarProblemDll.pdb" /SUBSYSTEM:WINDOWS /OPT:REF /OPT:ICF /LTCG /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\KOZUKI\Documents\Visual Studio 2013\Projects\FluidSolver_v1.0\x64\Release\PassiveScalarProblemDll.lib" /MACHINE:X64 /DLL x64\Release\dllmain.obj
          x64\Release\PassiveScalarProblemDll.obj
          x64\Release\stdafx.obj
-            Creating library C:\Users\HU FANGYUAN\Documents\Visual Studio 2013\Projects\FluidSolver_v1.0\x64\Release\PassiveScalarProblemDll.lib and object C:\Users\HU FANGYUAN\Documents\Visual Studio 2013\Projects\FluidSolver_v1.0\x64\Release\PassiveScalarProblemDll.exp
+            Creating library C:\Users\KOZUKI\Documents\Visual Studio 2013\Projects\FluidSolver_v1.0\x64\Release\PassiveScalarProblemDll.lib and object C:\Users\KOZUKI\Documents\Visual Studio 2013\Projects\FluidSolver_v1.0\x64\Release\PassiveScalarProblemDll.exp
          Generating code
          Finished generating code
-         PassiveScalarProblemDll.vcxproj -> C:\Users\HU FANGYUAN\Documents\Visual Studio 2013\Projects\FluidSolver_v1.0\x64\Release\PassiveScalarProblemDll.dll
-     1>Done Building Project "C:\Users\HU FANGYUAN\Documents\Visual Studio 2013\Projects\FluidSolver_v1.0\PassiveScalarProblemDll\PassiveScalarProblemDll.vcxproj" (Build target(s)).
+         PassiveScalarProblemDll.vcxproj -> C:\Users\KOZUKI\Documents\Visual Studio 2013\Projects\FluidSolver_v1.0\x64\Release\PassiveScalarProblemDll.dll
+     1>Done Building Project "C:\Users\KOZUKI\Documents\Visual Studio 2013\Projects\FluidSolver_v1.0\PassiveScalarProblemDll\PassiveScalarProblemDll.vcxproj" (Build target(s)).
 
 Build succeeded.
 
-Time Elapsed 00:00:07.61
+Time Elapsed 00:00:06.95

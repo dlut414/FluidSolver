@@ -72,10 +72,6 @@ namespace SIM {
 			return (pn_p_o*a);
 		}
 
-		template <typename T, typename U, typename V>
-		const T grad(const U& phi, const V& p) const {
-		}
-
 		const R div(const std::vector<Vec>& u, const unsigned& p) const {
 			MatPD vv = MatPD::Zero();
 			const auto c = cell->iCoord(pos[p]);
@@ -212,8 +208,10 @@ namespace SIM {
 					}
 				}
 			}
-			if (!isNear) return U(0);
-			else return phi[rid] + (p - pos[rid]).transpose()*grad(phi, rid);
+			if (!isNear) return U::Zero();
+			const auto dp = p - pos[rid];
+			const auto dPhi = (dp.transpose()* grad(phi, rid)).transpose();
+			return phi[rid] + dPhi;
 		}
 
 		const Vec func_mafl(const std::vector<Vec>& phi, const unsigned& p, const Vec& p_new) const {
@@ -498,7 +496,7 @@ namespace SIM {
 			}
 			const auto dpt = dp.transpose();
 			auto ret = phi[p];
-			ret = ret + (dpt*gd) + 0.5*dpt * hes * dp;
+			ret = ret + (dpt*gd) +0.5*dpt * hes * dp;
 			return ret;
 		}
 
