@@ -44,8 +44,8 @@ namespace VIS {
 			f_visRange = 1000.f;
 
 			m_camera.SetPosition(m_initCameraPosition);
-			m_camera.SetRotation(m_initCameraRotation);
-			m_camera.SetProjectionRH(45.0f, float(u_width)/float(u_height), f_near, f_far);
+			//m_camera.SetProjectionRH(45.0f, float(u_width)/float(u_height), f_near, f_far);
+			m_camera.SetProjectionOR(-0.6f*float(u_width)/float(u_height), 0.6f*float(u_width)/float(u_height), -0.6f, 0.6f, f_near, f_far);
 		}
 		~Controller() {}
 

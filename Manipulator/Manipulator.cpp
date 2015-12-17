@@ -44,10 +44,9 @@ static void callBack() {
 	if (!control.b_stop) {
 		Simulation::Run();
 		static int count = 0;
-		if (count % 1 == 0) {
+		if (count++ % 50 == 0) {
 			control.b_bmp = true;
 			control.b_sens = true;
-			count++;
 		}
 		control.b_dirty = true;
 	}
@@ -82,6 +81,8 @@ static void onDisplay() {
 		* glm::toMat4(control.m_rotation)
 		* glm::scale(glm::mat4(1.0f), control.m_scale);
 
+	control.m_modelMat = modelMatrix;
+	control.m_viewMat = control.m_camera.GetViewMatrix();
 	control.m_viewModelMat = control.m_camera.GetViewMatrix() * modelMatrix;
 	control.m_projectionMat = control.m_camera.GetProjectionMatrix();
 	control.m_projectionMatInv = glm::inverse(control.m_projectionMat);

@@ -10,6 +10,9 @@
 const GLchar* vertex = GLSL(330 core,
 
 uniform mat4 vMvp;
+uniform mat4 vModelMat;
+uniform mat4 vViewMat;
+uniform mat4 vProjectionMat;
 
 layout(location = 0) in int vType;
 layout(location = 1) in vec3 vPos;
@@ -22,8 +25,10 @@ out float f3;
 out float f4;
 
 void main() {
+	vec3 pos = vec3(vPos.x, vPos.y, 0.2f*v3);
 	fType = vType;
-	fPos = vMvp * vec4(vPos, 1.0f);
+	fPos = vMvp * vec4(pos, 1.0f);
+
 	f3 = v3;
 	f4 = v4;
 

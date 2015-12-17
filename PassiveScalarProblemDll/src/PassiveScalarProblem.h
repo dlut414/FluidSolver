@@ -20,12 +20,13 @@ public:
 
 	template <typename U>
 	__forceinline Vec velocity(const U& v) const {
+		Vec ret;
 		static const R omega = static_cast<R>(M_PI / 5.);
 		const auto r = v.norm();
+		if (r < 1.e-10) return Vec::Zero();
 		const auto cTheta = v[0] / r;
 		const auto sTheta = v[1] / r;
 		const auto vel = omega * r;
-		Vec ret;
 		ret << -vel*sTheta, vel*cTheta;
 		return ret;
 	}

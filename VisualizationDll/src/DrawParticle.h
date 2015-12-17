@@ -46,9 +46,11 @@ namespace VIS {
 			
 			glUniform1i(shaderObj.intID[0], controlPtr->i_visFlag);
 			glUniform1f(shaderObj.floatID[0], controlPtr->f_visRange);
-			glUniformMatrix4fv(shaderObj.matrixID[1], 1, GL_FALSE, &(controlPtr->m_mvpInv[0][0]));
 			glUniformMatrix4fv(shaderObj.matrixID[0], 1, GL_FALSE, &(controlPtr->m_mvp[0][0]));
 			glUniformMatrix4fv(shaderObj.matrixID[1], 1, GL_FALSE, &(controlPtr->m_mvpInv[0][0]));
+			glUniformMatrix4fv(shaderObj.matrixID[2], 1, GL_FALSE, &(controlPtr->m_modelMat[0][0]));
+			glUniformMatrix4fv(shaderObj.matrixID[3], 1, GL_FALSE, &(controlPtr->m_viewMat[0][0]));
+			glUniformMatrix4fv(shaderObj.matrixID[4], 1, GL_FALSE, &(controlPtr->m_projectionMat[0][0]));
 
 			glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
 			glBufferData(GL_ARRAY_BUFFER, num*sizeof(int), type, GL_STATIC_DRAW);
@@ -111,6 +113,9 @@ namespace VIS {
 			//shaderObj.programID.push_back(shaderObj.LoadShader("../VisualizationDll/shader0/vertex.glsl", "../VisualizationDll/shader0/fragment.glsl"));
 			shaderObj.matrixID.push_back( glGetUniformLocation(shaderObj.programID[0], "vMvp") );
 			shaderObj.matrixID.push_back( glGetUniformLocation(shaderObj.programID[0], "fMvpInv") );
+			shaderObj.matrixID.push_back( glGetUniformLocation(shaderObj.programID[0], "vModelMat") );
+			shaderObj.matrixID.push_back( glGetUniformLocation(shaderObj.programID[0], "vViewMat") );
+			shaderObj.matrixID.push_back( glGetUniformLocation(shaderObj.programID[0], "vProjectionMat") );
 
 			shaderObj.intID.push_back(glGetUniformLocation(shaderObj.programID[0], "flag"));
 			shaderObj.floatID.push_back(glGetUniformLocation(shaderObj.programID[0], "range"));

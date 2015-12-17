@@ -40,6 +40,9 @@ namespace VIS {
 		void SetProjectionRH(float fov, float aspectRatio, float zNear, float zFar) {
 			m_ProjectionMatrix = glm::perspective(glm::radians(fov), aspectRatio, zNear, zFar);
 		}
+		void SetProjectionOR(float left, float right, float bottom, float top, float zNear, float zFar) {
+			m_ProjectionMatrix = glm::ortho(left, right, bottom, top, zNear, zFar);
+		}
 
 		void ApplyViewMatrix() { UpdateViewMatrix(); }
 

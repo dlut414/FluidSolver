@@ -16,6 +16,9 @@
     <Filter Include="Header Files\shader0">
       <UniqueIdentifier>{4953b4f0-4580-4f7f-8af3-ed3445e17561}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\shaderInline">
+      <UniqueIdentifier>{2d287900-bce9-4672-9de7-5b27b79df599}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -45,11 +48,11 @@
     <ClInclude Include="src\DrawParticle.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Vertex.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\Fragment.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\shaderInline</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vertex.h">
+      <Filter>Header Files\shaderInline</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
