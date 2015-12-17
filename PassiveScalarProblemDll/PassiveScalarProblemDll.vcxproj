@@ -163,6 +163,7 @@
     <ClInclude Include="src\Derivative.h" />
     <ClInclude Include="src\FractionalStep_x.h" />
     <ClInclude Include="src\Header.h" />
+    <ClInclude Include="src\Interpolation.h" />
     <ClInclude Include="src\LinkCell.h" />
     <ClInclude Include="src\MatSolver.h" />
     <ClInclude Include="src\mMath.h" />

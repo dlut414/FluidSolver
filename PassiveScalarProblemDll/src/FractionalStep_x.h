@@ -89,7 +89,7 @@ namespace SIM {
 		}
 
 		void shift() {
-			shi.shiftOrigin(part, part->phi);
+			shi.shiftOriginWENO(part, part->phi);
 		}
 
 		void init_() {

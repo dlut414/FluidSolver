@@ -1,10 +1,6 @@
-﻿Build started 12/17/2015 12:46:44 PM.
+﻿Build started 12/18/2015 2:20:09 AM.
      1>Project "C:\Users\KOZUKI\Documents\Visual Studio 2013\Projects\FluidSolver_v1.0\PassiveScalarProblemDll\PassiveScalarProblemDll.vcxproj" on node 3 (Build target(s)).
      1>ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\CL.exe /c /Isrc /I..\..\extern\eigen /I..\common /Zi /nologo /W3 /WX- /sdl /MP /O2 /Oi /GL /D WIN32 /D NDEBUG /D _WINDOWS /D _USRDLL /D PASSIVESCALARPROBLEMDLL_EXPORTS /D _WINDLL /D _UNICODE /D UNICODE /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /openmp /Yc"stdafx.h" /Fp"x64\Release\PassiveScalarProblemDll.pch" /Fo"x64\Release\\" /Fd"x64\Release\vc120.pdb" /Gd /TP /errorReport:prompt stdafx.cpp
-         stdafx.cpp
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\CL.exe /c /Isrc /I..\..\extern\eigen /I..\common /Zi /nologo /W3 /WX- /sdl /MP /O2 /Oi /GL /D WIN32 /D NDEBUG /D _WINDOWS /D _USRDLL /D PASSIVESCALARPROBLEMDLL_EXPORTS /D _WINDLL /D _UNICODE /D UNICODE /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /openmp /Fo"x64\Release\\" /Fd"x64\Release\vc120.pdb" /Gd /TP /errorReport:prompt dllmain.cpp
-         dllmain.cpp
          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\CL.exe /c /Isrc /I..\..\extern\eigen /I..\common /Zi /nologo /W3 /WX- /sdl /MP /O2 /Oi /GL /D WIN32 /D NDEBUG /D _WINDOWS /D _USRDLL /D PASSIVESCALARPROBLEMDLL_EXPORTS /D _WINDLL /D _UNICODE /D UNICODE /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /openmp /Yu"stdafx.h" /Fp"x64\Release\PassiveScalarProblemDll.pch" /Fo"x64\Release\\" /Fd"x64\Release\vc120.pdb" /Gd /TP /errorReport:prompt PassiveScalarProblemDll.cpp
          PassiveScalarProblemDll.cpp
        Link:
@@ -19,4 +15,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:07.22
+Time Elapsed 00:00:07.15

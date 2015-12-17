@@ -72,6 +72,9 @@
     <ClInclude Include="PassiveScalarProblemDll.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\Interpolation.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
