@@ -625,7 +625,7 @@ namespace SIM {
 					}
 				}
 				static const R epsilon = 1.e-5;
-				static const int magnifier = 4;
+				static const int magnifier = 2;
 				for (auto i = 0; i < Stencils; i++) {
 					stencilWeight[i] = 1. / pow(epsilon + oscillationIndicator[i], magnifier);
 				}
