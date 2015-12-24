@@ -560,7 +560,7 @@ namespace SIM {
 
 		//const Vec func_lsB_upwind(const std::vector<Vec>& u, const unsigned& p, const Vec& p_new) const {}
 		
-		template <int StencilsX = 1, int StencilsY = 2, int Stencils = StencilsX*StencilsY, int Dimension = D>	struct interpolateWENO_ {
+		template <int StencilsX = 1, int StencilsY = 3, int Stencils = StencilsX*StencilsY, int Dimension = D>	struct interpolateWENO_ {
 		};
 		template <int StencilsX, int StencilsY, int Stencils>		struct interpolateWENO_<StencilsX, StencilsY, Stencils, 1> {
 			template <typename U> static const U Gen(const std::vector<U>& phi, const unsigned& p, const Vec& p_new, Particle_x<R, D, P>* part) {}
@@ -640,7 +640,7 @@ namespace SIM {
 						oscillationIndicator[i] += abs(polyCoef[i][term]);
 					}
 				}
-				static const R epsilon = 1.e-5;
+				static const R epsilon = 1.e-6;
 				static const int magnifier = 5;
 				for (auto i = 0; i < Stencils; i++) {
 					stencilWeight[i] = 1. / pow(epsilon + oscillationIndicator[i], magnifier);
