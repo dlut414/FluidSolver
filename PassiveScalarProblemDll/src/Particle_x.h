@@ -570,7 +570,7 @@ namespace SIM {
 				const auto dp = p_new - part->pos[p];
 				if (dp.norm() < part->eps) return phi[p];
 				const auto up = dp.normalized();
-				static const auto alpha = 2.* M_PI / StencilsX;
+				const auto alpha = 2.* M_PI / StencilsX;
 				Vec dir[StencilsX];
 				Vec ctr[Stencils];
 				for (auto i = 0; i < StencilsX; i++) {
@@ -605,23 +605,20 @@ namespace SIM {
 						const auto dr = part->pos[q] - part->pos[p];
 						const auto dr1 = dr.norm();
 						if (dr1 > part->r0) continue;
-						for (auto stcX = 0; stcX < StencilsX; stcX++) {
-							for (auto stcY = 0; stcY < StencilsY; stcY++) {
-								const auto stcId = stcX* StencilsY + stcY;
-								const auto dis = (part->pos[q] - ctr[stcId]).norm();
-								const auto w = part->w3(dis);
-								VecP npq;
-								part->poly(dr, npq);
-								mm[stcId] += (w* npq)* npq.transpose();
-								vv[stcId] += (w* npq)* (phi[q] - phi[p]);
-							}
+						for (auto stcId = 0; stcId < Stencils; stcId++) {
+							const auto dis = (part->pos[q] - ctr[stcId]).norm();
+							const auto w = part->w3(dis);
+							VecP npq;
+							part->poly(dr, npq);
+							mm[stcId] += (w* npq)* npq.transpose();
+							vv[stcId] += (w* npq)* (phi[q] - phi[p]);
 						}
 					}
 				}
-				static R oscillationIndicator[Stencils];
-				static R stencilWeight[Stencils];
-				static R stencilWeightNorm[Stencils];
-				static VecP polyCoef[Stencils];
+				R oscillationIndicator[Stencils];
+				R stencilWeight[Stencils];
+				R stencilWeightNorm[Stencils];
+				VecP polyCoef[Stencils];
 				for (auto i = 0; i < Stencils; i++) {
 					MatPP inv = MatPP::Zero();
 					if (abs(mm[i].determinant()) < part->eps_mat) {
@@ -640,8 +637,8 @@ namespace SIM {
 						oscillationIndicator[i] += abs(polyCoef[i][term]);
 					}
 				}
-				static const R epsilon = 1.e-6;
-				static const int magnifier = 5;
+				const R epsilon = 1.e-6;
+				const int magnifier = 5;
 				for (auto i = 0; i < Stencils; i++) {
 					stencilWeight[i] = 1. / pow(epsilon + oscillationIndicator[i], magnifier);
 				}
@@ -651,7 +648,7 @@ namespace SIM {
 				}
 				for (auto i = 0; i < Stencils; i++) {
 					stencilWeightNorm[i] = stencilWeight[i] / stencilWeightSum;
-					if (p == 8625)std::cout << stencilWeightNorm[i] << ", ";
+					//if (p == 8625)std::cout << stencilWeightNorm[i] << ", ";
 				}
 				VecP combinedCoef = VecP::Zero();
 				for (auto i = 0; i < Stencils; i++) {
@@ -659,7 +656,7 @@ namespace SIM {
 				}
 				const auto gd = part->pn_p_o * combinedCoef;
 				const auto mgd = part->pn_pp_o * combinedCoef;
-				static Mat hes;
+				Mat hes;
 				int counter = 0;
 				for (auto i = 0; i < D; i++) {
 					for (auto j = i; j < D; j++) {
@@ -691,7 +688,7 @@ namespace SIM {
 				const auto dp = p_new - part->pos[p];
 				if (dp.norm() < part->eps) return phi[p];
 				const auto up = dp.normalized();
-				static const auto alpha = 2.* M_PI / StencilsX;
+				const auto alpha = 2.* M_PI / StencilsX;
 				Vec dir[StencilsX];
 				Vec ctr[Stencils];
 				for (auto i = 0; i < StencilsX; i++) {
@@ -701,8 +698,8 @@ namespace SIM {
 					dir[i] << ct*up[0] + st*up[1], ct*up[1] - st*up[0];
 				}
 				for (auto j = 0; j < StencilsY; j++) {
-					//const auto dis = part->r0* ( R(1.) - R(2.)*(j + 1) / (1 + StencilsY) );
-					const auto dis = part->r0* (R(1.) - R(1.)*(j + 1) / (StencilsY));
+					const auto dis = part->r0* ( R(1.) - R(2.)*(j + 1) / (1 + StencilsY) );
+					//const auto dis = part->r0* (R(1.) - R(1.)*(j + 1) / (StencilsY));
 					for (auto i = 0; i < StencilsX; i++) {
 						const auto stcId = i* StencilsY + j;
 						ctr[stcId] = part->pos[p] + dis*dir[i];
@@ -739,10 +736,10 @@ namespace SIM {
 						}
 					}
 				}
-				static R oscillationIndicator[Stencils];
-				static R stencilWeight[Stencils];
-				static R stencilWeightNorm[Stencils];
-				static VecP polyCoef[Stencils];
+				R oscillationIndicator[Stencils];
+				R stencilWeight[Stencils];
+				R stencilWeightNorm[Stencils];
+				VecP polyCoef[Stencils];
 				for (auto i = 0; i < Stencils; i++) {
 					MatPP inv = MatPP::Zero();
 					if (abs(mm[i].determinant()) < part->eps_mat) {
@@ -756,13 +753,16 @@ namespace SIM {
 					else inv = mm[i].inverse();
 					polyCoef[i] = inv * vv[i];
 					oscillationIndicator[i] = R(0.);
+					const auto offset = PN::value - mMath::H<D, P>::value;
+					for (auto term = 0; term < PN::value; term++) {
+						oscillationIndicator[i] += abs(polyCoef[i][term]);
+					}
 				}
 
 				for (auto i = 0; i < Stencils; i++) {
-					oscillationIndicator[i] = sqrt(oscillationIndicator[i]);
 				}
-				static const R epsilon = 1.e-6;
-				static const int magnifier = 5;
+				const R epsilon = 1.e-6;
+				const int magnifier = 5;
 				for (auto i = 0; i < Stencils; i++) {
 					stencilWeight[i] = 1. / pow(epsilon + oscillationIndicator[i], magnifier);
 				}
@@ -780,7 +780,7 @@ namespace SIM {
 				}
 				const auto gd = part->pn_p_o * combinedCoef;
 				const auto mgd = part->pn_pp_o * combinedCoef;
-				static Mat hes;
+				Mat hes;
 				int counter = 0;
 				for (auto i = 0; i < D; i++) {
 					for (auto j = i; j < D; j++) {

@@ -1,4 +1,4 @@
-﻿Build started 12/26/2015 1:54:16 AM.
+﻿Build started 1/15/2016 11:22:58 PM.
      1>Project "C:\Users\KOZUKI\Documents\Visual Studio 2013\Projects\FluidSolver_v1.0\VisualizationDll\VisualizationDll.vcxproj" on node 2 (Build target(s)).
      1>Link:
          VisualizationDll.vcxproj -> C:\Users\KOZUKI\Documents\Visual Studio 2013\Projects\FluidSolver_v1.0\x64\Release\VisualizationDll.dll
@@ -6,4 +6,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:00.18
+Time Elapsed 00:00:00.03
