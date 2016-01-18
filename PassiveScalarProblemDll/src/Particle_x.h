@@ -698,8 +698,8 @@ namespace SIM {
 					dir[i] << ct*up[0] + st*up[1], ct*up[1] - st*up[0];
 				}
 				for (auto j = 0; j < StencilsY; j++) {
-					const auto dis = part->r0* ( R(1.) - R(2.)*(j + 1) / (1 + StencilsY) );
-					//const auto dis = part->r0* (R(1.) - R(1.)*(j + 1) / (StencilsY));
+					//const auto dis = part->r0* ( R(1.) - R(2.)*(j + 1) / (1 + StencilsY) );
+					const auto dis = part->r0* (R(1.) - R(1.)*(j + 1) / (StencilsY));
 					for (auto i = 0; i < StencilsX; i++) {
 						const auto stcId = i* StencilsY + j;
 						ctr[stcId] = part->pos[p] + dis*dir[i];
@@ -753,13 +753,19 @@ namespace SIM {
 					else inv = mm[i].inverse();
 					polyCoef[i] = inv * vv[i];
 					oscillationIndicator[i] = R(0.);
-					const auto offset = PN::value - mMath::H<D, P>::value;
-					for (auto term = 0; term < PN::value; term++) {
-						oscillationIndicator[i] += abs(polyCoef[i][term]);
-					}
 				}
 
 				for (auto i = 0; i < Stencils; i++) {
+					const auto dp = part->dp;
+					const auto A = polyCoef[i][0] * polyCoef[i][0];
+					const auto B = polyCoef[i][1] * polyCoef[i][1];
+					const auto C = polyCoef[i][2] * polyCoef[i][2];
+					const auto D = polyCoef[i][3] * polyCoef[i][3];
+					const auto E = polyCoef[i][4] * polyCoef[i][4];
+					const auto beta1 = (dp*dp*dp)*(A + B) + (dp*dp*dp*dp*dp / 6.)*(2.*C + D + 2.*E);
+					const auto beta2 = (dp*dp*dp*dp*dp)*(4.*C + D + 4.*E);
+					//oscillationIndicator[i] = 4.*beta1 - (1. / 3.)*beta2;
+					oscillationIndicator[i] = beta1 + beta2;
 				}
 				const R epsilon = 1.e-6;
 				const int magnifier = 5;
