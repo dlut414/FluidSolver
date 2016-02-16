@@ -6,7 +6,6 @@
 #include <unordered_map>
 #include <cassert>
 #include <Eigen/Dense>
-#include "Header.h"
 #include "mMath.h"
 #include <BBox.h>
 

@@ -21,6 +21,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		common\Bitmap.h = common\Bitmap.h
 		common\Camera.h = common\Camera.h
 		common\Controller.h = common\Controller.h
+		common\LinkCell.h = common\LinkCell.h
+		common\mMath.h = common\mMath.h
 		common\PreInformation.h = common\PreInformation.h
 	EndProjectSection
 EndProject
