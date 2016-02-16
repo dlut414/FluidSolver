@@ -6,7 +6,7 @@
 #include <Eigen/Sparse>
 #include <Eigen/SparseQR>
 #include <Eigen/OrderingMethods>
-#include "header.h"
+#include "Header.h"
 
 #define AUGMENT (1)
 #define AG AUGMENT

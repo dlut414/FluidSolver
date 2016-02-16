@@ -30,28 +30,16 @@
     <ClInclude Include="src\ConsValue.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Derivative.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\FractionalStep_x.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Header.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\LinkCell.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\mMath.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\Particle.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Particle_x.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Polynomial.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Sensor.h">

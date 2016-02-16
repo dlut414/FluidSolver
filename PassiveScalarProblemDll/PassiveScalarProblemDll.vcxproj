@@ -160,18 +160,14 @@
   <ItemGroup>
     <ClInclude Include="PassiveScalarProblemDll.h" />
     <ClInclude Include="src\ConsValue.h" />
-    <ClInclude Include="src\Derivative.h" />
     <ClInclude Include="src\FractionalStep_x.h" />
     <ClInclude Include="src\Header.h" />
     <ClInclude Include="src\Interpolation.h" />
-    <ClInclude Include="src\LinkCell.h" />
     <ClInclude Include="src\MatSolver.h" />
-    <ClInclude Include="src\mMath.h" />
     <ClInclude Include="src\Parameter.h" />
     <ClInclude Include="src\Particle.h" />
     <ClInclude Include="src\Particle_x.h" />
     <ClInclude Include="src\PassiveScalarProblem.h" />
-    <ClInclude Include="src\Polynomial.h" />
     <ClInclude Include="src\Sensor.h" />
     <ClInclude Include="src\Shifter.h" />
     <ClInclude Include="src\Simulator.h" />

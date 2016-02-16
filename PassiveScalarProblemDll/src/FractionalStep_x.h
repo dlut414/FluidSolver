@@ -1,4 +1,9 @@
 /*
+* LICENCE
+* copyright 2014 ~ ****
+* Some rights reserved.
+* Author: HUFANGYUAN
+* Released under CC BY-NC
 */
 #pragma once
 #include "Simulator.h"

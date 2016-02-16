@@ -1,5 +1,5 @@
-﻿Build started 1/18/2016 6:15:18 PM.
-     1>Project "C:\Users\KOZUKI\Documents\Visual Studio 2013\Projects\FluidSolver_v1.0\PassiveScalarProblemDll\PassiveScalarProblemDll.vcxproj" on node 3 (Build target(s)).
+﻿Build started 2/16/2016 10:53:42 AM.
+     1>Project "C:\Users\KOZUKI\Documents\Visual Studio 2013\Projects\FluidSolver_v1.0\PassiveScalarProblemDll\PassiveScalarProblemDll.vcxproj" on node 4 (Build target(s)).
      1>ClCompile:
          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\CL.exe /c /Isrc /I..\..\extern\eigen /I..\common /Zi /nologo /W3 /WX- /sdl /MP /O2 /Oi /GL /D WIN32 /D NDEBUG /D _WINDOWS /D _USRDLL /D PASSIVESCALARPROBLEMDLL_EXPORTS /D _WINDLL /D _UNICODE /D UNICODE /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /openmp /Yu"stdafx.h" /Fp"x64\Release\PassiveScalarProblemDll.pch" /Fo"x64\Release\\" /Fd"x64\Release\vc120.pdb" /Gd /TP /errorReport:prompt PassiveScalarProblemDll.cpp
          PassiveScalarProblemDll.cpp
@@ -15,4 +15,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:07.24
+Time Elapsed 00:00:11.89
