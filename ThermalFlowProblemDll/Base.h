@@ -9,7 +9,7 @@
 
 namespace SIM {
 
-	template <typename R, unsigned D>
+	template <typename R, int D>
 	class Base {
 		typedef Eigen::Matrix<R, D, 1> vec;
 		typedef Eigen::Matrix<R, 2, 1> vec2;

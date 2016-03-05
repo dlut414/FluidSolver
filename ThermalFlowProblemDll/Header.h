@@ -13,14 +13,6 @@ enum pType {
 	BD1 = 1,
 	BD2 = 2,
 };
-enum Dim {
-	TWOD = 2,
-	THREED = 3,
-};
-enum dType {
-	SCALAR,
-	VECTOR,
-};
 
 #define V_DIRICHLET		0x00000001
 #define V_NEUMANN		0x00000002

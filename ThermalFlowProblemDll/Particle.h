@@ -13,7 +13,7 @@
 
 namespace SIM {
 
-	template <typename R, unsigned D, typename Derived>
+	template <typename R, int D, typename Derived>
 	class Particle : public Base<R, D> {
 	public:
 		typedef Eigen::Matrix<int, D, 1>	iVec;
@@ -44,7 +44,7 @@ namespace SIM {
 
 		void clean() {
 			type.clear();
-			for (unsigned d = 0; d < D; d++) {
+			for (int d = 0; d < D; d++) {
 				pos[d].clear(); pos_m1[d].clear();
 				vel[d].clear(); vel_p1[d].clear(); vel_m1[d].clear();
 			}
@@ -56,13 +56,13 @@ namespace SIM {
 			file << std::scientific << std::setprecision(6) << ct << std::endl;
 			file << std::scientific << std::setprecision(6) << dp << std::endl;
 			file << np << " " << bd1 << " " << bd2 << std::endl;
-			for (unsigned p = 0; p < np; p++) {
+			for (int p = 0; p < np; p++) {
 				file << std::scientific << std::setprecision(6);
 				file << type[p] << " ";
-				for (unsigned d = 0; d < D; d++) {
+				for (int d = 0; d < D; d++) {
 					file << pos[d][p] << " ";
 				}
-				for (unsigned d = 0; d < D; d++) {
+				for (int d = 0; d < D; d++) {
 					file << vel[d][p] << " ";
 				}
 				file << temp[p] << std::endl;
@@ -78,8 +78,8 @@ namespace SIM {
 			n = np;
 			while (n-- > 0) {
 				file >> t;
-				for (unsigned d = 0; d < D; d++) file >> p[d];
-				for (unsigned d = 0; d < D; d++) file >> v[d];
+				for (int d = 0; d < D; d++) file >> p[d];
+				for (int d = 0; d < D; d++) file >> v[d];
 				file >> tp;
 				addPart(pType(t), p, v, tp);
 			}
@@ -89,7 +89,7 @@ namespace SIM {
 
 		void addPart(const pType& t, const vec& p, const vec& v) {
 			type.push_back(t);
-			for (unsigned d = 0; d < D; d++) {
+			for (int d = 0; d < D; d++) {
 				pos[d].push_back(p[d]); pos_m1[d].push_back(p[d]);
 				vel[d].push_back(v[d]); vel_p1.push_back(v[d]); vel_m1[d].push_back(v[d]);
 			}
@@ -101,7 +101,7 @@ namespace SIM {
 
 		void buildCell() {
 			BBox<R> b = BBox<R>();
-			for (unsigned p = 0; p < pos.size(); p++) {
+			for (int p = 0; p < pos.size(); p++) {
 				b += pos[p];
 			}
 			b.Expand(0.1);
@@ -114,15 +114,15 @@ namespace SIM {
 
 		void b2b() {
 			bbMap.clear();
-			for (unsigned p = 0; p < pos.size(); p++) {
+			for (int p = 0; p < pos.size(); p++) {
 				if (type[p] != BD2) continue;
 				auto tmpdr = std::numeric_limits<R>::max();
-				unsigned tmpbb = 0;
+				int tmpbb = 0;
 				const auto c = cell->iCoord(pos[p]);
 				for (auto i = 0; i < cell->blockSize::value; i++) {
 					const auto key = cell->hash(c, i);
-					for (unsigned m = 0; m < cell->linkList[key].size(); m++) {
-						const unsigned q = cell->linkList[key][m];
+					for (int m = 0; m < cell->linkList[key].size(); m++) {
+						const int q = cell->linkList[key][m];
 						if (q == p || type[q] != BD1) continue;
 						const auto dr1 = (pos[q] - pos[p]).norm();
 						if (dr1 < tmpdr) {
@@ -154,7 +154,7 @@ namespace SIM {
 		void b2neumann() {
 			p_neumann.clear();
 			t_neumann.clear();
-			for (unsigned p = 0; p < np; p++) {
+			for (int p = 0; p < np; p++) {
 				if (IS(bdc[p], P_NEUMANN)) p_neumann[p] = R(0);
 				if (IS(bdc[p], T_NEUMANN)) t_neumann[p] = R(0);
 			}
@@ -162,7 +162,7 @@ namespace SIM {
 		void b2dirichlet() {
 			p_dirichlet.clear();
 			t_dirichlet.clear();
-			for (unsigned p = 0; p < np; p++) {
+			for (int p = 0; p < np; p++) {
 				if (IS(bdc[p], P_DIRICHLET)) p_dirichlet[p] = R(0);
 				if (IS(bdc[p], T_DIRICHLET0)) t_dirichlet[p] = R(0);
 				if (IS(bdc[p], T_DIRICHLET1)) t_dirichlet[p] = R(1);
@@ -171,7 +171,7 @@ namespace SIM {
 
 	public:
 		R ct;
-		unsigned np, bd1, bd2;
+		int np, bd1, bd2;
 		std::vector<R> pos[D];
 		std::vector<R> pos_m1[D];
 		std::vector<R> vel[D];
@@ -185,12 +185,12 @@ namespace SIM {
 		std::vector<int> bdc;
 		std::vector<R> phi;
 		std::vector<R> vort;
-		std::unordered_map<unsigned, vec> bdnorm;
-		std::unordered_map<unsigned, R> p_dirichlet;
-		std::unordered_map<unsigned, R> t_dirichlet;
-		std::unordered_map<unsigned, R> p_neumann;
-		std::unordered_map<unsigned, R> t_neumann;
-		std::unordered_map<unsigned, unsigned> bbMap;
+		std::unordered_map<int, vec> bdnorm;
+		std::unordered_map<int, R> p_dirichlet;
+		std::unordered_map<int, R> t_dirichlet;
+		std::unordered_map<int, R> p_neumann;
+		std::unordered_map<int, R> t_neumann;
+		std::unordered_map<int, int> bbMap;
 
 		LinkCell<R, D>* cell;
 

@@ -10,46 +10,92 @@
 
 namespace SIM {
 
-	template <typename R, unsigned D, unsigned P>
-	class Particle_x : public Particle<R, D, Particle_x<R, D, P>> {
-		typedef mMath::Polynomial_A<R, D, P> PN;
-		typedef mMath::Derivative_A<R, D, P> DR;
-		typedef Eigen::Matrix<int, D, 1>	iVec;
-		typedef Eigen::Matrix<R, D, 1>		Vec;
-		typedef Eigen::Matrix<R, D, D>		Mat;
-		typedef Eigen::Matrix<R, PN::value, 1>	VecP;
-		typedef Eigen::Matrix<R, PN::value, D>	MatPD;
-		typedef Eigen::Matrix<R, PN::value, PN::value> MatPP;
+	template <typename R, int D, int P>
+	class Particle_x : public Particle<R,D,Particle_x<R,D,P>> {};
+
+	template <typename R, int P>
+	class Particle_x<R,2,P> : public Particle<R,2,Particle_x<R,2,P>> {
+		typedef mMath::Polynomial_A<R,2,P> PN;
+		typedef mMath::Derivative_A<R,2,P> DR;
+		typedef EiRun::Matrix<int,2,1> iVec;
+		typedef EiRun::Matrix<R,2,1> Vec;
+		typedef EiRun::Matrix<R,2,2> Mat;
+		typedef EiRun::Matrix<R,PN::value,1> VecP;
+		typedef EiRun::Matrix<R,PN::value,2> MatPD;
+		typedef EiRun::Matrix<R,PN::value,PN::value> MatPP;
 	public:
 		Particle_x() : Particle() {}
 		~Particle_x() {}
 
-		__forceinline void poly(const Vec& in, VecP& out) const { PN::Gen(varrho, in.data(), out.data()); }
+		__forceinline void poly(const R* in, R* out) const { PN::Run(varrho, in, out); }
 
-		const Vec grad(const std::vector<R>& phi, const unsigned& p) const {
+		const R DerX(const R* phi, const int& p) const {
 			VecP vv = VecP::Zero();
-			const auto c = cell->iCoord(pos[p]);
-			for (auto i = 0; i < cell->blockSize::value; i++) {
-				const auto key = cell->hash(c, i);
-				for (auto m = 0; m < cell->linkList[key].size(); m++) {
-					const auto q = cell->linkList[key][m];
-#if BD_OPT
-					if (bdOpt(p, q)) continue;
-#endif
-					const auto dr = pos[q] - pos[p];
-					const auto dr1 = dr.norm();
+			const int cx = cell->pos2cell(pos[0][p]);
+			const int cy = cell->pos2cell(pos[1][p]);
+			for (int i = 0; i < cell->blockSize::value; i++) {
+				const int key = cell->hash(cx, cy, i);
+				for (int m = 0; m < cell->linkList[key].size(); m++) {
+					const int q = cell->linkList[key][m];
+					if (type[p] == BD2) continue;
+					const R dr[2] = { pos[0][q] - pos[0][p], pos[1][q] - pos[1][p] };
+					const R dr1 = sqrt(dr[0] * dr[0] + dr[1] * dr[1]);
 					if (dr1 > r0) continue;
-					const auto w = w3(dr1);
+					const R w = ww(dr1);
 					VecP npq;
-					poly(dr, npq);
+					poly(dr, npq.data());
 					vv += w * (phi[q] - phi[p]) * npq;
 				}
 			}
-			const auto a = invMat[p] * vv;
-			return (pn_p_o*a);
+			const VecP aa = invMat[p] * vv;
+			return (pn_px_o * aa);
 		}
 
-		const Mat grad(const std::vector<Vec>& u, const unsigned& p) const {
+		const R DerY(const R* phi, const int& p) const {
+			VecP vv = VecP::Zero();
+			const int cx = cell->pos2cell(pos[0][p]);
+			const int cy = cell->pos2cell(pos[1][p]);
+			for (int i = 0; i < cell->blockSize::value; i++) {
+				const int key = cell->hash(cx, cy, i);
+				for (int m = 0; m < cell->linkList[key].size(); m++) {
+					const int q = cell->linkList[key][m];
+					if (type[p] == BD2) continue;
+					const R dr[2] = { pos[0][q] - pos[0][p], pos[1][q] - pos[1][p] };
+					const R dr1 = sqrt(dr[0] * dr[0] + dr[1] * dr[1]);
+					if (dr1 > r0) continue;
+					const R w = ww(dr1);
+					VecP npq;
+					poly(dr, npq.data());
+					vv += w * (phi[q] - phi[p]) * npq;
+				}
+			}
+			const VecP aa = invMat[p] * vv;
+			return (pn_py_o * aa);
+		}
+
+		const Vec Grad(const R* phi, const int& p) const {
+			VecP vv = VecP::Zero();
+			const int cx = cell->pos2cell(pos[0][p]);
+			const int cy = cell->pos2cell(pos[1][p]);
+			for (int i = 0; i < cell->blockSize::value; i++) {
+				const int key = cell->hash(cx, cy, i);
+				for (int m = 0; m < cell->linkList[key].size(); m++) {
+					const int q = cell->linkList[key][m];
+					if (type[p] == BD2) continue;
+					const R dr[2] = { pos[0][q] - pos[0][p], pos[1][q] - pos[1][p] };
+					const R dr1 = sqrt(dr[0] * dr[0] + dr[1] * dr[1]);
+					if (dr1 > r0) continue;
+					const R w = ww(dr1);
+					VecP npq;
+					poly(dr, npq.data());
+					vv += w * (phi[q] - phi[p]) * npq;
+				}
+			}
+			const VecP aa = invMat[p] * vv;
+			return (pn_p_o * aa);
+		}
+
+		const Mat grad(const std::vector<Vec>& u, const int& p) const {
 			MatPD vv = MatPD::Zero();
 			const auto c = cell->iCoord(pos[p]);
 			for (auto i = 0; i < cell->blockSize::value; i++) {
@@ -72,7 +118,7 @@ namespace SIM {
 			return (pn_p_o*a);
 		}
 
-		const R div(const std::vector<Vec>& u, const unsigned& p) const {
+		const R div(const std::vector<Vec>& u, const int& p) const {
 			MatPD vv = MatPD::Zero();
 			const auto c = cell->iCoord(pos[p]);
 			for (auto i = 0; i < cell->blockSize::value; i++) {
@@ -99,7 +145,7 @@ namespace SIM {
 			return ret;
 		}
 
-		const R lap(const std::vector<R>& phi, const unsigned& p) const {
+		const R lap(const std::vector<R>& phi, const int& p) const {
 			VecP vv = VecP::Zero();
 			const auto c = cell->iCoord(pos[p]);
 			for (auto i = 0; i < cell->blockSize::value; i++) {
@@ -122,7 +168,7 @@ namespace SIM {
 			return (pn_lap_o*a);
 		}
 
-		const Vec lap(const std::vector<Vec>& u, const unsigned& p) const {
+		const Vec lap(const std::vector<Vec>& u, const int& p) const {
 			MatPD vv = MatPD::Zero();
 			const auto c = cell->iCoord(pos[p]);
 			for (auto i = 0; i < cell->blockSize::value; i++) {
@@ -145,7 +191,7 @@ namespace SIM {
 			return (pn_lap_o*a).transpose();
 		}
 
-		const R rot(const std::vector<Vec>& u, const unsigned& p) const {
+		const R rot(const std::vector<Vec>& u, const int& p) const {
 			MatPD vv = MatPD::Zero();
 			const auto c = cell->iCoord(pos[p]);
 			for (auto i = 0; i < cell->blockSize::value; i++) {
@@ -182,7 +228,7 @@ namespace SIM {
 		}
 
 		template <typename U>
-		const U func(const std::vector<U>& phi, const unsigned& p) const {
+		const U func(const std::vector<U>& phi, const int& p) const {
 			return phi[p];
 		}
 
@@ -214,7 +260,7 @@ namespace SIM {
 			return phi[rid] + dPhi;
 		}
 
-		const Vec func_mafl(const std::vector<Vec>& phi, const unsigned& p, const Vec& p_new) const {
+		const Vec func_mafl(const std::vector<Vec>& phi, const int& p, const Vec& p_new) const {
 			const auto re = 1.5* dp;
 			const auto dx = 1.5* dp;
 			const auto p_i = pos[p];
@@ -261,7 +307,7 @@ namespace SIM {
 			return ret[3] - (dmove.norm() / dx)* (0.125* ret[1] - 0.875* ret[2] + 0.375* ret[3] + 0.375* ret[4]);
 		}
 
-		const Vec func_mafl_mmt(const std::vector<Vec>& phi, const unsigned& p, const Vec& p_new) const {
+		const Vec func_mafl_mmt(const std::vector<Vec>& phi, const int& p, const Vec& p_new) const {
 			const auto re = 1.5* dp;
 			const auto dx = 1.5* dp;
 			const auto p_i = pos[p];
@@ -317,7 +363,7 @@ namespace SIM {
 			return ret_mmt;
 		}
 
-		const R func_lsA(const std::vector<R>& phi, const unsigned& p, const Vec& p_new) const {
+		const R func_lsA(const std::vector<R>& phi, const int& p, const Vec& p_new) const {
 			const auto dp = p_new - pos[p];
 			MatPP mm = MatPP::Zero();
 			VecP vv = VecP::Zero();
@@ -373,7 +419,7 @@ namespace SIM {
 			return ret;
 		}
 
-		const Vec func_lsA(const std::vector<Vec>& phi, const unsigned& p, const Vec& p_new) const {
+		const Vec func_lsA(const std::vector<Vec>& phi, const int& p, const Vec& p_new) const {
 			auto mm = MatPP::Zero();
 			auto vv = MatPD::Zero();
 			const auto c = cell->iCoord(pos[p]);
@@ -430,7 +476,7 @@ namespace SIM {
 			return ret;
 		}
 
-		const Vec func_lsA_upwind(const std::vector<Vec>& phi, const unsigned& p, const Vec& p_new) const {
+		const Vec func_lsA_upwind(const std::vector<Vec>& phi, const int& p, const Vec& p_new) const {
 			const auto dp = p_new - pos[p];
 #if UPWIND_VEL
 			const auto up = -(phi[p].norm());
@@ -494,7 +540,7 @@ namespace SIM {
 			return ret;
 		}
 
-		const R func_lsA_upwind(const std::vector<R>& phi, const unsigned& p, const Vec& p_new) const {
+		const R func_lsA_upwind(const std::vector<R>& phi, const int& p, const Vec& p_new) const {
 			const auto dp = p_new - pos[p];
 #if UPWIND_VEL
 			const auto up = -(phi[p].norm());
@@ -556,16 +602,12 @@ namespace SIM {
 			return ret;
 		}
 
-		//const Vec func_lsB(const std::vector<Vec>& u, const unsigned& p, const Vec& p_new) const {}
-
-		//const Vec func_lsB_upwind(const std::vector<Vec>& u, const unsigned& p, const Vec& p_new) const {}
-
 		template <int StencilsX = 1, int StencilsY = 3, int Stencils = StencilsX*StencilsY, int Dimension = D>	struct interpolateWENO_A_ {};
 		template <int StencilsX, int StencilsY, int Stencils>		struct interpolateWENO_A_<StencilsX, StencilsY, Stencils, 1> {
-			template <typename U> static const U Gen(const std::vector<U>& phi, const unsigned& p, const Vec& p_new, Particle_x<R, D, P>* part) {}
+			template <typename U> static const U Run(const std::vector<U>& phi, const int& p, const Vec& p_new, Particle_x<R, D, P>* part) {}
 		};
 		template <int StencilsX, int StencilsY, int Stencils>		struct interpolateWENO_A_<StencilsX, StencilsY, Stencils, 2> {
-			template <typename U> static const U Gen(const std::vector<U>& phi, const unsigned& p, const Vec& p_new, Particle_x<R, D, P>* part) {
+			template <typename U> static const U Run(const std::vector<U>& phi, const int& p, const Vec& p_new, Particle_x<R, D, P>* part) {
 				const auto dp = p_new - part->pos[p];
 				if (dp.norm() < part->eps) return phi[p];
 				const auto up = dp.normalized();
@@ -674,15 +716,15 @@ namespace SIM {
 			}
 		};
 		template <int StencilsX, int StencilsY, int Stencils>		struct interpolateWENO_A_<StencilsX, StencilsY, Stencils, 3> {
-			template <typename U> static const U Gen(const std::vector<U>& phi, const unsigned& p, const Vec& p_new, Particle_x<R, D, P>* part) {}
+			template <typename U> static const U Run(const std::vector<U>& phi, const int& p, const Vec& p_new, Particle_x<R, D, P>* part) {}
 		};
 
 		template <int StencilsX = 1, int StencilsY = 3, int Stencils = StencilsX*StencilsY, int Dimension = D>	struct interpolateWENO_B_ {};
 		template <int StencilsX, int StencilsY, int Stencils>		struct interpolateWENO_B_<StencilsX, StencilsY, Stencils, 1> {
-			template <typename U> static const U Gen(const std::vector<U>& phi, const unsigned& p, const Vec& p_new, Particle_x<R, D, P>* part) {}
+			template <typename U> static const U Run(const std::vector<U>& phi, const int& p, const Vec& p_new, Particle_x<R, D, P>* part) {}
 		};
 		template <int StencilsX, int StencilsY, int Stencils>		struct interpolateWENO_B_<StencilsX, StencilsY, Stencils, 2> {
-			template <typename U> static const U Gen(const std::vector<U>& phi, const unsigned& p, const Vec& p_new, Particle_x<R, D, P>* part) {
+			template <typename U> static const U Run(const std::vector<U>& phi, const int& p, const Vec& p_new, Particle_x<R, D, P>* part) {
 				const auto dp = p_new - part->pos[p];
 				if (dp.norm() < part->eps) return phi[p];
 				const auto up = dp.normalized();
@@ -803,11 +845,11 @@ namespace SIM {
 			}
 		};
 		template <int StencilsX, int StencilsY, int Stencils>		struct interpolateWENO_B_<StencilsX, StencilsY, Stencils, 3> {
-			template <typename U> static const U Gen(const std::vector<U>& phi, const unsigned& p, const Vec& p_new, Particle_x<R, D, P>* part) {}
+			template <typename U> static const U Run(const std::vector<U>& phi, const int& p, const Vec& p_new, Particle_x<R, D, P>* part) {}
 		};
 
-		__forceinline const R interpolateWENO(const std::vector<R>& phi, const unsigned& p, const Vec& p_new) {
-			return interpolateWENO_B_<>::Gen(phi, p, p_new, this);
+		__forceinline const R interpolateWENO(const std::vector<R>& phi, const int& p, const Vec& p_new) {
+			return interpolateWENO_B_<>::Run(phi, p, p_new, this);
 		}
 
 		void updateInvMat() {
@@ -851,70 +893,36 @@ namespace SIM {
 			}
 		}
 
-		template <unsigned D_ = D>
-		void init_x() {}
-
-		template <>
-		void init_x<1>() {
+		void init_x() {
 			invMat.clear();
-			for (int p = 0; p < int(np); p++) {
+			for (int p = 0; p < np; p++) {
 				invMat.push_back(MatPP());
 			}
 
 			varrho = 1. / (1.*dp);
 			Vec zero = Vec::Zero();
-			DR::Gen<1>(varrho, zero.data(), pn_p_o.data());
-			DR::Gen<2>(varrho, zero.data(), pn_pp_o.data());
-			DR::Gen<2>(varrho, zero.data(), pn_lap_o.data());
-		}
-
-		template <>
-		void init_x<2>() {
-			invMat.clear();
-			for (int p = 0; p < int(np); p++) {
-				invMat.push_back(MatPP());
-			}
-
-			varrho = 1. / (1.*dp);
-			Vec zero = Vec::Zero();
-			DR::Gen<1, 0>(varrho, zero.data(), pn_p_o.block<1, PN::value>(0, 0).data());
-			DR::Gen<0, 1>(varrho, zero.data(), pn_p_o.block<1, PN::value>(1, 0).data());
-			DR::Gen<2, 0>(varrho, zero.data(), pn_pp_o.block<1, PN::value>(0, 0).data());
-			DR::Gen<1, 1>(varrho, zero.data(), pn_pp_o.block<1, PN::value>(1, 0).data());
-			DR::Gen<0, 2>(varrho, zero.data(), pn_pp_o.block<1, PN::value>(2, 0).data());
+			DR::Run<1, 0>(varrho, zero.data(), pn_px_o.data());
+			DR::Run<0, 1>(varrho, zero.data(), pn_py_o.data());
+			DR::Run<1, 0>(varrho, zero.data(), pn_p_o.block<1, PN::value>(0, 0).data());
+			DR::Run<0, 1>(varrho, zero.data(), pn_p_o.block<1, PN::value>(1, 0).data());
+			DR::Run<2, 0>(varrho, zero.data(), pn_pp_o.block<1, PN::value>(0, 0).data());
+			DR::Run<1, 1>(varrho, zero.data(), pn_pp_o.block<1, PN::value>(1, 0).data());
+			DR::Run<0, 2>(varrho, zero.data(), pn_pp_o.block<1, PN::value>(2, 0).data());
 			pn_lap_o = pn_pp_o.block<1, PN::value>(0, 0) + pn_pp_o.block<1, PN::value>(2, 0);
 		}
-
-		template <>
-		void init_x<3>() {
-			invMat.clear();
-			for (int p = 0; p < int(np); p++) {
-				invMat.push_back(MatPP());
-			}
-
-			varrho = 1. / (1.*dp);
-			Vec zero = Vec::Zero();
-			DR::Gen<1, 0, 0>(varrho, zero.data(), pn_p_o.block<1, PN::value>(0, 0).data());
-			DR::Gen<0, 1, 0>(varrho, zero.data(), pn_p_o.block<1, PN::value>(1, 0).data());
-			DR::Gen<0, 0, 1>(varrho, zero.data(), pn_p_o.block<1, PN::value>(2, 0).data());
-			DR::Gen<2, 0, 0>(varrho, zero.data(), pn_pp_o.block<1, PN::value>(0, 0).data());
-			DR::Gen<1, 1, 0>(varrho, zero.data(), pn_pp_o.block<1, PN::value>(1, 0).data());
-			DR::Gen<1, 0, 1>(varrho, zero.data(), pn_pp_o.block<1, PN::value>(2, 0).data());
-			DR::Gen<0, 2, 0>(varrho, zero.data(), pn_pp_o.block<1, PN::value>(3, 0).data());
-			DR::Gen<0, 1, 1>(varrho, zero.data(), pn_pp_o.block<1, PN::value>(4, 0).data());
-			DR::Gen<0, 0, 2>(varrho, zero.data(), pn_pp_o.block<1, PN::value>(5, 0).data());
-			pn_lap_o = pn_pp_o.block<1, PN::value>(0, 0) + pn_pp_o.block<1, PN::value>(3, 0) + pn_pp_o.block<1, PN::value>(5, 0);
-		}
-
-		void init_x() { init_x<>(); }
 
 	public:
 		std::vector<MatPP> invMat;
 
 		R varrho;
-		Eigen::Matrix<R, D, PN::value, Eigen::RowMajor>					pn_p_o;
-		Eigen::Matrix<R, mMath::H<D, 2>::value, PN::value, Eigen::RowMajor>	pn_pp_o;
-		Eigen::Matrix<R, 1, PN::value, Eigen::RowMajor>					pn_lap_o;
+		EiRun::Matrix<R, 1, PN::value, EiRun::RowMajor>						pn_px_o;
+		EiRun::Matrix<R, 1, PN::value, EiRun::RowMajor>						pn_py_o;
+		EiRun::Matrix<R, D, PN::value, EiRun::RowMajor>						pn_p_o;
+		EiRun::Matrix<R, mMath::H<D, 2>::value, PN::value, EiRun::RowMajor>	pn_pp_o;
+		EiRun::Matrix<R, 1, PN::value, EiRun::RowMajor>						pn_lap_o;
 	};
+
+	template <typename R, int P>
+	class Particle_x<R,3,P> : public Particle<R,3,Particle_x<R,3,P>> {};
 
 }
