@@ -5,8 +5,8 @@
 * Author: HUFANGYUAN
 * Released under CC BY-NC
 */
-//FractionalStep_KK.h
-///defination of class FractionalStep_KK (KK)
+//FractionalStep_DD.h
+///defination of class FractionalStep_DD (KK)
 
 #pragma once
 #include "Simulator.h"
@@ -15,7 +15,7 @@
 namespace SIM {
 
 	template <typename R, unsigned D, unsigned P>
-	class FractionalStep_KK : public Simulator <R, D, FractionalStep_KK<R, D, P>> {
+	class FractionalStep_DD : public Simulator <R, D, FractionalStep_DD<R, D, P>> {
 		typedef mMath::Polynomial_A<R, D, P> PN;
 		typedef mMath::Derivative_A<R, D, P> DR;
 		typedef Eigen::Matrix<R, PN::value, 1> VecP;
@@ -23,8 +23,8 @@ namespace SIM {
 		typedef Eigen::Matrix<R, D, 1>	Vec;
 		typedef Eigen::Triplet<R>		Tpl;
 	public:
-		FractionalStep_KK() {}
-		~FractionalStep_KK() {}
+		FractionalStep_DD() {}
+		~FractionalStep_DD() {}
 
 		void step() {
 			updateVelocity();

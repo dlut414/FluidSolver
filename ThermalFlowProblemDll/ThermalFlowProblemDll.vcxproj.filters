@@ -54,13 +54,13 @@
     <ClInclude Include="Sensor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="FractionalStep_KK.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Base.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="LinkCell.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FractionalStep_DD.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
