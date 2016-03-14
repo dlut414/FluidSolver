@@ -1,5 +1,13 @@
 /*
+* LICENCE
+* copyright 2014 ~ ****
+* Some rights reserved.
+* Author: HUFANGYUAN
+* Released under CC BY-NC
 */
+//Particle_x.h
+///defination of class Particle_x
+
 #pragma once
 #include "Header.h"
 #include "Particle.h"
@@ -10,6 +18,9 @@ namespace SIM {
 
 	template <typename R, int D, int P>
 	class Particle_x : public Particle<R,D,Particle_x<R,D,P>> {};
+
+	template <typename R, int P>
+	class Particle_x<R,1,P> :  public Particle<R,1,Particle<R,1,P>>{};
 
 	template <typename R, int P>
 	class Particle_x<R,2,P> : public Particle<R,2,Particle_x<R,2,P>> {

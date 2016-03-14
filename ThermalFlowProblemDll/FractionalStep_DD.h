@@ -108,7 +108,6 @@ namespace SIM {
 			part->buildCell();
 			part->b2b();
 			part->b2norm();
-			//part->updateTeam();
 			part->init_x();
 			initialPassiveScalar();
 		}
