@@ -1,4 +1,11 @@
-// ThermalFlowProblemDll.cpp : Defines the exported functions for the DLL application.
+/*
+* LICENCE
+* copyright 2014 ~ ****
+* Some rights reserved.
+* Author: HUFANGYUAN
+* Published under CC BY-NC
+*/
+// ThermalFlowProblemDll_.cpp : Defines the exported functions for the DLL application.
 //
 
 #include "stdafx.h"
@@ -13,32 +20,35 @@ namespace SIM {
 
 	static FSPtr objPtr;
 
-	void ThermalFlowProblemDll::Initialize() {
+	void ThermalFlowProblemDll2D::Initialize() {
 		objPtr = new FS();
 		objPtr->init();
 	}
 
-	void ThermalFlowProblemDll::Run() {
+	void ThermalFlowProblemDll2D::Run() {
 		objPtr->stepGL();
 	}
 
-	int ThermalFlowProblemDll::Number() {
+	int ThermalFlowProblemDll2D::Number() {
 		return objPtr->part->np;
 	}
-	NPtr ThermalFlowProblemDll::Type() {
+	NPtr ThermalFlowProblemDll2D::Type() {
 		return NPtr(objPtr->type());
 	}
-	NPtr ThermalFlowProblemDll::Position() {
-		return NPtr(objPtr->position());
+	NPtr ThermalFlowProblemDll2D::PositionX() {
+		return NPtr(objPtr->positionX());
 	}
-	NPtr ThermalFlowProblemDll::Scalar() {
+	NPtr ThermalFlowProblemDll2D::PositionY() {
+		return NPtr(objPtr->positionY());
+	}
+	NPtr ThermalFlowProblemDll2D::Scalar() {
 		return NPtr(objPtr->scalar());
 	}
 
-	void ThermalFlowProblemDll::SaveData() {
+	void ThermalFlowProblemDll2D::SaveData() {
 		objPtr->saveData();
 	}
-	void ThermalFlowProblemDll::SensorOut() {
+	void ThermalFlowProblemDll2D::SensorOut() {
 		objPtr->sensorOut();
 	}
 

@@ -20,18 +20,18 @@ namespace SIM {
 	class Particle_x : public Particle<R,D,Particle_x<R,D,P>> {};
 
 	template <typename R, int P>
-	class Particle_x<R,1,P> :  public Particle<R,1,Particle<R,1,P>>{};
+	class Particle_x<R,1,P> :  public Particle<R,1,Particle_x<R,1,P>>{};
 
 	template <typename R, int P>
 	class Particle_x<R,2,P> : public Particle<R,2,Particle_x<R,2,P>> {
 		typedef mMath::Polynomial_A<R,2,P> PN;
 		typedef mMath::Derivative_A<R,2,P> DR;
-		typedef EiRun::Matrix<int,2,1> iVec;
-		typedef EiRun::Matrix<R,2,1> Vec;
-		typedef EiRun::Matrix<R,2,2> Mat;
-		typedef EiRun::Matrix<R,PN::value,1> VecP;
-		typedef EiRun::Matrix<R,PN::value,2> MatPD;
-		typedef EiRun::Matrix<R,PN::value,PN::value> MatPP;
+		typedef Eigen::Matrix<int,2,1> iVec;
+		typedef Eigen::Matrix<R,2,1> Vec;
+		typedef Eigen::Matrix<R,2,2> Mat;
+		typedef Eigen::Matrix<R,PN::value,1> VecP;
+		typedef Eigen::Matrix<R,PN::value,2> MatPD;
+		typedef Eigen::Matrix<R,PN::value,PN::value> MatPP;
 	public:
 		Particle_x() : Particle() {}
 		~Particle_x() {}
@@ -740,14 +740,14 @@ namespace SIM {
 		std::unordered_map<int, MatPP> invNeu;
 
 		R varrho;
-		EiRun::Matrix<R, 1, PN::value, EiRun::RowMajor>						pn_px_o;
-		EiRun::Matrix<R, 1, PN::value, EiRun::RowMajor>						pn_py_o;
-		EiRun::Matrix<R, 1, PN::value, EiRun::RowMajor>						pn_pxx_o;
-		EiRun::Matrix<R, 1, PN::value, EiRun::RowMajor>						pn_pxy_o;
-		EiRun::Matrix<R, 1, PN::value, EiRun::RowMajor>						pn_pyy_o;
-		EiRun::Matrix<R, 2, PN::value, EiRun::RowMajor>						pn_p_o;
-		EiRun::Matrix<R, mMath::H<2, 2>::value, PN::value, EiRun::RowMajor>	pn_pp_o;
-		EiRun::Matrix<R, 1, PN::value, EiRun::RowMajor>						pn_lap_o;
+		Eigen::Matrix<R, 1, PN::value, Eigen::RowMajor>						pn_px_o;
+		Eigen::Matrix<R, 1, PN::value, Eigen::RowMajor>						pn_py_o;
+		Eigen::Matrix<R, 1, PN::value, Eigen::RowMajor>						pn_pxx_o;
+		Eigen::Matrix<R, 1, PN::value, Eigen::RowMajor>						pn_pxy_o;
+		Eigen::Matrix<R, 1, PN::value, Eigen::RowMajor>						pn_pyy_o;
+		Eigen::Matrix<R, 2, PN::value, Eigen::RowMajor>						pn_p_o;
+		Eigen::Matrix<R, mMath::H<2, 2>::value, PN::value, Eigen::RowMajor>	pn_pp_o;
+		Eigen::Matrix<R, 1, PN::value, Eigen::RowMajor>						pn_lap_o;
 	};
 
 	template <typename R, int P>

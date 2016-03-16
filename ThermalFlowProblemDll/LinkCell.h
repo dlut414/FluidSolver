@@ -19,7 +19,7 @@ namespace SIM {
 		typedef Eigen::Matrix<int,2,1>	iVecD;
 	public:
 		template <typename T>
-		LinkCell(const BBox<T,D>& b, const R& s) : box(b), cSize(s), cSizeInv(R(1)/s) { initialize(); }
+		LinkCell(const BBox<T,2>& b, const R& s) : box(b), cSize(s), cSizeInv(R(1)/s) { initialize(); }
 		~LinkCell() { finalize(); }
 
 		struct blockSize { enum { value = mMath::Power<3,2>::value, }; };

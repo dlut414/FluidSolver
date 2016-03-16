@@ -1,5 +1,12 @@
 /*
+* LICENCE
+* copyright 2014 ~ ****
+* Some rights reserved.
+* Author: HUFANGYUAN
+* Released under CC BY-NC
 */
+//Simulator.h
+///defination of class Simulator
 #pragma once
 #include <iostream>
 #include <fstream>
@@ -10,15 +17,20 @@
 #include "Parameter.h"
 #include "Particle.h"
 #include "MatSolver.h"
-#include "Shifter.h"
 #include "Sensor.h"
 
 namespace SIM {
 
-	template <typename R, unsigned D, typename Derived>
-	class Simulator {
-		typedef Eigen::Matrix<R, D, 1> Vec;
-		typedef Eigen::Matrix<R, D, D> Mat;
+	template <typename R, int D, typename Derived>
+	class Simulator {};
+
+	template <typename R, typename Derived>
+	class Simulator<R,1,Derived> {};
+
+	template <typename R, typename Derived>
+	class Simulator<R,2,Derived> {
+		typedef Eigen::Matrix<R, 2, 1> Vec;
+		typedef Eigen::Matrix<R, 2, 2> Mat;
 		typedef Eigen::Triplet<R> Tpl;
 	public:
 		Simulator() { timeStep = 0; }
@@ -33,17 +45,16 @@ namespace SIM {
 		void operator << (const std::string& str) {
 			std::ifstream file(str);
 			if (!file.is_open()) std::cout << " No file Para. found ! " << std::endl;
-			file >> para.k >> para.rho >> para.niu >> para.dtMax >> para.cfl >> para.tt >> para.eps >> para.beta >> para.alpha >> para.c;
+			file >> para.k >> para.Pr >> para.Ra >> para.cfl >> para.dtMax >> para.tt >> para.eps >> para.alpha >> para.beta;
 			std::cout << " Effective radius (times of dp)   : " << para.k << std::endl;
-			std::cout << " Density (kg/m3)                  : " << para.rho << std::endl;
-			std::cout << " Kinematic viscosity (m2/s)       : " << para.niu << std::endl;
-			std::cout << " Maximum time step (s)            : " << para.dtMax << std::endl;
+			std::cout << " Prandtl number                   : " << para.Pr << std::endl;
+			std::cout << " Rayleigh number                  : " << para.Ra << std::endl;
 			std::cout << " CFL number                       : " << para.cfl << std::endl;
-			std::cout << " Total time (s)                   : " << para.tt << std::endl;
+			std::cout << " Maximum time step (1)            : " << para.dtMax << std::endl;
+			std::cout << " Total time (1)                   : " << para.tt << std::endl;
 			std::cout << " EPS                              : " << para.eps << std::endl;
-			std::cout << " Beta of surface detection        : " << para.beta << std::endl;
-			std::cout << " Re-meshing effective radius      : " << para.alpha << std::endl;
-			std::cout << " Scaling of re-meshing strength   : " << para.c << std::endl;
+			std::cout << " Arbitrary parameter Alpha        : " << para.alpha << std::endl;
+			std::cout << " Arbitrary parameter Beta         : " << para.beta << std::endl;
 			std::cout << " Reading Para. done " << std::endl;
 			file.close();
 		}
@@ -51,7 +62,7 @@ namespace SIM {
 		void init() {
 			*this << "Para.txt";
 			derived().init_();
-			mSol = new MatSolver<R, D>(unsigned(derived().part->np), para.eps);
+			mSol = new MatSolver<R,2>(int(derived().part->np), para.eps);
 			std::cout << " Particle number : " << derived().part->np << std::endl;
 			sen << "Sensor.in";
 			R tmp = cfl();
@@ -98,31 +109,10 @@ namespace SIM {
 			sen >> convert.str();
 		}
 
-		void profileOut() {
-			auto* const part = derived().part;
+		void profileOut(const R& rt) {
 			static std::string pf = "profile";
 			sen.writeScal(derived().part);
 			sen.profile(rt, pf);
-		}
-
-		void profileOut_avgVel2() {
-			auto* const part = derived().part;
-			static std::string pf = "profile";
-			auto sum = 0.;
-			auto count = 0;
-			for (int p = 0; p<int(part->np); p++) {
-				if (part->type[p] == FLUID || part->type[p] == BD1) {
-					sum += part->vel2[p].squaredNorm();
-					count++;
-				}
-			}
-			sum = sum / count;
-			std::ofstream file("./out/" + pf + ".out", std::ofstream::app);
-			file << std::setprecision(6) << std::scientific << timeStep*para.cfl << " "
-				<< std::setprecision(6) << std::scientific << sum
-				<< std::endl;
-			file.close();
-			std::cout << " Writing profile. done " << std::endl;
 		}
 
 		void saveData() const {
@@ -135,10 +125,11 @@ namespace SIM {
 			*(derived().part) >> ("./out/" + str + ".out");
 		}
 
-		void fina() {}
-
-		__forceinline const Vec* position() const {
-			return derived().part->pos.data();
+		__forceinline const R* positionX() const {
+			return derived().part->pos[0].data();
+		}
+		__forceinline const R* positionY() const {
+			return derived().part->pos[1].data();
 		}
 		__forceinline const R* scalar() const {
 			return derived().part->phi.data();
@@ -148,11 +139,9 @@ namespace SIM {
 		}
 
 	public:
-		Parameter<R, D> para;
-		MatSolver<R, D>* mSol;
-		Shifter<R, D> shi;
-		Sensor<R, D> sen;
-		PassiveScalarProblem<R, 2> psp;
+		Parameter<R, 2> para;
+		MatSolver<R, 2>* mSol;
+		Sensor<R, 2> sen;
 
 	protected:
 		void step() {}
@@ -168,10 +157,9 @@ namespace SIM {
 #if OMP
 #pragma omp parallel for
 #endif
-			for (int p = 0; p<int(part->np); p++) {
+			for (int p = 0; p < part->np; p++) {
 				if (part->type[p] != BD1) continue;
-				//part->neumann[p] = para.rho* (para.niu* part->lap(part->vel2, p) + para.g)* part->bdnorm.at(p);
-				part->neumann[p] = 0.;
+				part->neumann[p] = R(0);
 			}
 		}
 
@@ -181,7 +169,7 @@ namespace SIM {
 #if OMP
 #pragma omp parallel for
 #endif
-			for (int p = 0; p < int(part->np); p++) {
+			for (int p = 0; p < part->np; p++) {
 				part->pres[p] = mSol->x[p];
 				if (part->pres[p] < -1.e5) part->pres[p] = -1.e5;
 				if (part->pres[p] > 1.e5) part->pres[p] = 1.e5;
@@ -194,7 +182,7 @@ namespace SIM {
 #if OMP
 #pragma omp parallel for
 #endif
-			for (int p = 0; p < int(part->np); p++) {
+			for (int p = 0; p < part->np; p++) {
 				part->phi[p] = mSol->x[p];
 				if (part->phi[p] < -1.e5) part->phi[p] = -1.e5;
 				if (part->phi[p] > 1.e5) part->phi[p] = 1.e5;
@@ -207,46 +195,28 @@ namespace SIM {
 #if OMP
 #pragma omp parallel for
 #endif
-			for (int p = 0; p < int(part->np); p++) {
+			for (int p = 0; p < part->np; p++) {
 				if (part->type[p] != FLUID) continue;
-				for (auto d = 0; d < D; d++) {
-					part->vel2[p][d] = mSol->u[D*p + d];
-				}
+				part->vel2[0][p] = mSol->u[D*p];
+				part->vel2[1][p] = mSol->u[D*p+1];
 			}
 		}
 
 		R cfl() {
 			R umax = 0.;
 			const auto* const part = derived().part;
-			for (unsigned p = 0; p < part->np; p++) {
-				R tmp = part->vel1[p].norm();
+			for (int p = 0; p < part->np; p++) {
+				const R ux = part->vel1[0][p];
+				const R uy = part->vel1[1][p];
+				const R tmp = sqrt(ux*ux + uy*uy);
 				if (tmp > umax) umax = tmp;
 			}
 			para.umax = umax;
 			return para.cfl * part->dp / umax;
 		}
 
-		void calBdNoSlip() {
-			derived().part->bdNoSlip();
-		}
-		void bdSetZero() {
-			derived().part->bdSetZero();
-		}
-
 		void calCell() {
 			derived().part->updateCell();
-		}
-
-		void calPnd() {
-			auto* const part = derived().part;
-#if OMP
-#pragma omp parallel for
-#endif
-			for (int p = 0; p < int(part->np); p++) {
-				part->pnd[p] = part->cPnd(p);
-				//part->pn[p] = part->cPn(p);
-				//part->nbd[p] = part->cNbd(p);
-			}
 		}
 
 		void calInvMat() {
@@ -259,39 +229,6 @@ namespace SIM {
 #pragma omp parallel for
 #endif
 			for (int p = 0; p < int(part->np); p++) part->fs[p] = part->_isFs(p);
-			//derived().part->updateTeam();
-		}
-
-		void pthOrderPresSpatialFilter() {
-			static auto counter = 0;
-			if (counter++ % 1 != 0) return;
-			auto* const part = derived().part;
-#if OMP
-#pragma omp parallel for
-#endif
-			for (int p = 0; p<int(part->np); p++) {
-				if (part->type[p] == BD2 || part->isFs(p)) continue;
-				part->pres[p] = part->func(part->pres, p);
-			}
-		}
-		void pthOrderVelSpatialFilter() {
-			static auto counter = 0;
-			if (counter++ % 30 != 0) return;
-			auto* const part = derived().part;
-#if OMP
-#pragma omp parallel for
-#endif
-			for (int p = 0; p<int(part->np); p++) {
-				if (part->type[p] != FLUID || part->isFs(p)) continue;
-				part->vel2[p] = part->func(part->vel1, p);
-			}
-#if OMP
-#pragma omp parallel for
-#endif
-			for (int p = 0; p<int(part->np); p++) {
-				if (part->type[p] != FLUID || part->isFs(p)) continue;
-				part->vel1[p] = part->vel2[p];
-			}
 		}
 
 		void calForVis() {
@@ -299,7 +236,7 @@ namespace SIM {
 #if OMP
 #pragma omp parallel for
 #endif
-			for (int p = 0; p<int(part->np); p++) {
+			for (int p = 0; p < part->np; p++) {
 				part->vort[p] = part->rot(part->vel1, p);
 			}
 		}
@@ -309,10 +246,12 @@ namespace SIM {
 			R velMax = std::numeric_limits<R>::min();
 			R phiMax = std::numeric_limits<R>::min();
 			R divMax = std::numeric_limits<R>::min();
-			unsigned idv = 0, idp = 0, idd = 0;
-			for (unsigned p = 0; p < part->np; p++) {
+			int idv = 0, idp = 0, idd = 0;
+			for (int p = 0; p < part->np; p++) {
 				if (part->type[p] == BD2) continue;
-				const R vel = part->vel1[p].norm();
+				const R ux = part->vel1[0][p];
+				const R uy = part->vel1[1][p];
+				const R vel = sqrt(ux*ux + uy*uy);
 				const R phi = part->phi[p];
 				const R div = part->div(part->vel1, p);
 				if (vel > velMax) {
@@ -323,7 +262,6 @@ namespace SIM {
 					phiMax = phi;
 					idp = p;
 				}
-				if (part->type[p] == BD1) continue;
 				if (abs(div) > abs(divMax)) {
 					divMax = div;
 					idd = p;
@@ -333,97 +271,22 @@ namespace SIM {
 			std::cout << " max phi: " << phiMax << " --- id: " << idp << std::endl;
 			std::cout << " max Div: " << divMax << " --- id: " << idd << std::endl;
 		}
-#if 0
-		void bvpSource() {
-			const auto* const part = derived().part;
-			for (auto p = 0; p < part->np; p++) {
-				if (part->type[p] == BD2) {
-					mSol->b[p] = 0.;
-					continue;
-				}
-				if (part->isFs(p)) {
-					mSol->b[p] = bvp->func(part->pos[p]);
-					continue;
-				}
-				mSol->b[p] = bvp->lap(part->pos[p]);
-			}
-		}
-
-		void bvpAvgError() {
-			const auto* const part = derived().part;
-			int n = 0;
-			R err = 0.;
-			for (auto p = 0; p < part->np; p++) {
-				if (part->type[p] != FLUID || part->isFs(p)) continue;
-				R ext = bvp->func(part->pos[p]);
-				err += abs(part->pres[p] - ext);
-				n++;
-			}
-			std::cout << " bvp --- avg Error: " << err / n << std::endl;
-			std::ofstream file("./out/out.txt", std::ofstream::app);
-			file << part->dp << " " << err / n << std::endl;
-			file.close();
-		}
-
-		void bvpMaxError() {
-			const auto* const part = derived().part;
-			R err = 0.;
-			for (auto p = 0; p < part->np; p++) {
-				if (part->type[p] != FLUID || part->isFs(p)) continue;
-				R ext = bvp->func(part->pos[p]);
-				R tmp = abs(part->pres[p] - ext);
-				if (tmp > err) err = tmp;
-			}
-			std::cout << " bvp --- max Error: " << err << std::endl;
-			std::ofstream file("./out/out.txt", std::ofstream::app);
-			file << part->dp << " " << err << std::endl;
-			file.close();
-		}
-
-		void gradMaxError() {
-			auto* const part = derived().part;
-			for (auto p = 0; p < part->np; p++) {
-				part->pres[p] = bvp->func(part->pos[p]);
-			}
-			R err = 0.;
-			for (auto p = 0; p < part->np; p++) {
-				vec ext = bvp->grad(part->pos[p]);
-				R tmp = (part->grad(part->pres, p) - ext).mag();
-				if (tmp > err) err = tmp;
-			}
-			std::cout << " |grad| --- max Error: " << err << std::endl;
-			std::ofstream file("./out/out.txt", std::ofstream::app);
-			file << part->dp << " " << err << std::endl;
-			file.close();
-		}
-
-		void lapMaxError() {
-			auto* const part = derived().part;
-			for (auto p = 0; p < part->np; p++) {
-				part->pres[p] = bvp->func(part->pos[p]);
-			}
-			R err = 0.;
-			for (auto p = 0; p < part->np; p++) {
-				R ext = bvp->lap(part->pos[p]);
-				R tmp = abs(part->lap(part->pres, p) - ext);
-				if (tmp > err) err = tmp;
-			}
-			std::cout << " lap --- max Error: " << err << std::endl;
-			std::ofstream file("./out/out.txt", std::ofstream::app);
-			file << part->dp << " " << err << std::endl;
-			file.close();
-		}
-#endif
 
 		void insertRand() {
 			auto* const part = derived().part;
-			R coef = 0.1;
+			R coef = 0.25;
 			std::default_random_engine gen;
 			std::normal_distribution<R> dis(0., 0.5);
-			for (auto p = 0; p < part->np; p++) {
+			for (int p = 0; p < int(part->np); p++) {
 				if (part->type[p] != FLUID) continue;
-				vec dr = coef* part->dp* vec(dis(gen), 0., dis(gen));
-				part->pos[p] += dr;
+				const R dr = coef* part->dp* dis(gen);
+				const R theta = 2.* M_PI * (R(rand()) / RAND_MAX);
+				const R dx = cos(theta)*dr;
+				const R dy = sin(theta)*dr;
+				part->pos[0][p] += dx;
+				part->pos[1][p] += dy;
+				part->pos_m1[0][p] += dx;
+				part->pos_m1[1][p] += dy;
 			}
 		}
 
@@ -431,4 +294,6 @@ namespace SIM {
 		int timeStep;
 	};
 
+	template <typename R, typename Derived>
+	class Simulator<R,3,Derived> {};
 }

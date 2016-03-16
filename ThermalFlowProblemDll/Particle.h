@@ -116,7 +116,7 @@ namespace SIM {
 			bbMap.clear();
 			for (int p = 0; p < pos.size(); p++) {
 				if (type[p] != BD2) continue;
-				auto tmpdr = std::numeric_limits<R>::max();
+				R tmpdr = std::numeric_limits<R>::max();
 				int tmpbb = 0;
 				const auto c = cell->iCoord(pos[p]);
 				for (auto i = 0; i < cell->blockSize::value; i++) {

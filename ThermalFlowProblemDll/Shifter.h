@@ -7,17 +7,125 @@
 #include "Particle.h"
 
 namespace SIM {
+	
+	template <typename R, int D>
+	class Shifter {};
 
-	template <typename R, unsigned D>
-	class Shifter {
-		typedef Eigen::Matrix<R, D, 1> Vec;
-		typedef Eigen::Matrix<R, D, D> Mat;
+	template <typename R>
+	class Shifter<R,1> {};
+
+	template <typename R>
+	class Shifter<R,2> {
+		typedef Eigen::Matrix<R,2,1> Vec;
+		typedef Eigen::Matrix<R,2,2> Mat;
 	public:
 		Shifter() {}
 		~Shifter() {}
 
-		template <typename R, unsigned D, class Der>
-		void shiftNearest2d(Particle<R, D, Der>* const part, const Parameter<R, D>& para) const {
+		template <typename Der>
+		void SpringModel(Particle<R,2,Der>* const part, const Parameter<R,2>& para) const {
+			std::vector<R> Dposx(part->np, R(0));
+			std::vector<R> Dposy(part->np, R(0));
+			std::vector<R> Du1x(part->np, R(0));
+			std::vector<R> Du1y(part->np, R(0));
+			std::vector<R> Du2x(part->np, R(0));
+			std::vector<R> Du2y(part->np, R(0));
+			std::vector<R> Du3x(part->np, R(0));
+			std::vector<R> Du3y(part->np, R(0));
+			std::vector<R> Dtemp(part->np, R(0));
+			const R coef = para.umax* para.dt;
+#if OMP
+#pragma omp parallel for
+#endif
+			for (int p = 0; p < part->np; p++) {
+				if (part->type[p] != FLUID) continue;
+				R Dpq[2] = { 0.0, 0.0 };
+				const auto& cell = part->cell;
+				const int cx = cell->pos2cell(pos[0][p]);
+				const int cy = cell->pos2cell(pos[1][p]);
+				for (int i = 0; i < cell->blockSize::value; i++) {
+					const int key = cell->hash(cx, cy, i);
+					for (int m = 0; m < cell->linkList[key].size(); m++) {
+						const int q = cell->linkList[key][m];
+						if (type[p] == BD2) continue;
+						const R dr[2] = { pos[0][q] - pos[0][p], pos[1][q] - pos[1][p] };
+						const R dr1 = sqrt(dr[0] * dr[0] + dr[1] * dr[1]);
+						if (dr1 > r0) continue;
+						const R w = ww(dr1);
+						const R coeff = w / dr1;
+						Dpq[0] -= coeff * dr[0];
+						Dpq[1] -= coeff * dr[1];
+					}
+				}
+				Dposx[p] = coef* Dpq[0];
+				Dposy[p] = coef* Dpq[1];
+			}
+#if OMP
+#pragma omp parallel for
+#endif
+			for (int p = 0; p < part->np; p++) {
+				if (part->type[p] != FLUID) continue;
+				dp[p] = part->pos_m1[p];
+				tmp1[p] = part->derived().func_lsA_upwind(part->vel1, p, dp[p]);
+				tmp2[p] = part->derived().func_lsA_upwind(part->vel2, p, dp[p]);
+			}
+#if OMP
+#pragma omp parallel for
+#endif
+			for (int p = 0; p < int(part->np); p++) {
+				if (part->type[p] != FLUID) continue;
+				part->pos[p] = dp[p];
+				part->vel1[p] = tmp1[p];
+				part->vel2[p] = tmp2[p];
+			}
+		}
+
+		template <typename T, typename U>
+		void StaticUpwindModel(T* const part, U& phi) const {
+			U tmp(part->np);
+#if OMP
+#pragma omp parallel for
+#endif
+			for (int p = 0; p < int(part->np); p++) {
+				if (part->type[p] != FLUID) continue;
+				if (part->isFs(p)) continue;
+				tmp[p] = part->derived().func_lsA_upwind(phi, p, part->pos_m1[p]);
+			}
+#if OMP
+#pragma omp parallel for
+#endif
+			for (int p = 0; p < int(part->np); p++) {
+				if (part->type[p] != FLUID) continue;
+				if (part->isFs(p)) continue;
+				part->pos[p] = part->pos_m1[p];
+				phi[p] = tmp[p];
+			}
+		}
+
+		template <typename T, typename U>
+		void StaticWENOModel(T* const part, U& phi) const {
+			U tmp(part->np);
+#if OMP
+#pragma omp parallel for
+#endif
+			for (int p = 0; p < int(part->np); p++) {
+				if (part->type[p] != FLUID) continue;
+				if (part->isFs(p)) continue;
+				tmp[p] = part->derived().interpolateWENO(part->phi, p, part->pos_m1[p]);
+			}
+#if OMP
+#pragma omp parallel for
+#endif
+			for (int p = 0; p < int(part->np); p++) {
+				if (part->type[p] != FLUID) continue;
+				if (part->isFs(p)) continue;
+				part->pos[p] = part->pos_m1[p];
+				phi[p] = tmp[p];
+			}
+		}
+
+		template <typename R, class Der>
+		void shiftNearest(Particle<R, 2, Der>* const part, const Parameter<R, 2>& para) const {
 			std::vector<Vec> dp(part->pos);
 			std::vector<Vec> tmp(part->np, Vec(0));
 			for (int loop = 0; loop < 1; loop++) {
@@ -98,17 +206,17 @@ namespace SIM {
 			}
 		}
 
-		template <typename R, unsigned D, class Der>
-		void shiftPnd(Particle<R, D, Der>* part, Parameter<R, D>& para) const {
+		template <typename R, , class Der>
+		void shiftPnd(Particle<R, 2, Der>* part, Parameter<R, 2>& para) const {
 			std::vector<Vec> dn(part->np, Vec(0.));
-			for (unsigned p = 0; p < part->pnd.size(); p++) {
+			for (int p = 0; p < part->pnd.size(); p++) {
 				dn[p] = part->grad_suzuki_pnd(part->pnd, p);
 			}
 			R nn = 0.;
-			for (unsigned p = 0; p < dn.size(); p++) {
+			for (int p = 0; p < dn.size(); p++) {
 				nn += dn[p] * dn[p];
 			}
-			for (unsigned p = 0; p < part->pos.size(); p++) {
+			for (int p = 0; p < part->pos.size(); p++) {
 				if (part->type[p] != FLUID) continue;
 				Vec gc = Vec(0., 0., 0.);
 				const iVec3 c = part->cell->iCoord(part->pos[p]);
@@ -116,9 +224,9 @@ namespace SIM {
 					for (int j = -1; j <= 1; j++) {
 						for (int i = -1; i <= 1; i++) {
 							const iVec3 ne = c + iVec3(i, j, k);
-							const unsigned key = part->cell->hash(ne);
-							for (unsigned m = 0; m < part->cell->linkList[key].size(); m++) {
-								const unsigned q = part->cell->linkList[key][m];
+							const int key = part->cell->hash(ne);
+							for (int m = 0; m < part->cell->linkList[key].size(); m++) {
+								const int q = part->cell->linkList[key][m];
 								if (q == p) continue;
 								const Vec	dr = part->pos[p] - part->pos[q];
 								const R  dr1 = dr.mag();
@@ -140,10 +248,10 @@ namespace SIM {
 			}
 		}
 
-		template <typename R, unsigned D, class Der>
-		void shiftPbf(Particle<R, D, Der>* part, Parameter<R, D>& para) const {
+		template <typename R, class Der>
+		void shiftPbf(Particle<R, 2, Der>* part, Parameter<R, 2>& para) const {
 			std::vector<Vec> dp(part->pos.size());
-			for (unsigned p = 0; p < part->pos.size(); p++) {
+			for (int p = 0; p < part->pos.size(); p++) {
 				if (part->type[p] != FLUID) continue;
 				Vec dpq = Vec(0., 0., 0.);
 				Vec gc = Vec(0., 0., 0.);
@@ -153,9 +261,9 @@ namespace SIM {
 					for (int j = -1; j <= 1; j++) {
 						for (int i = -1; i <= 1; i++) {
 							const iVec3 ne = c + iVec3(i, j, k);
-							const unsigned key = part->cell->hash(ne);
-							for (unsigned m = 0; m < part->cell->linkList[key].size(); m++) {
-								const unsigned q = part->cell->linkList[key][m];
+							const int key = part->cell->hash(ne);
+							for (int m = 0; m < part->cell->linkList[key].size(); m++) {
+								const int q = part->cell->linkList[key][m];
 								if (q == p) continue;
 								const Vec	dr = part->pos[q] - part->pos[p];
 								const R	dr2 = dr.mag2();
@@ -178,24 +286,24 @@ namespace SIM {
 				}
 				dp[p] = 0.001*lam * dpq;
 			}
-			for (unsigned p = 0; p < part->pos.size(); p++) {
+			for (int p = 0; p < part->pos.size(); p++) {
 				if (part->type[p] != FLUID) continue;
 				part->vel2[p] += part->grad(part->vel1, p) * dp[p];
 			}
-			for (unsigned p = 0; p < part->pos.size(); p++) {
+			for (int p = 0; p < part->pos.size(); p++) {
 				if (part->type[p] != FLUID) continue;
 				part->pos[p] += dp[p];
 				part->vel1[p] = part->vel2[p];
 			}
 		}
 
-		template <typename R, unsigned D, class Der>
-		void shiftXu(Particle<R, D, Der>* const part, const Parameter<R, D>& para) const {
+		template <typename R, class Der>
+		void shiftXu(Particle<R, 2, Der>* const part, const Parameter<R, 2>& para) const {
 			std::vector<Vec> dp(part->pos.size());
-			for (unsigned p = 0; p < part->pos.size(); p++) {
+			for (int p = 0; p < part->pos.size(); p++) {
 				if ((part->type[p] != FLUID)) continue;
 				R pa = 0.;
-				unsigned count = 0;
+				int count = 0;
 				Vec dpq = Vec(0., 0., 0.);
 				Vec gc = Vec(0., 0., 0.);
 				const iVec3 c = part->cell->iCoord(part->pos[p]);
@@ -203,9 +311,9 @@ namespace SIM {
 					for (int j = -1; j <= 1; j++) {
 						for (int i = -1; i <= 1; i++) {
 							const iVec3 ne = c + iVec3(i, j, k);
-							const unsigned key = part->cell->hash(ne);
-							for (unsigned m = 0; m < part->cell->linkList[key].size(); m++) {
-								const unsigned q = part->cell->linkList[key][m];
+							const int key = part->cell->hash(ne);
+							for (int m = 0; m < part->cell->linkList[key].size(); m++) {
+								const int q = part->cell->linkList[key][m];
 								if (q == p) continue;
 								const Vec	dr = part->pos[q] - part->pos[p];
 								const R	dr2 = dr.mag2();
@@ -229,117 +337,18 @@ namespace SIM {
 				dp[p] = 0.05* para.umax * para.dt *pa*pa * dpq;
 				//dp[p] = 0.05* para.cfl*para.dp *pa*pa * dpq;
 			}
-			for (unsigned p = 0; p < part->pos.size(); p++) {
+			for (int p = 0; p < part->pos.size(); p++) {
 				if ((part->type[p] != FLUID)) continue;
 				//part->vel2[p] += dp[p] * (part->derived().grad(part->vel1, p));
 				//if ((part->vel2[p]).mag() > 5.) part->vel2[p] = 5. * (part->vel2[p]).norm();
 			}
-			for (unsigned p = 0; p < part->pos.size(); p++) {
+			for (int p = 0; p < part->pos.size(); p++) {
 				if ((part->type[p] != FLUID)) continue;
 				//part->vel1[p] = part->vel2[p];
 				part->pos[p] += dp[p];
 			}
 		}
 
-		template <typename T, typename U>
-		void shiftSpring(T* const part, const U& para) const {
-			std::vector<Vec> dp(part->np, Vec::Zero());
-			std::vector<Vec> tmp1(part->np, Vec::Zero());
-			std::vector<Vec> tmp2(part->np, Vec::Zero());
-#if OMP
-#pragma omp parallel for
-#endif
-			for (int p = 0; p < int(part->np); p++) {
-				if (part->type[p] != FLUID) continue;
-				Vec dpq = Vec::Zero();
-				Vec gc = Vec::Zero();
-				const auto& cell = part->cell;
-				const auto c = cell->iCoord(part->pos_m1[p]);
-				for (auto i = 0; i < cell->blockSize::value; i++) {
-					const auto key = cell->hash(c, i);
-					for (auto m = 0; m < cell->linkList[key].size(); m++) {
-						const auto& q = cell->linkList[key][m];
-						if (q == p) continue;
-						const auto dr = part->pos_m1[q] - part->pos_m1[p];
-						const auto dr1 = dr.norm();
-						static const auto re = part->dp*para.alpha;
-						//gc -= w2(dr1, part->r0)* (dr / dr1);
-						if (dr1 > re) continue;
-						const auto ww = w2(dr1, re);
-						dpq -= ww * (dr / dr1);
-					}
-				}
-				//if (part->isFs(p)) {
-				//	gc = gc.norm();
-				//	dpq = dpq - 1.*(dpq*gc)*gc;
-				//}
-				dp[p] = para.c* para.umax* para.dt* dpq;
-			}
-#if OMP
-#pragma omp parallel for
-#endif
-			for (int p = 0; p < int(part->np); p++) {
-				if (part->type[p] != FLUID) continue;
-				if (part->isFs(p)) continue;
-				//dp[p] = part->pos_m1[p] + dp[p];
-				dp[p] = part->pos_m1[p];
-				tmp1[p] = part->derived().func_lsA_upwind(part->vel1, p, dp[p]);
-				tmp2[p] = part->derived().func_lsA_upwind(part->vel2, p, dp[p]);
-			}
-#if OMP
-#pragma omp parallel for
-#endif
-			for (int p = 0; p < int(part->np); p++) {
-				if (part->type[p] != FLUID) continue;
-				part->pos[p] = dp[p];
-				part->vel1[p] = tmp1[p];
-				part->vel2[p] = tmp2[p];
-			}
-		}
-
-		template <typename T, typename U>
-		void shiftOriginUpwind(T* const part, U& phi) const {
-			U tmp(part->np);
-#if OMP
-#pragma omp parallel for
-#endif
-			for (int p = 0; p < int(part->np); p++) {
-				if (part->type[p] != FLUID) continue;
-				if (part->isFs(p)) continue;
-				tmp[p] = part->derived().func_lsA_upwind(phi, p, part->pos_m1[p]);
-			}
-#if OMP
-#pragma omp parallel for
-#endif
-			for (int p = 0; p < int(part->np); p++) {
-				if (part->type[p] != FLUID) continue;
-				if (part->isFs(p)) continue;
-				part->pos[p] = part->pos_m1[p];
-				phi[p] = tmp[p];
-			}
-		}
-
-		template <typename T, typename U>
-		void shiftOriginWENO(T* const part, U& phi) const {
-			U tmp(part->np);
-#if OMP
-#pragma omp parallel for
-#endif
-			for (int p = 0; p < int(part->np); p++) {
-				if (part->type[p] != FLUID) continue;
-				if (part->isFs(p)) continue;
-				tmp[p] = part->derived().interpolateWENO(part->phi, p, part->pos_m1[p]);
-			}
-#if OMP
-#pragma omp parallel for
-#endif
-			for (int p = 0; p < int(part->np); p++) {
-				if (part->type[p] != FLUID) continue;
-				if (part->isFs(p)) continue;
-				part->pos[p] = part->pos_m1[p];
-				phi[p] = tmp[p];
-			}
-		}
 	private:
 		inline const R w_spline(const R& r, const R& r0) const {
 			/*cubic spline*/
@@ -370,5 +379,8 @@ namespace SIM {
 			return 1. - r / r0;
 		}
 	};
+
+	template <typename R>
+	class Shifter<R,3> {};
 
 }

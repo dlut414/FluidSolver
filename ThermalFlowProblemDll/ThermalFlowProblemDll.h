@@ -18,13 +18,14 @@ namespace SIM {
 
 	typedef void* NPtr;
 
-	class ThermalFlowProblemDll {
+	class ThermalFlowProblemDll2D {
 	public:
 		static THERMALFLOWPROBLEMDLL_API void Initialize();
 		static THERMALFLOWPROBLEMDLL_API void Run();
 		static THERMALFLOWPROBLEMDLL_API int Number();
 		static THERMALFLOWPROBLEMDLL_API NPtr Type();
-		static THERMALFLOWPROBLEMDLL_API NPtr Position();
+		static THERMALFLOWPROBLEMDLL_API NPtr PositionX();
+		static THERMALFLOWPROBLEMDLL_API NPtr PositionY();
 		static THERMALFLOWPROBLEMDLL_API NPtr Scalar();
 		static THERMALFLOWPROBLEMDLL_API void SaveData();
 		static THERMALFLOWPROBLEMDLL_API void SensorOut();

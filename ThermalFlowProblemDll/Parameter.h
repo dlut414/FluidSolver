@@ -7,7 +7,6 @@ namespace SIM {
 
 	template <typename R, unsigned D>
 	class Parameter {
-		typedef Eigen::Matrix<R, D, 1> Vec;
 	public:
 		Parameter() { init(); }
 		~Parameter() {}
@@ -29,7 +28,7 @@ namespace SIM {
 		R beta;		//arbitrary parameter
 	private:
 		void init() {
-			dt = 1.;
+			dt = 1.0;
 		}
 	};
 
