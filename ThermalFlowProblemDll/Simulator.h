@@ -18,6 +18,12 @@
 #include "Particle.h"
 #include "MatSolver.h"
 #include "Sensor.h"
+#ifdef max
+#undef max
+#endif
+#ifdef min
+#undef min
+#endif
 
 namespace SIM {
 
@@ -189,6 +195,17 @@ namespace SIM {
 			}
 		}
 
+		void solvMat_t() {
+			mSol->biCg();
+			auto* const part = derived().part;
+#if OMP
+#pragma omp parallel for
+#endif
+			for (int p = 0; p < int(part->np); p++) {
+				part->temp[p] = mSol->x[p];
+			}
+		}
+
 		void solvMat_v() {
 			mSol->biCg_v();
 			auto* const part = derived().part;
@@ -197,8 +214,8 @@ namespace SIM {
 #endif
 			for (int p = 0; p < part->np; p++) {
 				if (part->type[p] != FLUID) continue;
-				part->vel2[0][p] = mSol->u[D*p];
-				part->vel2[1][p] = mSol->u[D*p+1];
+				part->vel_p1[0][p] = mSol->u[2*p];
+				part->vel_p1[1][p] = mSol->u[2*p+1];
 			}
 		}
 
@@ -206,8 +223,8 @@ namespace SIM {
 			R umax = 0.;
 			const auto* const part = derived().part;
 			for (int p = 0; p < part->np; p++) {
-				const R ux = part->vel1[0][p];
-				const R uy = part->vel1[1][p];
+				const R ux = part->vel[0][p];
+				const R uy = part->vel[1][p];
 				const R tmp = sqrt(ux*ux + uy*uy);
 				if (tmp > umax) umax = tmp;
 			}
@@ -237,7 +254,7 @@ namespace SIM {
 #pragma omp parallel for
 #endif
 			for (int p = 0; p < part->np; p++) {
-				part->vort[p] = part->rot(part->vel1, p);
+				part->vort[p] = part->Rot(part->vel[0].data(), part->vel[1].data(), p);
 			}
 		}
 
@@ -249,11 +266,11 @@ namespace SIM {
 			int idv = 0, idp = 0, idd = 0;
 			for (int p = 0; p < part->np; p++) {
 				if (part->type[p] == BD2) continue;
-				const R ux = part->vel1[0][p];
-				const R uy = part->vel1[1][p];
+				const R ux = part->vel[0][p];
+				const R uy = part->vel[1][p];
 				const R vel = sqrt(ux*ux + uy*uy);
 				const R phi = part->phi[p];
-				const R div = part->div(part->vel1, p);
+				const R div = part->Div(part->vel[0].data(), part->vel[1].data(), p);
 				if (vel > velMax) {
 					velMax = vel;
 					idv = p;

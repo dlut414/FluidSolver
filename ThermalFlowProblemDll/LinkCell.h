@@ -29,18 +29,18 @@ namespace SIM {
 		__forceinline const int hash(const R& px, const R& py) const { return hash_(pos2cell(px), pos2cell(py)); }
 		__forceinline const int hash(const int& cx, const int& cy, const int& i) const { return hash_(cx + loopTable.at(i)[0], cy + loopTable.at(i)[1]); }
 
-		void update(const R* const px, const R* const py) {
+		void update(const R* const px, const R* const py, const int& np) {
 			for (int i = 0; i < linkList.size(); i++) {
 				linkList[i].clear();
 			}
-			for (int i = 0; i < pos.size(); i++) {
-				linkList[hash(px, py)].push_back(i);
+			for (int i = 0; i < np; i++) {
+				linkList[hash(px[i], py[i])].push_back(i);
 			}
 		}
 
 	public:
 		BBox<R,2> box;
-		std::vector< std::vector<int> > linkList;
+		std::vector<std::vector<int>> linkList;
 
 	private:
 		void initialize() {

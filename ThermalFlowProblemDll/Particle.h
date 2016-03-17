@@ -10,31 +10,26 @@
 #include "LinkCell.h"
 #include "Header.h"
 #include "Base.h"
+#ifdef max
+#undef max
+#endif
+#ifdef min
+#undef min
+#endif
 
 namespace SIM {
 
 	template <typename R, int D, typename Derived>
-	class Particle : public Base<R, D> {
+	class Particle : public Base<R,D> {};
+
+	template <typename R, typename Derived>
+	class Particle<R,1,Derived> : public Base<R,1> {};
+
+	template <typename R, typename Derived>
+	class Particle<R,2,Derived> : public Base<R,2> {
 	public:
-		typedef Eigen::Matrix<int, D, 1>	iVec;
-		typedef Eigen::Matrix<R, D, 1> vec;
-		typedef Eigen::Matrix<R, 1, 3> vec13;
-		typedef Eigen::Matrix<R, 5, 1> vec5;
-		typedef Eigen::Matrix<R, 6, 1> vec6;
-		typedef Eigen::Matrix<R, 7, 1> vec7;
-		typedef Eigen::Matrix<R, 8, 1> vec8;
-		typedef Eigen::Matrix<R, 9, 1> vec9;
-		typedef Eigen::Matrix<R, 5, 5> mat55;
-		typedef Eigen::Matrix<R, 6, 6> mat66;
-		typedef Eigen::Matrix<R, 7, 7> mat77;
-		typedef Eigen::Matrix<R, 8, 8> mat88;
-		typedef Eigen::Matrix<R, 9, 9> mat99;
-		typedef Eigen::Matrix<R, 5, 3> mat53;
-		typedef Eigen::Matrix<R, 6, 3> mat63;
-		typedef Eigen::Matrix<R, 7, 3> mat73;
-		typedef Eigen::Matrix<R, 8, 3> mat83;
-		typedef Eigen::Matrix<R, 9, 3> mat93;
-		typedef Eigen::Matrix<R, D, D> mat;
+		typedef Eigen::Matrix<int,2,1> iVec;
+		typedef Eigen::Matrix<R,2,1> Vec;
 	public:
 		Particle() {}
 		~Particle() {}
@@ -44,10 +39,8 @@ namespace SIM {
 
 		void clean() {
 			type.clear();
-			for (int d = 0; d < D; d++) {
-				pos[d].clear(); pos_m1[d].clear();
-				vel[d].clear(); vel_p1[d].clear(); vel_m1[d].clear();
-			}
+			pos[0].clear(); pos[1].clear(); pos_m1[0].clear(); pos_m1[1].clear();
+			vel[0].clear(); vel[1].clear(); vel_p1[0].clear(); vel_p1[1].clear(); vel_m1[0].clear(); vel_m1[1].clear();
 			pres.clear();
 			phi.clear(); vort.clear();
 		}
@@ -58,28 +51,21 @@ namespace SIM {
 			file << np << " " << bd1 << " " << bd2 << std::endl;
 			for (int p = 0; p < np; p++) {
 				file << std::scientific << std::setprecision(6);
-				file << type[p] << " ";
-				for (int d = 0; d < D; d++) {
-					file << pos[d][p] << " ";
-				}
-				for (int d = 0; d < D; d++) {
-					file << vel[d][p] << " ";
-				}
-				file << temp[p] << std::endl;
+				file << type[p] << " " << pos[0][p] << " " << pos[1][p] << " " << vel[0][p] << " " << vel[1][p] << " " << temp[p] << std::endl;
 			}
 			std::cout << " Writing Geo. done. " << std::endl;
 			file.close();
 		}
 		void operator << (const std::string str) {
-			int n;	 int t;		vec p;		vec	v;	R tp;
+			int n;	 int t;		Vec p;		Vec	v;	R tp;
 			std::ifstream file(str);
 			if (!file.is_open()) std::cout << " File Geo. not found ! " << std::endl;
 			file >> ct >> dp >> np >> bd1 >> bd2;
 			n = np;
 			while (n-- > 0) {
 				file >> t;
-				for (int d = 0; d < D; d++) file >> p[d];
-				for (int d = 0; d < D; d++) file >> v[d];
+				file >> p[0] >> p[1];
+				file >> v[0] >> v[1];
 				file >> tp;
 				addPart(pType(t), p, v, tp);
 			}
@@ -87,48 +73,46 @@ namespace SIM {
 			std::cout << " Reading Geo. done " << std::endl;
 		}
 
-		void addPart(const pType& t, const vec& p, const vec& v) {
+		void addPart(const pType& t, const Vec& p, const Vec& v, const R& tp) {
 			type.push_back(t);
-			for (int d = 0; d < D; d++) {
-				pos[d].push_back(p[d]); pos_m1[d].push_back(p[d]);
-				vel[d].push_back(v[d]); vel_p1.push_back(v[d]); vel_m1[d].push_back(v[d]);
-			}
-			pres.push_back(R(0));
-			phi.push_back(R(0)); vort.push_back(R(0));
-			norm.push_back(vec::Zero());
+			pos[0].push_back(p[0]);	pos[1].push_back(p[1]);
+			pos_m1[0].push_back(p[0]); pos_m1[1].push_back(p[1]);
+			vel[0].push_back(v[0]); vel[1].push_back(v[1]);
+			vel_p1[0].push_back(v[0]); vel_p1[1].push_back(v[1]);
+			vel_m1[0].push_back(v[0]); vel_m1[1].push_back(v[1]);
+			temp.push_back(tp); pres.push_back(R(0)); phi.push_back(R(0)); vort.push_back(R(0));
 			bdc.push_back(0);
 		}
 
 		void buildCell() {
 			BBox<R> b = BBox<R>();
-			for (int p = 0; p < pos.size(); p++) {
-				b += pos[p];
+			for (int p = 0; p < np; p++) {
+				Vec pp;
+				pp[0] = pos[0][p];
+				pp[1] = pos[1][p];
+				b += pp;
 			}
 			b.Expand(0.1);
-			cell = new LinkCell<R, D>(b, r0);
+			cell = new LinkCell<R,2>(b, r0);
 			updateCell();
 		}
-		inline void updateCell() {
-			cell->update(pos);
+		void updateCell() {
+			cell->update(pos[0].data(), pos[1].data(), np);
 		}
 
 		void b2b() {
 			bbMap.clear();
-			for (int p = 0; p < pos.size(); p++) {
+			for (int p = 0; p < np; p++) {
 				if (type[p] != BD2) continue;
 				R tmpdr = std::numeric_limits<R>::max();
 				int tmpbb = 0;
-				const auto c = cell->iCoord(pos[p]);
-				for (auto i = 0; i < cell->blockSize::value; i++) {
-					const auto key = cell->hash(c, i);
-					for (int m = 0; m < cell->linkList[key].size(); m++) {
-						const int q = cell->linkList[key][m];
-						if (q == p || type[q] != BD1) continue;
-						const auto dr1 = (pos[q] - pos[p]).norm();
-						if (dr1 < tmpdr) {
-							tmpdr = dr1;
-							tmpbb = q;
-						}
+				for (int q = 0; q < np; q++) {
+					if (q == p || type[q] != BD1) continue;
+					const R dr[2] = { pos[0][q] - pos[0][p], pos[1][q] - pos[1][p] };
+					const R dr1 = sqrt(dr[0] * dr[0] + dr[1] * dr[1]);
+					if (dr1 < tmpdr) {
+						tmpdr = dr1;
+						tmpbb = q;
 					}
 				}
 				bbMap[p] = tmpbb;
@@ -138,12 +122,16 @@ namespace SIM {
 		void b2norm() {
 			bdnorm.clear();
 			for (const auto& p : bbMap) {
-				const auto n = pos[p.second] - pos[p.first];
+				Vec n;
+				n[0] = pos[0][p.second] - pos[0][p.first];
+				n[1] = pos[1][p.second] - pos[1][p.first];
 				bdnorm[p.second] = n;
 			}
 			for (const auto& p : bbMap) {
-				const auto n = pos[p.second] - pos[p.first];
-				const auto tmp = bdnorm.at(p.second);
+				Vec n;
+				n[0] = pos[0][p.second] - pos[0][p.first];
+				n[1] = pos[1][p.second] - pos[1][p.first];
+				const Vec tmp = bdnorm.at(p.second);
 				if (tmp.norm() < n.norm()) bdnorm[p.second] = n;
 			}
 			for (const auto& p : bbMap) {
@@ -172,11 +160,11 @@ namespace SIM {
 	public:
 		R ct;
 		int np, bd1, bd2;
-		std::vector<R> pos[D];
-		std::vector<R> pos_m1[D];
-		std::vector<R> vel[D];
-		std::vector<R> vel_p1[D];
-		std::vector<R> vel_m1[D];
+		std::vector<R> pos[2];
+		std::vector<R> pos_m1[2];
+		std::vector<R> vel[2];
+		std::vector<R> vel_p1[2];
+		std::vector<R> vel_m1[2];
 
 		std::vector<R> temp;
 		std::vector<R> pnd;
@@ -185,16 +173,17 @@ namespace SIM {
 		std::vector<int> bdc;
 		std::vector<R> phi;
 		std::vector<R> vort;
-		std::unordered_map<int, vec> bdnorm;
+		std::unordered_map<int, Vec> bdnorm;
 		std::unordered_map<int, R> p_dirichlet;
 		std::unordered_map<int, R> t_dirichlet;
 		std::unordered_map<int, R> p_neumann;
 		std::unordered_map<int, R> t_neumann;
 		std::unordered_map<int, int> bbMap;
 
-		LinkCell<R, D>* cell;
-
-	private:
+		LinkCell<R,2>* cell;
 	};
+
+	template <typename R, typename Derived>
+	class Particle<R,3,Derived> : public Base<R,3> {};
 
 }

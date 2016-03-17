@@ -27,6 +27,7 @@ namespace SIM {
 		typedef mMath::Derivative_A<R,2,P> DR;
 		typedef Eigen::Matrix<R,PN::value,1> VecP;
 		typedef Eigen::Matrix<R,2,1> Vec;
+		typedef Eigen::Matrix<R,PN::value,PN::value> MatPP;
 		typedef Eigen::Triplet<R> Tpl;
 	public:
 		FractionalStep_KM() {}
@@ -36,7 +37,7 @@ namespace SIM {
 			part = new Particle_x<R,2,P>();
 			part->clean();
 			*part << "Geo.in";
-			part->init(para.k, para.beta);
+			part->init(para.k);
 			part->buildCell();
 			part->b2b();
 			part->b2norm();
@@ -62,9 +63,13 @@ namespace SIM {
 
 			calCell();
 			calInvMat();
-			shift();
+			Redistribute();
 
 			sync();
+		}
+
+		void Redistribute() {
+			shi.StaticUpwindModel(part);
 		}
 
 		void visTerm_i_q2r1() {
@@ -119,8 +124,8 @@ namespace SIM {
 			for (int p = 0; p < part->np; p++) {
 				if (part->type[p] == FLUID) {
 					const Vec du = -coefL * part->Grad(part->phi, p);
-					part->vel2[0][p] += du[0];
-					part->vel2[1][p] += du[1];
+					part->vel_p1[0][p] += du[0];
+					part->vel_p1[1][p] += du[1];
 				}
 			}
 		}
@@ -140,9 +145,9 @@ namespace SIM {
 #endif
 			for (int p = 0; p < part->np; p++) {
 				if (part->type[p] == FLUID) {
-					const Vec du = -coefL * part->Grad(part->phi, p);
-					part->vel2[0][p] += du[0];
-					part->vel2[1][p] += du[1];
+					const Vec du = -coefL * part->Grad(part->phi.data(), p);
+					part->vel_p1[0][p] += du[0];
+					part->vel_p1[1][p] += du[1];
 				}
 			}
 		}
@@ -154,8 +159,8 @@ namespace SIM {
 #endif
 			for (int p = 0; p < part->np; p++) {
 				if (part->type[p] == FLUID) {
-					part->pos[0][p] += coefL * (part->vel1[0][p] + part->vel2[0][p]);
-					part->pos[1][p] += coefL * (part->vel1[1][p] + part->vel2[1][p]);
+					part->pos[0][p] += coefL * (part->vel[0][p] + part->vel_p1[0][p]);
+					part->pos[1][p] += coefL * (part->vel[1][p] + part->vel_p1[1][p]);
 				}
 			}
 		}
@@ -167,8 +172,8 @@ namespace SIM {
 #endif
 			for (int p = 0; p < part->np; p++) {
 				if (part->type[p] == FLUID) {
-					part->pos[0][p] += coefL * (3.0* part->vel1[0][p] - 1.0* part->vel_m1[0][p]);
-					part->pos[1][p] += coefL * (3.0* part->vel1[1][p] - 1.0* part->vel_m1[1][p]);
+					part->pos[0][p] += coefL * (3.0* part->vel[0][p] - 1.0* part->vel_m1[0][p]);
+					part->pos[1][p] += coefL * (3.0* part->vel[1][p] - 1.0* part->vel_m1[1][p]);
 				}
 			}
 		}
@@ -188,21 +193,21 @@ namespace SIM {
 				R pp = R(0);
 				const auto& mm = part->invMat[p];
 				const auto& cell = part->cell;
-				const int cx = cell->pos2cell(pos[0][p]);
-				const int cy = cell->pos2cell(pos[1][p]);
+				const int cx = cell->pos2cell(part->pos[0][p]);
+				const int cy = cell->pos2cell(part->pos[1][p]);
 				for (int i = 0; i < cell->blockSize::value; i++) {
 					const int key = cell->hash(cx, cy, i);
 					for (int m = 0; m < cell->linkList[key].size(); m++) {
 						const int q = cell->linkList[key][m];
 						if (part->type[p] == BD2) continue;
-						const R dr[2] = { pos[0][q] - pos[0][p], pos[1][q] - pos[1][p] };
+						const R dr[2] = { part->pos[0][q] - part->pos[0][p], part->pos[1][q] - part->pos[1][p] };
 						const R dr1 = sqrt(dr[0] * dr[0] + dr[1] * dr[1]);
 						if (dr1 > part->r0) continue;
 						const R w = part->ww(dr1);
 						VecP npq;
 						part->poly(dr, npq.data());
 						const VecP aa = mm * (w* npq);
-						const R pq = -(part->pn_lap_o* aa);
+						const R pq = -(part->pn_lap_o.dot(aa));
 						pp -= pq;
 						if (q == p) continue;
 						coef.push_back(Tpl(2 * p, 2 * q, pq));
@@ -227,14 +232,14 @@ namespace SIM {
 				R pp = R(0);
 				const auto& mm = part->invMat[p];
 				const auto& cell = part->cell;
-				const int cx = cell->pos2cell(pos[0][p]);
-				const int cy = cell->pos2cell(pos[1][p]);
+				const int cx = cell->pos2cell(part->pos[0][p]);
+				const int cy = cell->pos2cell(part->pos[1][p]);
 				for (int i = 0; i < cell->blockSize::value; i++) {
 					const int key = cell->hash(cx, cy, i);
 					for (int m = 0; m < cell->linkList[key].size(); m++) {
 						const int q = cell->linkList[key][m];
 						if (part->type[p] == BD2) continue;
-						const R dr[2] = { pos[0][q] - pos[0][p], pos[1][q] - pos[1][p] };
+						const R dr[2] = { part->pos[0][q] - part->pos[0][p], part->pos[1][q] - part->pos[1][p] };
 						const R dr1 = sqrt(dr[0] * dr[0] + dr[1] * dr[1]);
 						if (dr1 > part->r0) continue;
 						const R w = part->ww(dr1);
@@ -261,14 +266,14 @@ namespace SIM {
 #endif
 			for (int p = 0; p < part->np; p++) {
 				if (part->type[p] == BD1 || part->type[p] == BD2) {
-					mSol->rhs[2 * p + 0] = part->vel1[0][p];
-					mSol->rhs[2 * p + 1] = part->vel1[1][p];
+					mSol->rhs[2 * p + 0] = part->vel[0][p];
+					mSol->rhs[2 * p + 1] = part->vel[1][p];
 					continue;
 				}
 				const Vec Gp = part->Grad(part->pres, p);
 				const R coefL = 1.0 / (2.0* para.dt * para.Pr);
-				const R rhsx = coefL* (4.0* part->vel1[0][p] - part->vel_m1[0][p]) - (1.0 / para.Pr)* Gp[0];
-				const R rhsy = coefL* (4.0* part->vel1[1][p] - part->vel_m1[1][p]) - (1.0 / para.Pr)* Gp[1] + para.Ra* part->temp[p];
+				const R rhsx = coefL* (4.0* part->vel[0][p] - part->vel_m1[0][p]) - (1.0 / para.Pr)* Gp[0];
+				const R rhsy = coefL* (4.0* part->vel[1][p] - part->vel_m1[1][p]) - (1.0 / para.Pr)* Gp[1] + para.Ra* part->temp[p];
 				mSol->rhs[2 * p + 0] = rhsx;
 				mSol->rhs[2 * p + 1] = rhsy;
 			}
@@ -280,13 +285,13 @@ namespace SIM {
 #endif
 			for (int p = 0; p < part->np; p++) {
 				if (part->type[p] == BD1 || part->type[p] == BD2) {
-					mSol->rhs[2 * p + 0] = part->vel1[0][p];
-					mSol->rhs[2 * p + 1] = part->vel1[1][p];
+					mSol->rhs[2 * p + 0] = part->vel[0][p];
+					mSol->rhs[2 * p + 1] = part->vel[1][p];
 					continue;
 				}
 				const R coefL = (1.0 / para.dt * para.Pr);
-				const R rhsx = coefL* part->vel1[0][p];
-				const R rhsy = coefL* part->vel1[0][p] + para.Ra* part->temp[p];
+				const R rhsx = coefL* part->vel[0][p];
+				const R rhsy = coefL* part->vel[0][p] + para.Ra* part->temp[p];
 				mSol->rhs[2 * p + 0] = rhsx;
 				mSol->rhs[2 * p + 1] = rhsy;
 			}
@@ -298,13 +303,13 @@ namespace SIM {
 #endif
 			for (int p = 0; p < part->np; p++) {
 				if (part->type[p] == BD1 || part->type[p] == BD2) {
-					mSol->rhs[2 * p + 0] = part->vel1[0][p];
-					mSol->rhs[2 * p + 1] = part->vel1[1][p];
+					mSol->rhs[2 * p + 0] = part->vel[0][p];
+					mSol->rhs[2 * p + 1] = part->vel[1][p];
 					continue;
 				}
 				const R coefL = 1.0 / (2.0* para.dt * para.Pr);
-				const R rhsx = coefL* (4.0* part->vel1[0][p] - part->vel_m1[0][p]);
-				const R rhsy = coefL* (4.0* part->vel1[1][p] - part->vel_m1[1][p]) + para.Ra* part->temp[p];
+				const R rhsx = coefL* (4.0* part->vel[0][p] - part->vel_m1[0][p]);
+				const R rhsy = coefL* (4.0* part->vel[1][p] - part->vel_m1[1][p]) + para.Ra* part->temp[p];
 				mSol->rhs[2 * p + 0] = rhsx;
 				mSol->rhs[2 * p + 1] = rhsy;
 			}
@@ -324,14 +329,14 @@ namespace SIM {
 				if (IS(part->bdc[p], P_NEUMANN))	mm = &(part->invNeu.at(p));
 				else								mm = &(part->invMat[p]);
 				const auto& cell = part->cell;
-				const int cx = cell->pos2cell(pos[0][p]);
-				const int cy = cell->pos2cell(pos[1][p]);
+				const int cx = cell->pos2cell(part->pos[0][p]);
+				const int cy = cell->pos2cell(part->pos[1][p]);
 				for (int i = 0; i < cell->blockSize::value; i++) {
 					const int key = cell->hash(cx, cy, i);
 					for (int m = 0; m < cell->linkList[key].size(); m++) {
 						const int q = cell->linkList[key][m];
-						if (type[p] == BD2) continue;
-						const R dr[2] = { pos[0][q] - pos[0][p], pos[1][q] - pos[1][p] };
+						if (part->type[p] == BD2) continue;
+						const R dr[2] = { part->pos[0][q] - part->pos[0][p], part->pos[1][q] - part->pos[1][p] };
 						const R dr1 = sqrt(dr[0] * dr[0] + dr[1] * dr[1]);
 						if (dr1 > part->r0) continue;
 						const R w = part->ww(dr1);
@@ -361,12 +366,12 @@ namespace SIM {
 					mSol->b[p] = 0.0;
 					continue;
 				}
-				mSol->b[p] = coefL * part->Div(part->vel2[0], part->vel2[1], p);
+				mSol->b[p] = coefL * part->Div(part->vel_p1[0].data(), part->vel_p1[1].data(), p);
 				if (IS(part->bdc[p], P_NEUMANN)) {
 					VecP inner = VecP::Zero();
 					inner.block<2,1>(0, 0) = part->bdnorm.at(p);
 					const VecP aa = part->invMat[p] * inner;
-					const R cst = part->p_neumann.at(p)*part->ww(0.0)* (1.0 / part->varrho) * (part->pn_lap_o * aa);
+					const R cst = part->p_neumann.at(p)*part->ww(0.0)* (1.0 / part->varrho) * (part->pn_lap_o.dot(aa));
 					mSol->b[p] -= cst;
 				}
 			}
@@ -382,7 +387,7 @@ namespace SIM {
 					mSol->b[p] = 0.0;
 					continue;
 				}
-				mSol->b[p] = coefL * part->Div(part->vel2[0], part->vel2[1], p);
+				mSol->b[p] = coefL * part->Div(part->vel_p1[0], part->vel_p1[1], p);
 				if (IS(part->bdc[p], P_NEUMANN)) {
 					VecP inner = VecP::Zero();
 					inner.block<2, 1>(0, 0) = part->bdnorm.at(p);
@@ -411,21 +416,21 @@ namespace SIM {
 				else								mm = &(part->invMat[p]);
 				const R coefL = -R(0.5)* para.dt;
 				const auto& cell = part->cell;
-				const int cx = cell->pos2cell(pos[0][p]);
-				const int cy = cell->pos2cell(pos[1][p]);
+				const int cx = cell->pos2cell(part->pos[0][p]);
+				const int cy = cell->pos2cell(part->pos[1][p]);
 				for (int i = 0; i < cell->blockSize::value; i++) {
 					const int key = cell->hash(cx, cy, i);
 					for (int m = 0; m < cell->linkList[key].size(); m++) {
 						const int q = cell->linkList[key][m];
-						if (type[p] == BD2) continue;
-						const R dr[2] = { pos[0][q] - pos[0][p], pos[1][q] - pos[1][p] };
+						if (part->type[p] == BD2) continue;
+						const R dr[2] = { part->pos[0][q] - part->pos[0][p], part->pos[1][q] - part->pos[1][p] };
 						const R dr1 = sqrt(dr[0] * dr[0] + dr[1] * dr[1]);
 						if (dr1 > part->r0) continue;
 						const R w = part->ww(dr1);
 						VecP npq;
-						part->poly(dr, npq);
+						part->poly(dr, npq.data());
 						const VecP aa = (*mm) * (w* npq);
-						const R pq = coefL* (part->pn_lap_o* aa);
+						const R pq = coefL* (part->pn_lap_o.dot(aa));
 						pp -= pq;
 						if (q == p) continue;
 						coef.push_back(Tpl(p, q, pq));
@@ -451,12 +456,12 @@ namespace SIM {
 					mSol->b[p] = part->t_dirichlet.at(p);
 					continue;
 				}
-				mSol->b[p] = part->temp[p] + coefL* part->Lap(part->temp, p);
+				mSol->b[p] = part->temp[p] + coefL* part->Lap(part->temp.data(), p);
 				if (IS(part->bdc[p], T_NEUMANN)) {
 					VecP inner = VecP::Zero();
 					inner.block<2,1>(0, 0) = part->bdnorm.at(p);
 					const VecP aa = part->invMat[p] * inner;
-					const R cst = part->p_neumann.at(p)*part->ww(0.0)* (1.0 / part->varrho) * (part->pn_lap_o * aa);
+					const R cst = part->p_neumann.at(p)*part->ww(0.0)* (1.0 / part->varrho) * (part->pn_lap_o.dot(aa));
 					mSol->b[p] -= cst;
 				}
 			}
@@ -468,10 +473,10 @@ namespace SIM {
 #pragma omp parallel for
 #endif
 			for (int p = 0; p < part->np; p++) {
-				part->vel_m1[0][p] = part->vel1[0][p];
-				part->vel_m1[1][p] = part->vel1[1][p];
-				part->vel1[0][p] = part->vel2[0][p];
-				part->vel1[1][p] = part->vel2[1][p];
+				part->vel_m1[0][p] = part->vel[0][p];
+				part->vel_m1[1][p] = part->vel[1][p];
+				part->vel[0][p] = part->vel_p1[0][p];
+				part->vel[1][p] = part->vel_p1[1][p];
 			}
 		}
 		void syncPos() {

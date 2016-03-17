@@ -23,12 +23,12 @@ namespace SIM {
 		Base() {}
 		~Base() {}
 
-		inline const R ww(const R& r, const R& re) const {
-			if (r >= re) {
+		inline const R ww(const R& r) const {
+			if (r >= r0) {
 				return 0.;
 			}
 			else {
-				return pow((1 - r / re), 2);
+				return pow((1 - r / r0), 2);
 			}
 		}
 
@@ -40,8 +40,8 @@ namespace SIM {
 		R eps_mat;
 
 	public:
-		void init(const R& _k, const R& _beta) {
-			k = _k; beta = _beta; r0 = k* dp;
+		void init(const R& _k) {
+			k = _k; r0 = k* dp;
 			eps = std::numeric_limits<R>::epsilon();
 			eps_mat = static_cast<R>(1.e-6);
 		}

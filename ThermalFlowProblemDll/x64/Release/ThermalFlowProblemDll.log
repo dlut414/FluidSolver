@@ -1,19 +1,31 @@
-﻿Build started 2016/03/16 20:42:38.
+﻿Build started 2016/03/17 17:02:24.
      1>Project "C:\Users\HU FANGYUAN\Documents\Visual Studio 2013\Projects\FluidSolver_v1.0\ThermalFlowProblemDll\ThermalFlowProblemDll.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\CL.exe /c /I..\..\extern\eigen /I..\common /Zi /nologo /W3 /WX- /sdl /O2 /Oi /GL /D WIN32 /D NDEBUG /D _WINDOWS /D _USRDLL /D THERMALFLOWPROBLEMDLL_EXPORTS /D _WINDLL /D _UNICODE /D UNICODE /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Yu"stdafx.h" /Fp"x64\Release\ThermalFlowProblemDll.pch" /Fo"x64\Release\\" /Fd"x64\Release\vc120.pdb" /Gd /TP /errorReport:prompt ThermalFlowProblemDll.cpp
          ThermalFlowProblemDll.cpp
-     1>c:\users\hu fangyuan\documents\visual studio 2013\projects\fluidsolver_v1.0\thermalflowproblemdll\Particle.h(119): warning C4003: not enough actual parameters for macro 'max'
-     1>c:\users\hu fangyuan\documents\visual studio 2013\projects\fluidsolver_v1.0\thermalflowproblemdll\Shifter.h(29): warning C4003: not enough actual parameters for macro 'max'
-     1>c:\users\hu fangyuan\documents\visual studio 2013\projects\fluidsolver_v1.0\thermalflowproblemdll\Simulator.h(249): warning C4003: not enough actual parameters for macro 'min'
-     1>c:\users\hu fangyuan\documents\visual studio 2013\projects\fluidsolver_v1.0\thermalflowproblemdll\Simulator.h(250): warning C4003: not enough actual parameters for macro 'min'
-     1>c:\users\hu fangyuan\documents\visual studio 2013\projects\fluidsolver_v1.0\thermalflowproblemdll\Simulator.h(251): warning C4003: not enough actual parameters for macro 'min'
-     1>c:\users\hu fangyuan\documents\visual studio 2013\projects\fluidsolver_v1.0\thermalflowproblemdll\FractionalStep_KM.h(64): error C3861: 'shift': identifier not found
-                 c:\users\hu fangyuan\documents\visual studio 2013\projects\fluidsolver_v1.0\thermalflowproblemdll\FractionalStep_KM.h(47) : while compiling class template member function 'void SIM::FractionalStep_KM<Parameters::DataType,2,2>::step(void)'
-                 c:\users\hu fangyuan\documents\visual studio 2013\projects\fluidsolver_v1.0\thermalflowproblemdll\Simulator.h(99) : see reference to function template instantiation 'void SIM::FractionalStep_KM<Parameters::DataType,2,2>::step(void)' being compiled
-                 ThermalFlowProblemDll.cpp(24) : see reference to class template instantiation 'SIM::FractionalStep_KM<Parameters::DataType,2,2>' being compiled
+     1>c:\users\hu fangyuan\documents\visual studio 2013\projects\fluidsolver_v1.0\thermalflowproblemdll\Particle_x.h(173): error C2440: 'return' : cannot convert from 'const Eigen::CwiseBinaryOp<Eigen::internal::scalar_sum_op<double>,const Derived,const Derived>' to 'const Parameters::DataType'
+                 with
+                 [
+                     Derived=Eigen::Matrix<double,1,1,0,1,1>
+                 ]
+                 No user-defined-conversion operator available that can perform this conversion, or the operator cannot be called
+                 c:\users\hu fangyuan\documents\visual studio 2013\projects\fluidsolver_v1.0\thermalflowproblemdll\Particle_x.h(151) : while compiling class template member function 'const Parameters::DataType SIM::Particle_x<R,2,2>::Div(const R *const ,const R *const ,const int &) const'
+                 with
+                 [
+                     R=Parameters::DataType
+                 ]
+                 c:\users\hu fangyuan\documents\visual studio 2013\projects\fluidsolver_v1.0\thermalflowproblemdll\Simulator.h(273) : see reference to function template instantiation 'const Parameters::DataType SIM::Particle_x<R,2,2>::Div(const R *const ,const R *const ,const int &) const' being compiled
+                 with
+                 [
+                     R=Parameters::DataType
+                 ]
+                 ThermalFlowProblemDll.cpp(33) : see reference to class template instantiation 'SIM::Particle_x<R,2,2>' being compiled
+                 with
+                 [
+                     R=Parameters::DataType
+                 ]
      1>Done Building Project "C:\Users\HU FANGYUAN\Documents\Visual Studio 2013\Projects\FluidSolver_v1.0\ThermalFlowProblemDll\ThermalFlowProblemDll.vcxproj" (Build target(s)) -- FAILED.
 
 Build FAILED.
 
-Time Elapsed 00:00:00.79
+Time Elapsed 00:00:04.17
