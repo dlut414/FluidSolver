@@ -199,7 +199,7 @@ namespace SIM {
 					const int key = cell->hash(cx, cy, i);
 					for (int m = 0; m < cell->linkList[key].size(); m++) {
 						const int q = cell->linkList[key][m];
-						if (part->type[p] == BD2) continue;
+						if (part->type[q] == BD2) continue;
 						const R dr[2] = { part->pos[0][q] - part->pos[0][p], part->pos[1][q] - part->pos[1][p] };
 						const R dr1 = sqrt(dr[0] * dr[0] + dr[1] * dr[1]);
 						if (dr1 > part->r0) continue;
@@ -238,7 +238,7 @@ namespace SIM {
 					const int key = cell->hash(cx, cy, i);
 					for (int m = 0; m < cell->linkList[key].size(); m++) {
 						const int q = cell->linkList[key][m];
-						if (part->type[p] == BD2) continue;
+						if (part->type[q] == BD2) continue;
 						const R dr[2] = { part->pos[0][q] - part->pos[0][p], part->pos[1][q] - part->pos[1][p] };
 						const R dr1 = sqrt(dr[0] * dr[0] + dr[1] * dr[1]);
 						if (dr1 > part->r0) continue;
@@ -335,7 +335,7 @@ namespace SIM {
 					const int key = cell->hash(cx, cy, i);
 					for (int m = 0; m < cell->linkList[key].size(); m++) {
 						const int q = cell->linkList[key][m];
-						if (part->type[p] == BD2) continue;
+						if (part->type[q] == BD2) continue;
 						const R dr[2] = { part->pos[0][q] - part->pos[0][p], part->pos[1][q] - part->pos[1][p] };
 						const R dr1 = sqrt(dr[0] * dr[0] + dr[1] * dr[1]);
 						if (dr1 > part->r0) continue;
@@ -422,7 +422,7 @@ namespace SIM {
 					const int key = cell->hash(cx, cy, i);
 					for (int m = 0; m < cell->linkList[key].size(); m++) {
 						const int q = cell->linkList[key][m];
-						if (part->type[p] == BD2) continue;
+						if (part->type[q] == BD2) continue;
 						const R dr[2] = { part->pos[0][q] - part->pos[0][p], part->pos[1][q] - part->pos[1][p] };
 						const R dr1 = sqrt(dr[0] * dr[0] + dr[1] * dr[1]);
 						if (dr1 > part->r0) continue;

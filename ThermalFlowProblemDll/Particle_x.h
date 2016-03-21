@@ -46,7 +46,7 @@ namespace SIM {
 				const int key = cell->hash(cx, cy, i);
 				for (int m = 0; m < cell->linkList[key].size(); m++) {
 					const int q = cell->linkList[key][m];
-					if (type[p] == BD2) continue;
+					if (type[q] == BD2) continue;
 					const R dr[2] = { pos[0][q] - pos[0][p], pos[1][q] - pos[1][p] };
 					const R dr1 = sqrt(dr[0] * dr[0] + dr[1] * dr[1]);
 					if (dr1 > r0) continue;
@@ -68,7 +68,7 @@ namespace SIM {
 				const int key = cell->hash(cx, cy, i);
 				for (int m = 0; m < cell->linkList[key].size(); m++) {
 					const int q = cell->linkList[key][m];
-					if (type[p] == BD2) continue;
+					if (type[q] == BD2) continue;
 					const R dr[2] = { pos[0][q] - pos[0][p], pos[1][q] - pos[1][p] };
 					const R dr1 = sqrt(dr[0] * dr[0] + dr[1] * dr[1]);
 					if (dr1 > r0) continue;
@@ -90,7 +90,7 @@ namespace SIM {
 				const int key = cell->hash(cx, cy, i);
 				for (int m = 0; m < cell->linkList[key].size(); m++) {
 					const int q = cell->linkList[key][m];
-					if (type[p] == BD2) continue;
+					if (type[q] == BD2) continue;
 					const R dr[2] = { pos[0][q] - pos[0][p], pos[1][q] - pos[1][p] };
 					const R dr1 = sqrt(dr[0] * dr[0] + dr[1] * dr[1]);
 					if (dr1 > r0) continue;
@@ -112,7 +112,7 @@ namespace SIM {
 				const int key = cell->hash(cx, cy, i);
 				for (int m = 0; m < cell->linkList[key].size(); m++) {
 					const int q = cell->linkList[key][m];
-					if (type[p] == BD2) continue;
+					if (type[q] == BD2) continue;
 					const R dr[2] = { pos[0][q] - pos[0][p], pos[1][q] - pos[1][p] };
 					const R dr1 = sqrt(dr[0] * dr[0] + dr[1] * dr[1]);
 					if (dr1 > r0) continue;
@@ -134,7 +134,7 @@ namespace SIM {
 				const int key = cell->hash(cx, cy, i);
 				for (int m = 0; m < cell->linkList[key].size(); m++) {
 					const int q = cell->linkList[key][m];
-					if (type[p] == BD2) continue;
+					if (type[q] == BD2) continue;
 					const R dr[2] = { pos[0][q] - pos[0][p], pos[1][q] - pos[1][p] };
 					const R dr1 = sqrt(dr[0] * dr[0] + dr[1] * dr[1]);
 					if (dr1 > r0) continue;
@@ -157,7 +157,7 @@ namespace SIM {
 				const int key = cell->hash(cx, cy, i);
 				for (int m = 0; m < cell->linkList[key].size(); m++) {
 					const int q = cell->linkList[key][m];
-					if (type[p] == BD2) continue;
+					if (type[q] == BD2) continue;
 					const R dr[2] = { pos[0][q] - pos[0][p], pos[1][q] - pos[1][p] };
 					const R dr1 = sqrt(dr[0] * dr[0] + dr[1] * dr[1]);
 					if (dr1 > r0) continue;
@@ -168,9 +168,9 @@ namespace SIM {
 					vvy += w * (phiy[q] - phiy[p]) * npq;
 				}
 			}
-			const VecP aax = invMat[p] * vvx;
-			const VecP aay = invMat[p] * vvy;
-			return (pn_px_o * aax + pn_py_o * aay);
+			const R pupx = pn_px_o* invMat[p] * vvx;
+			const R pvpy = pn_py_o* invMat[p] * vvy;
+			return pupx + pvpy;
 		}
 
 		const R Lap(const R* const phi, const int& p) const {
@@ -181,7 +181,7 @@ namespace SIM {
 				const int key = cell->hash(cx, cy, i);
 				for (int m = 0; m < cell->linkList[key].size(); m++) {
 					const int q = cell->linkList[key][m];
-					if (type[p] == BD2) continue;
+					if (type[q] == BD2) continue;
 					const R dr[2] = { pos[0][q] - pos[0][p], pos[1][q] - pos[1][p] };
 					const R dr1 = sqrt(dr[0] * dr[0] + dr[1] * dr[1]);
 					if (dr1 > r0) continue;
@@ -204,7 +204,7 @@ namespace SIM {
 				const int key = cell->hash(cx, cy, i);
 				for (int m = 0; m < cell->linkList[key].size(); m++) {
 					const int q = cell->linkList[key][m];
-					if (type[p] == BD2) continue;
+					if (type[q] == BD2) continue;
 					const R dr[2] = { pos[0][q] - pos[0][p], pos[1][q] - pos[1][p] };
 					const R dr1 = sqrt(dr[0] * dr[0] + dr[1] * dr[1]);
 					if (dr1 > r0) continue;
@@ -232,7 +232,7 @@ namespace SIM {
 				const int key = cell->hash(cx, cy, i);
 				for (int m = 0; m < cell->linkList[key].size(); m++) {
 					const int q = cell->linkList[key][m];
-					if (type[p] == BD2) continue;
+					if (type[q] == BD2) continue;
 					const R dr[2] = { pos[0][q] - pos[0][p], pos[1][q] - pos[1][p] };
 					const R dr1 = sqrt(dr[0] * dr[0] + dr[1] * dr[1]);
 					if (dr1 > r0) continue;
@@ -243,9 +243,57 @@ namespace SIM {
 					vvy += w * (phiy[q] - phiy[p]) * npq;
 				}
 			}
-			const VecP aax = invMat[p] * vvx;
-			const VecP aay = invMat[p] * vvy;
-			return (pn_py_o * aax - pn_px_o * aay);
+			const R pupy = pn_py_o* invMat[p] * vvx;
+			const R pvpx = pn_px_o* invMat[p] * vvy;
+			return (pupy - pvpx);
+		}
+
+		const R interpolateLSA(const R* const phi, const R& px, const R& py) const {
+			int p = -1;
+			R dis2 = std::numeric_limits<R>::max();
+			const int cx = cell->pos2cell(px);
+			const int cy = cell->pos2cell(py);
+			for (int i = 0; i < cell->blockSize::value; i++) {
+				const int key = cell->hash(cx, cy, i);
+				for (int m = 0; m < cell->linkList[key].size(); m++) {
+					const int q = cell->linkList[key][m];
+					if (type[q] == BD2) continue;
+					const R dr[2] = { pos[0][q] - px, pos[1][q] - py };
+					const R dr2 = (dr[0] * dr[0] + dr[1] * dr[1]);
+					const R dr1 = sqrt(dr2);
+					if (dr1 > r0) continue;
+					if (dr2 < dis2) {
+						dis2 = dr2;
+						p = q;
+					}
+				}
+			}
+			if (p == -1) return R(0);
+			return interpolateLSA(phi, p, px, py);
+		}
+
+		const Vec interpolateLSA(const R* const phix, const R* const phiy, const R& px, const R& py) const {
+			int p = -1;
+			R dis2 = std::numeric_limits<R>::max();
+			const int cx = cell->pos2cell(px);
+			const int cy = cell->pos2cell(py);
+			for (int i = 0; i < cell->blockSize::value; i++) {
+				const int key = cell->hash(cx, cy, i);
+				for (int m = 0; m < cell->linkList[key].size(); m++) {
+					const int q = cell->linkList[key][m];
+					if (type[q] == BD2) continue;
+					const R dr[2] = { pos[0][q] - px, pos[1][q] - py };
+					const R dr2 = (dr[0] * dr[0] + dr[1] * dr[1]);
+					const R dr1 = sqrt(dr2);
+					if (dr1 > r0) continue;
+					if (dr2 < dis2) {
+						dis2 = dr2;
+						p = q;
+					}
+				}
+			}
+			if (p == -1) return Vec::Zero();
+			return interpolateLSA(phix, phiy, p, px, py);
 		}
 
 		const R interpolateLSA(const R* const phi, const int& p, const R& px, const R& py) const {
@@ -259,7 +307,7 @@ namespace SIM {
 				const int key = cell->hash(cx, cy, i);
 				for (int m = 0; m < cell->linkList[key].size(); m++) {
 					const int q = cell->linkList[key][m];
-					if (type[p] == BD2) continue;
+					if (type[q] == BD2) continue;
 					const R dr[2] = { pos[0][q] - pos[0][p], pos[1][q] - pos[1][p] };
 					const R dr1 = sqrt(dr[0] * dr[0] + dr[1] * dr[1]);
 					if (dr1 > r0) continue;
@@ -304,7 +352,7 @@ namespace SIM {
 				const int key = cell->hash(cx, cy, i);
 				for (int m = 0; m < cell->linkList[key].size(); m++) {
 					const int q = cell->linkList[key][m];
-					if (type[p] == BD2) continue;
+					if (type[q] == BD2) continue;
 					const R dr[2] = { pos[0][q] - pos[0][p], pos[1][q] - pos[1][p] };
 					const R dr1 = sqrt(dr[0] * dr[0] + dr[1] * dr[1]);
 					if (dr1 > r0) continue;
@@ -339,7 +387,7 @@ namespace SIM {
 			const R Pxx[2] = { pn_pxx_o* aax, pn_pxx_o* aay };
 			const R Pxy[2] = { pn_pxy_o* aax, pn_pxy_o* aay };
 			const R Pyy[2] = { pn_pyy_o* aax, pn_pyy_o* aay };
-			const Vec ret;
+			Vec ret;
 			ret[0] = phix[p] + (dx*Px[0] + dy*Py[0]) + R(0.5)* (dx*dx*Pxx[0] + R(2)*dx*dy*Pxy[0] + dy*dy*Pyy[0]);
 			ret[1] = phix[p] + (dx*Px[1] + dy*Py[1]) + R(0.5)* (dx*dx*Pxx[1] + R(2)*dx*dy*Pxy[1] + dy*dy*Pyy[1]);
 			return ret;
@@ -356,7 +404,7 @@ namespace SIM {
 				const int key = cell->hash(cx, cy, i);
 				for (int m = 0; m < cell->linkList[key].size(); m++) {
 					const int q = cell->linkList[key][m];
-					if (type[p] == BD2) continue;
+					if (type[q] == BD2) continue;
 					const R dr[2] = { pos[0][q] - pos[0][p], pos[1][q] - pos[1][p] };
 					const R dr1 = sqrt(dr[0] * dr[0] + dr[1] * dr[1]);
 					if (dr1 > r0 || (dx*dr[0] + dy*dr[1]) < R(0)) continue;
@@ -401,7 +449,7 @@ namespace SIM {
 				const int key = cell->hash(cx, cy, i);
 				for (int m = 0; m < cell->linkList[key].size(); m++) {
 					const int q = cell->linkList[key][m];
-					if (type[p] == BD2) continue;
+					if (type[q] == BD2) continue;
 					const R dr[2] = { pos[0][q] - pos[0][p], pos[1][q] - pos[1][p] };
 					const R dr1 = sqrt(dr[0] * dr[0] + dr[1] * dr[1]);
 					if (dr1 > r0 || (dx*dr[0] + dy*dr[1]) < R(0)) continue;
@@ -436,7 +484,7 @@ namespace SIM {
 			const R Pxx[2] = { pn_pxx_o* aax, pn_pxx_o* aay };
 			const R Pxy[2] = { pn_pxy_o* aax, pn_pxy_o* aay };
 			const R Pyy[2] = { pn_pyy_o* aax, pn_pyy_o* aay };
-			const Vec ret;
+			Vec ret;
 			ret[0] = phix[p] + (dx*Px[0] + dy*Py[0]) + R(0.5)* (dx*dx*Pxx[0] + R(2)*dx*dy*Pxy[0] + dy*dy*Pyy[0]);
 			ret[1] = phix[p] + (dx*Px[1] + dy*Py[1]) + R(0.5)* (dx*dx*Pxx[1] + R(2)*dx*dy*Pxy[1] + dy*dy*Pyy[1]);
 			return ret;
@@ -480,7 +528,7 @@ namespace SIM {
 				const int key = cell->hash(cx, cy, i);
 				for (int m = 0; m < cell->linkList[key].size(); m++) {
 					const int q = cell->linkList[key][m];
-					if (type[p] == BD2) continue;
+					if (type[q] == BD2) continue;
 					const R dr[2] = { pos[0][q] - pos[0][p], pos[1][q] - pos[1][p] };
 					const R dr1 = sqrt(dr[0] * dr[0] + dr[1] * dr[1]);
 					if (dr1 > r0) continue;
@@ -581,7 +629,7 @@ namespace SIM {
 				const int key = cell->hash(cx, cy, i);
 				for (int m = 0; m < cell->linkList[key].size(); m++) {
 					const int q = cell->linkList[key][m];
-					if (type[p] == BD2) continue;
+					if (type[q] == BD2) continue;
 					const R dr[2] = { pos[0][q] - pos[0][p], pos[1][q] - pos[1][p] };
 					const R dr1 = sqrt(dr[0] * dr[0] + dr[1] * dr[1]);
 					if (dr1 > r0) continue;
@@ -670,7 +718,7 @@ namespace SIM {
 					const int key = cell->hash(cx, cy, i);
 					for (int m = 0; m < cell->linkList[key].size(); m++) {
 						const int q = cell->linkList[key][m];
-						if (type[p] == BD2) continue;
+						if (type[q] == BD2) continue;
 						const R dr[2] = { pos[0][q] - pos[0][p], pos[1][q] - pos[1][p] };
 						const R dr1 = sqrt(dr[0] * dr[0] + dr[1] * dr[1]);
 						if (dr1 > r0) continue;
@@ -684,7 +732,7 @@ namespace SIM {
 				if (type[p] == BD1) {
 					const Vec& inner = bdnorm.at(p);
 					MatPP nn = MatPP::Zero();
-					nn.block<D, D>(0, 0) = w3(0)* inner * inner.transpose();
+					nn.block<2,2>(0, 0) = ww(0)* inner * inner.transpose();
 					MatPP mpn = mm + nn;
 					MatPP& inv = invNeu.at(p);
 					inv = MatPP::Zero();

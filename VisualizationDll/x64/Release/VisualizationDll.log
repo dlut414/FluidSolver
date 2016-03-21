@@ -1,22 +1,9 @@
-﻿Build started 2016/03/17 12:14:40.
+﻿Build started 2016/03/21 20:48:28.
      1>Project "C:\Users\HU FANGYUAN\Documents\Visual Studio 2013\Projects\FluidSolver_v1.0\VisualizationDll\VisualizationDll.vcxproj" on node 2 (Build target(s)).
-     1>ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\CL.exe /c /I..\common /I"..\..\extern\glew-1.11.0\include" /I..\..\extern\glm /I"..\..\extern\freeglut-2.8.1\include" /Isrc /I..\..\extern\eigen /Zi /nologo /W3 /WX- /sdl /O2 /Oi /GL /D WIN32 /D NDEBUG /D _WINDOWS /D _USRDLL /D VISUALIZATIONDLL_EXPORTS /D _WINDLL /D _UNICODE /D UNICODE /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Yc"stdafx.h" /Fp"x64\Release\VisualizationDll.pch" /Fo"x64\Release\\" /Fd"x64\Release\vc120.pdb" /Gd /TP /errorReport:prompt stdafx.cpp
-         stdafx.cpp
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\CL.exe /c /I..\common /I"..\..\extern\glew-1.11.0\include" /I..\..\extern\glm /I"..\..\extern\freeglut-2.8.1\include" /Isrc /I..\..\extern\eigen /Zi /nologo /W3 /WX- /sdl /O2 /Oi /GL /D WIN32 /D NDEBUG /D _WINDOWS /D _USRDLL /D VISUALIZATIONDLL_EXPORTS /D _WINDLL /D _UNICODE /D UNICODE /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"x64\Release\\" /Fd"x64\Release\vc120.pdb" /Gd /TP /errorReport:prompt dllmain.cpp
-         dllmain.cpp
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\CL.exe /c /I..\common /I"..\..\extern\glew-1.11.0\include" /I..\..\extern\glm /I"..\..\extern\freeglut-2.8.1\include" /Isrc /I..\..\extern\eigen /Zi /nologo /W3 /WX- /sdl /O2 /Oi /GL /D WIN32 /D NDEBUG /D _WINDOWS /D _USRDLL /D VISUALIZATIONDLL_EXPORTS /D _WINDLL /D _UNICODE /D UNICODE /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Yu"stdafx.h" /Fp"x64\Release\VisualizationDll.pch" /Fo"x64\Release\\" /Fd"x64\Release\vc120.pdb" /Gd /TP /errorReport:prompt VisualizationDll.cpp
-         VisualizationDll.cpp
-       Link:
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\HU FANGYUAN\Documents\Visual Studio 2013\Projects\FluidSolver_v1.0\x64\Release\VisualizationDll.dll" /INCREMENTAL:NO /NOLOGO /LIBPATH:"..\..\extern\freeglut-2.8.1\lib\x64" /LIBPATH:"..\..\extern\glew-1.11.0\lib\Release\x64" glew32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\HU FANGYUAN\Documents\Visual Studio 2013\Projects\FluidSolver_v1.0\x64\Release\VisualizationDll.pdb" /SUBSYSTEM:WINDOWS /OPT:REF /OPT:ICF /LTCG /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\HU FANGYUAN\Documents\Visual Studio 2013\Projects\FluidSolver_v1.0\x64\Release\VisualizationDll.lib" /MACHINE:X64 /DLL x64\Release\dllmain.obj
-         x64\Release\stdafx.obj
-         x64\Release\VisualizationDll.obj
-            Creating library C:\Users\HU FANGYUAN\Documents\Visual Studio 2013\Projects\FluidSolver_v1.0\x64\Release\VisualizationDll.lib and object C:\Users\HU FANGYUAN\Documents\Visual Studio 2013\Projects\FluidSolver_v1.0\x64\Release\VisualizationDll.exp
-         Generating code
-         Finished generating code
+     1>Link:
          VisualizationDll.vcxproj -> C:\Users\HU FANGYUAN\Documents\Visual Studio 2013\Projects\FluidSolver_v1.0\x64\Release\VisualizationDll.dll
      1>Done Building Project "C:\Users\HU FANGYUAN\Documents\Visual Studio 2013\Projects\FluidSolver_v1.0\VisualizationDll\VisualizationDll.vcxproj" (Build target(s)).
 
 Build succeeded.
 
-Time Elapsed 00:00:09.63
+Time Elapsed 00:00:00.35

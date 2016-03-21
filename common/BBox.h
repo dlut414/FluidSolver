@@ -11,10 +11,16 @@
 #include <limits>
 #include <algorithm>
 #include <Eigen/Dense>
+#ifdef max
+#undef max
+#endif
+#ifdef min
+#undef min
+#endif
 
 template <typename R, int D = 2>
 class BBox {
-	typedef Eigen::Matrix<R, D, 1> vec;
+	typedef Eigen::Matrix<R,D,1> vec;
 public:
     BBox() {
         R _infinity = std::numeric_limits<R>::infinity();

@@ -1,4 +1,9 @@
 /*
+* LICENCE
+* copyright 2014 ~ ****
+* Some rights reserved.
+* Author: HUFANGYUAN
+* Released under CC BY-NC
 */
 #pragma once
 #include <list>
@@ -118,7 +123,7 @@ namespace SIM {
 #endif
 			for (int p = 0; p < part->np; p++) {
 				if (part->type[p] != FLUID) continue;
-				const Vec u1 = part->derived().interpolateLSAU(part->vel[0], part->vel[1], p, part->pos_m1[0][p], part->pos_m1[1][p]);
+				const Vec u1 = part->derived().interpolateLSAU(part->vel[0].data(), part->vel[1].data(), p, part->pos_m1[0][p], part->pos_m1[1][p]);
 				Du1x[p] = u1[0];
 				Du1y[p] = u1[1];
 			}
@@ -127,7 +132,7 @@ namespace SIM {
 #endif
 			for (int p = 0; p < part->np; p++) {
 				if (part->type[p] != FLUID) continue;
-				const Vec u2 = part->derived().interpolateLSAU(part->vel_p1[0], part->vel_p1[1], p, part->pos_m1[0][p], part->pos_m1[1][p]);
+				const Vec u2 = part->derived().interpolateLSAU(part->vel_p1[0].data(), part->vel_p1[1].data(), p, part->pos_m1[0][p], part->pos_m1[1][p]);
 				Du2x[p] = u2[0];
 				Du2y[p] = u2[1];
 			}
@@ -136,7 +141,7 @@ namespace SIM {
 #endif
 			for (int p = 0; p < part->np; p++) {
 				if (part->type[p] != FLUID) continue;
-				Dtemp[p] = part->derived().interpolateLSAU(part->temp, p, part->pos_m1[0][p], part->pos_m1[1][p]);
+				Dtemp[p] = part->derived().interpolateLSAU(part->temp.data(), p, part->pos_m1[0][p], part->pos_m1[1][p]);
 			}
 #if OMP
 #pragma omp parallel for

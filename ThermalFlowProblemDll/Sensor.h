@@ -63,14 +63,14 @@ namespace SIM {
 		void writeVect(const Particle<R, D, Der>* const part) {
 			const auto& pt = part->derived();
 			for (auto s = 0; s < pos.size(); s++) {
-				vect[s] = pt.func(pt.vel1, pos[s]);
+				vect[s] = pt.interpolateLSA(pt.vel[0].data(), pt.vel[1].data(), pos[s][0], pos[s][1]);
 			}
 		}
 		template <typename R, unsigned D, typename Der>
 		void writeScal(const Particle<R, D, Der>* const part) {
 			const auto& pt = part->derived();
 			for (unsigned s = 0; s < pos.size(); s++) {
-				scal[s] = pt.func(pt.pres, pos[s]);
+				scal[s] = pt.interpolateLSA(pt.pres.data(), pos[s][0], pos[s][1]);
 			}
 		}
 
