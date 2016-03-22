@@ -22,7 +22,7 @@ namespace VIS {
 			m_rotation = m_initRotation = glm::angleAxis<float>(-glm::pi<float>() * 0.f, glm::vec3(1, 0, 0));;
 			m_pan = m_initPan = glm::vec3(0.f, 0.f, 0.f);
 
-			m_initCameraPosition = glm::vec3(0.0f, 0.0f, 1.5f);
+			m_initCameraPosition = glm::vec3(0.5f, 0.5f, 1.5f);
 			m_initCameraRotation = glm::angleAxis<float>(glm::pi<float>() * 0.0f, glm::vec3(1, 0, 0));
 
 			f_pointRadius = 2.0f;
@@ -41,7 +41,7 @@ namespace VIS {
 			u_width = 1024;
 			u_height = 800;
 			i_visFlag = 1;
-			f_visRange = 1000.f;
+			f_visRange = 1.0f;
 
 			m_camera.SetPosition(m_initCameraPosition);
 			//m_camera.SetProjectionRH(45.0f, float(u_width)/float(u_height), f_near, f_far);

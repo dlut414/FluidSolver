@@ -337,7 +337,7 @@ namespace SIM {
 			const R Pxx = pn_pxx_o* aa;
 			const R Pxy = pn_pxy_o* aa;
 			const R Pyy = pn_pyy_o* aa;
-			return phi[p] + (dx*Px + dy*Py) + R(0.5)* (dx*dx*Pxx + R(2)*dx*dy*Pxy + dy*dy*Pyy);
+			return phi[p] + (dx*Px + dy*Py) + 0.5* (dx*dx*Pxx + R(2)*dx*dy*Pxy + dy*dy*Pyy);
 		}
 
 		const Vec interpolateLSA(const R* const phix, const R* const phiy, const int& p, const R& px, const R& py) const {
@@ -388,8 +388,8 @@ namespace SIM {
 			const R Pxy[2] = { pn_pxy_o* aax, pn_pxy_o* aay };
 			const R Pyy[2] = { pn_pyy_o* aax, pn_pyy_o* aay };
 			Vec ret;
-			ret[0] = phix[p] + (dx*Px[0] + dy*Py[0]) + R(0.5)* (dx*dx*Pxx[0] + R(2)*dx*dy*Pxy[0] + dy*dy*Pyy[0]);
-			ret[1] = phix[p] + (dx*Px[1] + dy*Py[1]) + R(0.5)* (dx*dx*Pxx[1] + R(2)*dx*dy*Pxy[1] + dy*dy*Pyy[1]);
+			ret[0] = phix[p] + (dx*Px[0] + dy*Py[0]) + 0.5* (dx*dx*Pxx[0] + R(2)*dx*dy*Pxy[0] + dy*dy*Pyy[0]);
+			ret[1] = phiy[p] + (dx*Px[1] + dy*Py[1]) + 0.5* (dx*dx*Pxx[1] + R(2)*dx*dy*Pxy[1] + dy*dy*Pyy[1]);
 			return ret;
 		}
 
@@ -434,7 +434,7 @@ namespace SIM {
 			const R Pxx = pn_pxx_o* aa;
 			const R Pxy = pn_pxy_o* aa;
 			const R Pyy = pn_pyy_o* aa;
-			return phi[p] + (dx*Px + dy*Py) + R(0.5)* (dx*dx*Pxx + R(2)*dx*dy*Pxy + dy*dy*Pyy);
+			return phi[p] + (dx*Px + dy*Py) + 0.5* (dx*dx*Pxx + R(2)*dx*dy*Pxy + dy*dy*Pyy);
 		}
 
 		const Vec interpolateLSAU(const R* const phix, const R* const phiy, const int& p, const R& px, const R& py) const {
@@ -485,8 +485,8 @@ namespace SIM {
 			const R Pxy[2] = { pn_pxy_o* aax, pn_pxy_o* aay };
 			const R Pyy[2] = { pn_pyy_o* aax, pn_pyy_o* aay };
 			Vec ret;
-			ret[0] = phix[p] + (dx*Px[0] + dy*Py[0]) + R(0.5)* (dx*dx*Pxx[0] + R(2)*dx*dy*Pxy[0] + dy*dy*Pyy[0]);
-			ret[1] = phix[p] + (dx*Px[1] + dy*Py[1]) + R(0.5)* (dx*dx*Pxx[1] + R(2)*dx*dy*Pxy[1] + dy*dy*Pyy[1]);
+			ret[0] = phix[p] + (dx*Px[0] + dy*Py[0]) + 0.5* (dx*dx*Pxx[0] + R(2)*dx*dy*Pxy[0] + dy*dy*Pyy[0]);
+			ret[1] = phiy[p] + (dx*Px[1] + dy*Py[1]) + 0.5* (dx*dx*Pxx[1] + R(2)*dx*dy*Pxy[1] + dy*dy*Pyy[1]);
 			return ret;
 		}
 
@@ -588,7 +588,7 @@ namespace SIM {
 			const R Pxx = pn_pxx_o* combinedCoef;
 			const R Pxy = pn_pxy_o* combinedCoef;
 			const R Pyy = pn_pyy_o* combinedCoef;
-			return phi[p] + (dx*Px + dy*Py) + R(0.5)* (dx*dx*Pxx + R(2)*dx*dy*Pxy + dy*dy*Pyy);
+			return phi[p] + (dx*Px + dy*Py) + 0.5* (dx*dx*Pxx + 2.0*dx*dy*Pxy + dy*dy*Pyy);
 		}
 
 		template <int StencilsX = 1, int StencilsY = 3, int Stencils = StencilsX*StencilsY>
@@ -698,7 +698,7 @@ namespace SIM {
 			const R Pxx = pn_pxx_o* combinedCoef;
 			const R Pxy = pn_pxy_o* combinedCoef;
 			const R Pyy = pn_pyy_o* combinedCoef;
-			return phi[p] + (dx*Px + dy*Py) + R(0.5)* (dx*dx*Pxx + R(2)*dx*dy*Pxy + dy*dy*Pyy);
+			return phi[p] + (dx*Px + dy*Py) + 0.5* (dx*dx*Pxx + 2.0*dx*dy*Pxy + dy*dy*Pyy);
 		}
 
 		__forceinline const R interpolateWENO(const R* const phi, const int& p, const R& px, const R& py) const {

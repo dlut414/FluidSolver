@@ -39,11 +39,13 @@ namespace SIM {
 			*part << "Geo.in";
 			part->init(para.k);
 			part->buildCell();
+			part->makeBdc();
 			part->b2b();
 			part->b2norm();
 			part->b2neumann();
 			part->b2dirichlet();
 			part->init_x();
+			*sen << "Sensor.in";
 		}
 
 		void step() {
@@ -180,6 +182,7 @@ namespace SIM {
 
 	public:
 		Particle_x<R,2,P>* part;
+		Sensor<R,2,Particle_x<R,2,P>>* sen;
 
 	private:
 		void makeLhs_v_q2() {
@@ -354,7 +357,7 @@ namespace SIM {
 				if (pqsum < para.eps) coef.push_back(Tpl(p, p, 1.0));
 			}
 			mSol->a.setFromTriplets(coef.begin(), coef.end());
-			}
+		}
 
 		void makeRhs_p_q2() {
 			const R coefL = (3.0) / (2.0* para.dt);

@@ -1,18 +1,43 @@
-﻿Build started 2016/03/21 21:46:31.
-     1>Project "C:\Users\HU FANGYUAN\Documents\Visual Studio 2013\Projects\FluidSolver_v1.0\ThermalFlowProblemDll\ThermalFlowProblemDll.vcxproj" on node 2 (Build target(s)).
+﻿Build started 2016/03/22 21:49:11.
+     1>Project "C:\Users\HU FANGYUAN\Documents\Visual Studio 2013\Projects\FluidSolver_v1.0\ThermalFlowProblemDll\ThermalFlowProblemDll.vcxproj" on node 3 (Build target(s)).
      1>ClCompile:
          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\CL.exe /c /I..\..\extern\eigen /I..\common /Zi /nologo /W3 /WX- /sdl /O2 /Oi /GL /D WIN32 /D NDEBUG /D _WINDOWS /D _USRDLL /D THERMALFLOWPROBLEMDLL_EXPORTS /D _WINDLL /D _UNICODE /D UNICODE /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Yu"stdafx.h" /Fp"x64\Release\ThermalFlowProblemDll.pch" /Fo"x64\Release\\" /Fd"x64\Release\vc120.pdb" /Gd /TP /errorReport:prompt ThermalFlowProblemDll.cpp
          ThermalFlowProblemDll.cpp
-       Link:
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\HU FANGYUAN\Documents\Visual Studio 2013\Projects\FluidSolver_v1.0\x64\Release\ThermalFlowProblemDll.dll" /INCREMENTAL:NO /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\HU FANGYUAN\Documents\Visual Studio 2013\Projects\FluidSolver_v1.0\x64\Release\ThermalFlowProblemDll.pdb" /SUBSYSTEM:WINDOWS /OPT:REF /OPT:ICF /LTCG /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\HU FANGYUAN\Documents\Visual Studio 2013\Projects\FluidSolver_v1.0\x64\Release\ThermalFlowProblemDll.lib" /MACHINE:X64 /DLL x64\Release\dllmain.obj
-         x64\Release\stdafx.obj
-         x64\Release\ThermalFlowProblemDll.obj
-            Creating library C:\Users\HU FANGYUAN\Documents\Visual Studio 2013\Projects\FluidSolver_v1.0\x64\Release\ThermalFlowProblemDll.lib and object C:\Users\HU FANGYUAN\Documents\Visual Studio 2013\Projects\FluidSolver_v1.0\x64\Release\ThermalFlowProblemDll.exp
-         Generating code
-         Finished generating code
-         ThermalFlowProblemDll.vcxproj -> C:\Users\HU FANGYUAN\Documents\Visual Studio 2013\Projects\FluidSolver_v1.0\x64\Release\ThermalFlowProblemDll.dll
-     1>Done Building Project "C:\Users\HU FANGYUAN\Documents\Visual Studio 2013\Projects\FluidSolver_v1.0\ThermalFlowProblemDll\ThermalFlowProblemDll.vcxproj" (Build target(s)).
+     1>c:\users\hu fangyuan\documents\visual studio 2013\projects\fluidsolver_v1.0\thermalflowproblemdll\MatSolver.h(52): error C2064: term does not evaluate to a function taking 2 arguments
+                 c:\users\hu fangyuan\documents\visual studio 2013\projects\fluidsolver_v1.0\thermalflowproblemdll\MatSolver.h(37) : while compiling class template member function 'void SIM::MatSolver<R,2>::biCg(void)'
+                 with
+                 [
+                     R=Parameters::DataType
+                 ]
+                 c:\users\hu fangyuan\documents\visual studio 2013\projects\fluidsolver_v1.0\thermalflowproblemdll\Simulator.h(196) : see reference to function template instantiation 'void SIM::MatSolver<R,2>::biCg(void)' being compiled
+                 with
+                 [
+                     R=Parameters::DataType
+                 ]
+                 c:\users\hu fangyuan\documents\visual studio 2013\projects\fluidsolver_v1.0\thermalflowproblemdll\Simulator.h(71) : see reference to class template instantiation 'SIM::MatSolver<R,2>' being compiled
+                 with
+                 [
+                     R=Parameters::DataType
+                 ]
+                 c:\users\hu fangyuan\documents\visual studio 2013\projects\fluidsolver_v1.0\thermalflowproblemdll\Simulator.h(68) : while compiling class template member function 'void SIM::Simulator<R,2,SIM::FractionalStep_KM<R,2,2>>::init(void)'
+                 with
+                 [
+                     R=Parameters::DataType
+                 ]
+                 ThermalFlowProblemDll.cpp(25) : see reference to function template instantiation 'void SIM::Simulator<R,2,SIM::FractionalStep_KM<R,2,2>>::init(void)' being compiled
+                 with
+                 [
+                     R=Parameters::DataType
+                 ]
+                 c:\users\hu fangyuan\documents\visual studio 2013\projects\fluidsolver_v1.0\thermalflowproblemdll\FractionalStep_KM.h(25) : see reference to class template instantiation 'SIM::Simulator<R,2,SIM::FractionalStep_KM<R,2,2>>' being compiled
+                 with
+                 [
+                     R=Parameters::DataType
+                 ]
+                 ThermalFlowProblemDll.cpp(24) : see reference to class template instantiation 'SIM::FractionalStep_KM<Parameters::DataType,2,2>' being compiled
+     1>c:\users\hu fangyuan\documents\visual studio 2013\projects\fluidsolver_v1.0\thermalflowproblemdll\MatSolver.h(54): error C2064: term does not evaluate to a function taking 2 arguments
+     1>Done Building Project "C:\Users\HU FANGYUAN\Documents\Visual Studio 2013\Projects\FluidSolver_v1.0\ThermalFlowProblemDll\ThermalFlowProblemDll.vcxproj" (Build target(s)) -- FAILED.
 
-Build succeeded.
+Build FAILED.
 
-Time Elapsed 00:00:09.13
+Time Elapsed 00:00:01.47

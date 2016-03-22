@@ -139,6 +139,19 @@ namespace SIM {
 			}
 		}
 
+		void makeBdc() {
+			for (int p = 0; p < np; p++) {
+				bdc[p] = 0;
+				if (type[p] == BD1) {
+					bdc[p] = ON(bdc[p], P_NEUMANN);
+					if (abs(pos[0][p] - 0.) < eps) bdc[p] = ON(bdc[p], T_DIRICHLET1);
+					if (abs(pos[0][p] - 1.) < eps) bdc[p] = ON(bdc[p], T_DIRICHLET0);
+					if (abs(pos[1][p] - 0.) < eps) bdc[p] = ON(bdc[p], T_NEUMANN);
+					if (abs(pos[1][p] - 1.) < eps) bdc[p] = ON(bdc[p], T_NEUMANN);
+				}
+			}
+		}
+
 		void b2neumann() {
 			p_neumann.clear();
 			t_neumann.clear();

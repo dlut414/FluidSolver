@@ -23,6 +23,7 @@ namespace VIS {
 	public:
 		static VISUALIZATIONDLL_API void Initialize();
 		static VISUALIZATIONDLL_API void Run(const Controller* const controlPtr, const int& dim, const int& num, NPtr tp, NPtr pos, NPtr s);
+		static VISUALIZATIONDLL_API void Run(const Controller* const controlPtr, const int& num, NPtr tp, NPtr posX, NPtr posY, NPtr s);
 		static VISUALIZATIONDLL_API void Finalize();
 	};
 

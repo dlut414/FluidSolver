@@ -17,10 +17,12 @@
 #include <Controller.h>
 #include "../VisualizationDll/VisualizationDll.h"
 #include "../PassiveScalarProblemDll/PassiveScalarProblemDll.h"
+#include "../ThermalFlowProblemDll/ThermalFlowProblemDll.h"
 #include <PreInformation.h>
 
 typedef VIS::VisualizationDll Visualization;
-typedef SIM::PassiveScalarProblemDll Simulation;
+//typedef SIM::PassiveScalarProblemDll Simulation;
+typedef SIM::ThermalFlowProblemDll2D Simulation;
 
 static VIS::Controller control;
 
@@ -89,7 +91,8 @@ static void onDisplay() {
 	control.m_mvp = control.m_projectionMat * control.m_viewModelMat;
 	control.m_mvpInv = glm::inverse(control.m_mvp);
 
-	Visualization::Run(&control, Parameters::Dimension, Simulation::Number(), Simulation::Type(), Simulation::Position(), Simulation::Scalar());
+	//Visualization::Run(&control, Parameters::Dimension, Simulation::Number(), Simulation::Type(), Simulation::Position(), Simulation::Scalar());
+	Visualization::Run(&control, Simulation::Number(), Simulation::Type(), Simulation::PositionX(), Simulation::PositionY(), Simulation::Scalar());
 
 	glutSwapBuffers();
 	glutReportErrors();

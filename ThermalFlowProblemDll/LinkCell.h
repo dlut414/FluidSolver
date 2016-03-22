@@ -30,7 +30,7 @@ namespace SIM {
 		struct blockSize { enum { value = mMath::Power<3,2>::value, }; };
 		
 		__forceinline const int pos2cell(const R& x) const { return int(cSizeInv*x); }
-		__forceinline const int hash_(const int& cx, const int& cy) const { return int((cx + nocX * cy) % cNum); }
+		__forceinline const int hash_(const int& cx, const int& cy) const { return int((cx + nocX * cy + cNum) % cNum); }
 		__forceinline const int hash(const R& px, const R& py) const { return hash_(pos2cell(px), pos2cell(py)); }
 		__forceinline const int hash(const int& cx, const int& cy, const int& i) const { return hash_(cx + loopTable.at(i)[0], cy + loopTable.at(i)[1]); }
 

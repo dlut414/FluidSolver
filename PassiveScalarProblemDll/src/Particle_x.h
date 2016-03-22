@@ -24,7 +24,7 @@ namespace SIM {
 		Particle_x() : Particle() {}
 		~Particle_x() {}
 		
-		__forceinline void poly(const Vec& in, VecP& out) const { PN::Gen(varrho, in.data(), out.data()); }
+		__forceinline void poly(const Vec& in, VecP& out) const { PN::Run(varrho, in.data(), out.data()); }
 
 		const Vec grad(const std::vector<R>& phi, const unsigned& p) const {
 			VecP vv = VecP::Zero();
@@ -563,10 +563,10 @@ namespace SIM {
 		template <int StencilsX = 1, int StencilsY = 3, int Stencils = StencilsX*StencilsY, int Dimension = D>	struct interpolateWENO_A_ {
 		};
 		template <int StencilsX, int StencilsY, int Stencils>		struct interpolateWENO_A_<StencilsX, StencilsY, Stencils, 1> {
-			template <typename U> static const U Gen(const std::vector<U>& phi, const unsigned& p, const Vec& p_new, Particle_x<R, D, P>* part) {}
+			template <typename U> static const U Run(const std::vector<U>& phi, const unsigned& p, const Vec& p_new, Particle_x<R, D, P>* part) {}
 		};
 		template <int StencilsX, int StencilsY, int Stencils>		struct interpolateWENO_A_<StencilsX, StencilsY, Stencils, 2> {
-			template <typename U> static const U Gen(const std::vector<U>& phi, const unsigned& p, const Vec& p_new, Particle_x<R,D,P>* part) {
+			template <typename U> static const U Run(const std::vector<U>& phi, const unsigned& p, const Vec& p_new, Particle_x<R,D,P>* part) {
 				const auto dp = p_new - part->pos[p];
 				if (dp.norm() < part->eps) return phi[p];
 				const auto up = dp.normalized();
@@ -675,16 +675,16 @@ namespace SIM {
 			}
 		};
 		template <int StencilsX, int StencilsY, int Stencils>		struct interpolateWENO_A_<StencilsX, StencilsY, Stencils, 3> {
-			template <typename U> static const U Gen(const std::vector<U>& phi, const unsigned& p, const Vec& p_new, Particle_x<R, D, P>* part) {}
+			template <typename U> static const U Run(const std::vector<U>& phi, const unsigned& p, const Vec& p_new, Particle_x<R, D, P>* part) {}
 		};
 		
 		template <int StencilsX = 1, int StencilsY = 3, int Stencils = StencilsX*StencilsY, int Dimension = D>	struct interpolateWENO_B_ {
 		};
 		template <int StencilsX, int StencilsY, int Stencils>		struct interpolateWENO_B_<StencilsX, StencilsY, Stencils, 1> {
-			template <typename U> static const U Gen(const std::vector<U>& phi, const unsigned& p, const Vec& p_new, Particle_x<R, D, P>* part) {}
+			template <typename U> static const U Run(const std::vector<U>& phi, const unsigned& p, const Vec& p_new, Particle_x<R, D, P>* part) {}
 		};
 		template <int StencilsX, int StencilsY, int Stencils>		struct interpolateWENO_B_<StencilsX, StencilsY, Stencils, 2> {
-			template <typename U> static const U Gen(const std::vector<U>& phi, const unsigned& p, const Vec& p_new, Particle_x<R, D, P>* part) {
+			template <typename U> static const U Run(const std::vector<U>& phi, const unsigned& p, const Vec& p_new, Particle_x<R, D, P>* part) {
 				const auto dp = p_new - part->pos[p];
 				if (dp.norm() < part->eps) return phi[p];
 				const auto up = dp.normalized();
@@ -805,11 +805,11 @@ namespace SIM {
 			}
 		};
 		template <int StencilsX, int StencilsY, int Stencils>		struct interpolateWENO_B_<StencilsX, StencilsY, Stencils, 3> {
-			template <typename U> static const U Gen(const std::vector<U>& phi, const unsigned& p, const Vec& p_new, Particle_x<R, D, P>* part) {}
+			template <typename U> static const U Run(const std::vector<U>& phi, const unsigned& p, const Vec& p_new, Particle_x<R, D, P>* part) {}
 		};
 
 		__forceinline const R interpolateWENO(const std::vector<R>& phi, const unsigned& p, const Vec& p_new) {
-			return interpolateWENO_B_<>::Gen(phi, p, p_new, this);
+			return interpolateWENO_B_<>::Run(phi, p, p_new, this);
 		}
 
 		void updateInvMat() {
@@ -865,9 +865,9 @@ namespace SIM {
 
 			varrho = 1./(1.*dp);
 			Vec zero = Vec::Zero();
-			DR::Gen<1>(varrho, zero.data(), pn_p_o.data());
-			DR::Gen<2>(varrho, zero.data(), pn_pp_o.data());
-			DR::Gen<2>(varrho, zero.data(), pn_lap_o.data());
+			DR::Run<1>(varrho, zero.data(), pn_p_o.data());
+			DR::Run<2>(varrho, zero.data(), pn_pp_o.data());
+			DR::Run<2>(varrho, zero.data(), pn_lap_o.data());
 		}
 
 		template <>
@@ -879,11 +879,11 @@ namespace SIM {
 
 			varrho = 1./(1.*dp);
 			Vec zero = Vec::Zero();
-			DR::Gen<1, 0>(varrho, zero.data(), pn_p_o.block<1, PN::value>(0, 0).data());
-			DR::Gen<0, 1>(varrho, zero.data(), pn_p_o.block<1, PN::value>(1, 0).data());
-			DR::Gen<2, 0>(varrho, zero.data(), pn_pp_o.block<1, PN::value>(0, 0).data());
-			DR::Gen<1, 1>(varrho, zero.data(), pn_pp_o.block<1, PN::value>(1, 0).data());
-			DR::Gen<0, 2>(varrho, zero.data(), pn_pp_o.block<1, PN::value>(2, 0).data());
+			DR::Run<1, 0>(varrho, zero.data(), pn_p_o.block<1, PN::value>(0, 0).data());
+			DR::Run<0, 1>(varrho, zero.data(), pn_p_o.block<1, PN::value>(1, 0).data());
+			DR::Run<2, 0>(varrho, zero.data(), pn_pp_o.block<1, PN::value>(0, 0).data());
+			DR::Run<1, 1>(varrho, zero.data(), pn_pp_o.block<1, PN::value>(1, 0).data());
+			DR::Run<0, 2>(varrho, zero.data(), pn_pp_o.block<1, PN::value>(2, 0).data());
 			pn_lap_o = pn_pp_o.block<1, PN::value>(0, 0) + pn_pp_o.block<1, PN::value>(2, 0);
 		}
 
@@ -896,15 +896,15 @@ namespace SIM {
 
 			varrho = 1./(1.*dp);
 			Vec zero = Vec::Zero();
-			DR::Gen<1, 0, 0>(varrho, zero.data(), pn_p_o.block<1, PN::value>(0, 0).data());
-			DR::Gen<0, 1, 0>(varrho, zero.data(), pn_p_o.block<1, PN::value>(1, 0).data());
-			DR::Gen<0, 0, 1>(varrho, zero.data(), pn_p_o.block<1, PN::value>(2, 0).data());
-			DR::Gen<2, 0, 0>(varrho, zero.data(), pn_pp_o.block<1, PN::value>(0, 0).data());
-			DR::Gen<1, 1, 0>(varrho, zero.data(), pn_pp_o.block<1, PN::value>(1, 0).data());
-			DR::Gen<1, 0, 1>(varrho, zero.data(), pn_pp_o.block<1, PN::value>(2, 0).data());
-			DR::Gen<0, 2, 0>(varrho, zero.data(), pn_pp_o.block<1, PN::value>(3, 0).data());
-			DR::Gen<0, 1, 1>(varrho, zero.data(), pn_pp_o.block<1, PN::value>(4, 0).data());
-			DR::Gen<0, 0, 2>(varrho, zero.data(), pn_pp_o.block<1, PN::value>(5, 0).data());
+			DR::Run<1, 0, 0>(varrho, zero.data(), pn_p_o.block<1, PN::value>(0, 0).data());
+			DR::Run<0, 1, 0>(varrho, zero.data(), pn_p_o.block<1, PN::value>(1, 0).data());
+			DR::Run<0, 0, 1>(varrho, zero.data(), pn_p_o.block<1, PN::value>(2, 0).data());
+			DR::Run<2, 0, 0>(varrho, zero.data(), pn_pp_o.block<1, PN::value>(0, 0).data());
+			DR::Run<1, 1, 0>(varrho, zero.data(), pn_pp_o.block<1, PN::value>(1, 0).data());
+			DR::Run<1, 0, 1>(varrho, zero.data(), pn_pp_o.block<1, PN::value>(2, 0).data());
+			DR::Run<0, 2, 0>(varrho, zero.data(), pn_pp_o.block<1, PN::value>(3, 0).data());
+			DR::Run<0, 1, 1>(varrho, zero.data(), pn_pp_o.block<1, PN::value>(4, 0).data());
+			DR::Run<0, 0, 2>(varrho, zero.data(), pn_pp_o.block<1, PN::value>(5, 0).data());
 			pn_lap_o = pn_pp_o.block<1, PN::value>(0, 0) + pn_pp_o.block<1, PN::value>(3, 0) + pn_pp_o.block<1, PN::value>(5, 0);
 		}
 

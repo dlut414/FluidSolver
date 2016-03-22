@@ -13,7 +13,7 @@
 
 namespace SIM {
 
-	template <typename R, unsigned D>
+	template <typename R, int D>
 	class MatSolver {
 		typedef Eigen::Triplet<R> Tpl;
 		typedef Eigen::Matrix<R, Eigen::Dynamic, 1> dVec;
@@ -24,25 +24,161 @@ namespace SIM {
 		typedef Eigen::DiagonalPreconditioner<R> preconditioner;
 #endif
 	public:
-		MatSolver(const unsigned& _n, const R& e)
-			: n(_n), a(_n + AG, _n + AG), x(_n + AG), b(_n + AG), au(D*_n, D*_n), u(D*_n), rhs(D*_n), eps(e) {
+		MatSolver(const int& _n, const R& e)
+			: n(_n), Dn(D*_n), eps(e), 
+			a(_n + AG, _n + AG), x(_n + AG), b(_n + AG), 
+			au(D*_n, D*_n), u(D*_n), rhs(D*_n), 
+			vr(_n+AG), vr_hat(_n+AG), vv(_n+AG), vp(_n+AG), vt(_n+AG), vh(_n+AG), vs(_n+AG),
+			Dvr(D*_n), Dvr_hat(D*_n), Dvv(D*_n), Dvp(D*_n), Dvt(D*_n), Dvh(D*_n), Dvs(D*_n) {
 			init();
 		}
 		~MatSolver() {}
 
 		void biCg() {
-			solverBiCg.compute(a);
-			//x = solver1.solveWithGuess(b, 0.5*x);
-			x = solverBiCg.solve(b);
-			std::cout << " iterations ----------> " << solverBiCg.iterations() << std::endl;
-			std::cout << " error ---------------> " << solverBiCg.error() << std::endl;
+			//solverBiCg.compute(a);
+			////x = solver1.solveWithGuess(b, 0.5*x);
+			//x = solverBiCg.solve(b);
+			//std::cout << " iterations ----------> " << solverBiCg.iterations() << std::endl;
+			//std::cout << " error ---------------> " << solverBiCg.error() << std::endl;
+			R rho;
+			R alpha;
+			R beta;
+			R omega;
+			R residual;
+#if OMP
+#pragma omp parallel for
+#endif
+			for (int p = 0; p < n; p++) {
+				const R ppInv = R(1.0) / a(p, p);
+				for (int q = 0; q < n; q++) {
+					a(p, q) *= ppInv;
+				}
+				b[p] *= ppInv;
+				x[p] = R(0.0);
+			}
+			vr = b - a*x;
+#if OMP
+#pragma omp parallel for
+#endif
+			for (int p = 0; p < n; p++) {
+				vr_hat[p] = vr[p];
+				vv[p] = vp[p] = R(0.0);
+			}
+			rho = alpha = omega = R(1.0);
+			int loop = 0;
+			for (loop = 0; loop < maxIter; loop++) {
+				const R rho_m1 = rho;
+				rho = vr_hat.dot(vr);
+				beta = (rho / rho_m1)*(alpha / omega);
+#if OMP
+#pragma omp parallel for
+#endif
+				for (int p = 0; p < n; p++) {
+					vp[p] = vr[p] + beta*(vp[p] - omega* vv[p]);
+				}
+				vv = a* vp;
+				alpha = rho / (vr_hat.dot(vv));
+#if OMP
+#pragma omp parallel for
+#endif
+				for (int p = 0; p < n; p++) {
+					vh[p] = x[p] + alpha*vp[p];
+					vs[p] = vr[p] - alpha* vv[p];
+				}
+				vt = a*vs;
+				omega = (vt.dot(vs)) / (vt.dot(vt));
+#if OMP
+#pragma omp parallel for
+#endif
+				for (int p = 0; p < n; p++) {
+					x[p] = vh[p] + omega*vs[p];
+				}
+				vr = b - a*x;
+				residual = vr.dot(vr);
+				if (residual < eps*eps) break;
+#if OMP
+#pragma omp parallel for
+#endif
+				for (int p = 0; p < n; p++) {
+					vr[p] = vs[p] - omega*vt[p];
+				}
+			}
+
+			std::cout << " iterations ----------> " << loop+1 << std::endl;
+			std::cout << " error ---------------> " << sqrt(residual) << std::endl;
 		}
 		void biCg_v() {
-			solverBiCg.compute(au);
-			//u = solver2.solveWithGuess(rhs, 0.5*u);
-			u = solverBiCg.solve(rhs);
-			std::cout << " iterations ----------> " << solverBiCg.iterations() << std::endl;
-			std::cout << " error ---------------> " << solverBiCg.error() << std::endl;
+			//solverBiCg.compute(au);
+			////u = solver2.solveWithGuess(rhs, 0.5*u);
+			//u = solverBiCg.solve(rhs);
+			//std::cout << " iterations ----------> " << solverBiCg.iterations() << std::endl;
+			//std::cout << " error ---------------> " << solverBiCg.error() << std::endl;
+			R rho;
+			R alpha;
+			R beta;
+			R omega;
+			R residual;
+#if OMP
+#pragma omp parallel for
+#endif
+			for (int p = 0; p < Dn; p++) {
+				const R ppInv = R(1.0) / a(p, p);
+				for (int q = 0; q < Dn; q++) {
+					au(p, q) *= ppInv;
+				}
+				rhs[p] *= ppInv;
+				u[p] = R(0.0);
+			}
+			vr = b - a*x;
+#if OMP
+#pragma omp parallel for
+#endif
+			for (int p = 0; p < Dn; p++) {
+				Dvr_hat[p] = Dvr[p];
+				Dvv[p] = Dvp[p] = R(0.0);
+			}
+			rho = alpha = omega = R(1.0);
+			int loop = 0;
+			for (loop = 0; loop < maxIter; loop++) {
+				const R rho_m1 = rho;
+				rho = Dvr_hat.dot(Dvr);
+				beta = (rho / rho_m1)*(alpha / omega);
+#if OMP
+#pragma omp parallel for
+#endif
+				for (int p = 0; p < Dn; p++) {
+					Dvp[p] = Dvr[p] + beta*(Dvp[p] - omega* Dvv[p]);
+				}
+				Dvv = au* Dvp;
+				alpha = rho / (Dvr_hat.dot(Dvv));
+#if OMP
+#pragma omp parallel for
+#endif
+				for (int p = 0; p < Dn; p++) {
+					Dvh[p] = u[p] + alpha*Dvp[p];
+					Dvs[p] = Dvr[p] - alpha* Dvv[p];
+				}
+				Dvt = au*Dvs;
+				omega = (Dvt.dot(Dvs)) / (Dvt.dot(Dvt));
+#if OMP
+#pragma omp parallel for
+#endif
+				for (int p = 0; p < Dn; p++) {
+					u[p] = Dvh[p] + omega*Dvs[p];
+				}
+				Dvr = rhs - au*u;
+				residual = Dvr.dot(Dvr);
+				if (residual < eps*eps) break;
+#if OMP
+#pragma omp parallel for
+#endif
+				for (int p = 0; p < Dn; p++) {
+					Dvr[p] = Dvs[p] - omega*Dvt[p];
+				}
+			}
+
+			std::cout << " iterations ----------> " << loop + 1 << std::endl;
+			std::cout << " error ---------------> " << sqrt(residual) << std::endl;
 		}
 		void qr() {
 			a.makeCompressed();
@@ -67,7 +203,7 @@ namespace SIM {
 		void ccBiCg_augment(const std::vector<enum pType>& type) {
 			sMat d(n + AG, n + AG);
 			std::vector<Tpl> coef;
-			for (unsigned p = 0; p<n; p++) {
+			for (int p = 0; p<n; p++) {
 				if (type[p] == BD2) continue;
 				coef.push_back(Tpl(n, p, 1.));
 				coef.push_back(Tpl(p, n, 1.));
@@ -117,7 +253,8 @@ namespace SIM {
 		void lsqr() {}
 
 	public:
-		unsigned n;
+		int n;
+		int Dn;
 		int maxIter;
 		R eps;
 		sMat a, au;
@@ -128,10 +265,10 @@ namespace SIM {
 	private:
 		void init() {
 			maxIter = 1000;
-			for (unsigned i = 0; i < n; i++) {
+			for (int i = 0; i < n; i++) {
 				x[i] = b[i] = 0.;
 			}
-			for (unsigned i = 0; i < D*n; i++) {
+			for (int i = 0; i < D*n; i++) {
 				u[i] = rhs[i] = 0.;
 			}
 #if AUGMENT
@@ -140,9 +277,13 @@ namespace SIM {
 #endif
 			solverBiCg.setMaxIterations(maxIter);
 			solverBiCg.setTolerance(eps);
-			solverQR.setPivotThreshold(1. / n);
+			solverQR.setPivotThreshold(1.0 / n);
 		}
 		void fina() {}
+
+	private:
+		dVec vr, vr_hat, vv, vp, vt, vh, vs;
+		dVec Dvr, Dvr_hat, Dvv, Dvp, Dvt, Dvh, Dvs;
 	};
 
 }

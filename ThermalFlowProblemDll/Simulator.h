@@ -70,7 +70,6 @@ namespace SIM {
 			derived().init_();
 			mSol = new MatSolver<R,2>(int(derived().part->np), para.eps);
 			std::cout << " Particle number : " << derived().part->np << std::endl;
-			sen << "Sensor.in";
 			R tmp = cfl();
 			para.dt = tmp < para.dtMax ? tmp : para.dtMax;
 			timeStep = int(derived().part->ct / para.dt);
@@ -111,14 +110,13 @@ namespace SIM {
 			static int i = 0;
 			std::ostringstream convert;
 			convert << i++;
-			sen.writeVect(derived().part);
-			sen >> convert.str();
+			*(derived().sen) >> convert.str();
 		}
 
-		void profileOut(const R& rt) {
+		void profileOut() {
+			auto* const part = derived().part;
 			static std::string pf = "profile";
-			sen.writeScal(derived().part);
-			sen.profile(rt, pf);
+			derived().sen->profile(rt, pf);
 		}
 
 		void saveData() const {
@@ -138,7 +136,7 @@ namespace SIM {
 			return derived().part->pos[1].data();
 		}
 		__forceinline const R* scalar() const {
-			return derived().part->phi.data();
+			return derived().part->temp.data();
 		}
 		__forceinline const int* type() const {
 			return (int*)(derived().part->type.data());
@@ -147,7 +145,6 @@ namespace SIM {
 	public:
 		Parameter<R, 2> para;
 		MatSolver<R, 2>* mSol;
-		Sensor<R, 2> sen;
 
 	protected:
 		void step() {}
@@ -177,8 +174,8 @@ namespace SIM {
 #endif
 			for (int p = 0; p < part->np; p++) {
 				part->pres[p] = mSol->x[p];
-				if (part->pres[p] < -1.e5) part->pres[p] = -1.e5;
-				if (part->pres[p] > 1.e5) part->pres[p] = 1.e5;
+				//if (part->pres[p] < -1.e5) part->pres[p] = -1.e5;
+				//if (part->pres[p] > 1.e5) part->pres[p] = 1.e5;
 			}
 		}
 
@@ -190,8 +187,8 @@ namespace SIM {
 #endif
 			for (int p = 0; p < part->np; p++) {
 				part->phi[p] = mSol->x[p];
-				if (part->phi[p] < -1.e5) part->phi[p] = -1.e5;
-				if (part->phi[p] > 1.e5) part->phi[p] = 1.e5;
+				//if (part->phi[p] < -1.e5) part->phi[p] = -1.e5;
+				//if (part->phi[p] > 1.e5) part->phi[p] = 1.e5;
 			}
 		}
 

@@ -35,7 +35,10 @@ namespace VIS {
 	}
 
 	void VisualizationDll::Run(const Controller* const controlPtr, const int& dim, const int& num, NPtr tp, NPtr pos, NPtr s) {
-		drawer->draw(controlPtr, dim, num, tp, pos, s);
+		drawer->Draw(controlPtr, dim, num, tp, pos, s);
+	}
+	void VisualizationDll::Run(const Controller* const controlPtr, const int& num, NPtr tp, NPtr posX, NPtr posY, NPtr s) {
+		drawer->Draw(controlPtr, num, tp, posX, posY, s);
 	}
 
 	void VisualizationDll::Finalize() {
