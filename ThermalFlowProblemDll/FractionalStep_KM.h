@@ -45,6 +45,7 @@ namespace SIM {
 			part->b2neumann();
 			part->b2dirichlet();
 			part->init_x();
+			sen = new Sensor<R,2,Particle_x<R,2,P>>(part);
 			*sen << "Sensor.in";
 		}
 

@@ -21,13 +21,14 @@ namespace SIM {
 		typedef Eigen::Matrix<R,2,1> Vec;
 	public:
 		Sensor(Particle<R,2,Der>* _ptr) : ptr(_ptr) {
+			pos.clear();	vel.clear();	pres.clear(); gd.clear();
 			const auto& pt = ptr->derived();
-			for (unsigned p = 0; p < pt.np; p++) {
+			for (int p = 0; p < pt.np; p++) {
 				if (IS(pt.bdc[p], T_DIRICHLET1)) {
 					id.push_back(p); gd.push_back(Vec::Zero());
 				}
 			}
-			for (unsigned p = 0; p < pt.np; p++) {
+			for (int p = 0; p < pt.np; p++) {
 				if (IS(pt.bdc[p], T_DIRICHLET0)) {
 					id.push_back(p); gd.push_back(Vec::Zero());
 				}
@@ -54,7 +55,7 @@ namespace SIM {
 			for (auto s = 0; s < id.size(); s++) {
 				auto p = id[s];
 				for (auto d = 0; d < 2; d++) {
-					file << std::setprecision(6) << std::scientific << pt.pos[p][d] << " ";
+					file << std::setprecision(6) << std::scientific << pt.pos[d][p] << " ";
 				}
 				for (auto d = 0; d < 2; d++) {
 					file << std::setprecision(6) << std::scientific << gd[s][d] << " ";
@@ -67,15 +68,12 @@ namespace SIM {
 		void operator << (const std::string& str) {
 			std::ifstream file(str);
 			if (!file.is_open()) std::cout << " No file Sensor. file ! " << std::endl;
-			pos.clear();	vel.clear();	pres.clear();	gd.clear();
 			while (file.good()) {
-				Vec p;
-				for (auto d = 0; d < 2; d++) {
-					file >> p[d];
-				}
-				pos.push_back(p);
+				Vec censorPos;
+				file >> censorPos[0] >> censorPos[1];
+				pos.push_back(censorPos);
 				vel.push_back(Vec::Zero());
-				pres.push_back(0.);
+				pres.push_back(0.0);
 			}
 			file.close();
 			std::cout << " Reading Sensor. done " << std::endl;
@@ -113,7 +111,7 @@ namespace SIM {
 		}
 
 	public:
-		std::vector<unsigned> id;
+		std::vector<int> id;
 		std::vector<Vec> pos;
 		std::vector<Vec> vel;
 		std::vector<Vec> gd;
