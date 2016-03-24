@@ -101,41 +101,63 @@ namespace SIM {
 		}
 
 		void b2b() {
-			bbMap.clear();
-			for (int p = 0; p < np; p++) {
-				if (type[p] != BD2) continue;
-				R tmpdr = std::numeric_limits<R>::max();
-				int tmpbb = 0;
-				for (int q = 0; q < np; q++) {
-					if (q == p || type[q] != BD1) continue;
-					const R dr[2] = { pos[0][q] - pos[0][p], pos[1][q] - pos[1][p] };
-					const R dr1 = sqrt(dr[0] * dr[0] + dr[1] * dr[1]);
-					if (dr1 < tmpdr) {
-						tmpdr = dr1;
-						tmpbb = q;
-					}
-				}
-				bbMap[p] = tmpbb;
-			}
+			//bbMap.clear();
+			//for (int p = 0; p < np; p++) {
+			//	if (type[p] != BD2) continue;
+			//	R tmpdr = std::numeric_limits<R>::max();
+			//	int tmpbb = 0;
+			//	for (int q = 0; q < np; q++) {
+			//		if (q == p || type[q] != BD1) continue;
+			//		const R dr[2] = { pos[0][q] - pos[0][p], pos[1][q] - pos[1][p] };
+			//		const R dr1 = sqrt(dr[0] * dr[0] + dr[1] * dr[1]);
+			//		if (dr1 < tmpdr) {
+			//			tmpdr = dr1;
+			//			tmpbb = q;
+			//		}
+			//	}
+			//	bbMap[p] = tmpbb;
+			//}
 		}
 
-		void b2norm() {
-			bdnorm.clear();
-			for (const auto& p : bbMap) {
-				Vec n;
-				n[0] = pos[0][p.second] - pos[0][p.first];
-				n[1] = pos[1][p.second] - pos[1][p.first];
-				bdnorm[p.second] = n;
-			}
-			for (const auto& p : bbMap) {
-				Vec n;
-				n[0] = pos[0][p.second] - pos[0][p.first];
-				n[1] = pos[1][p.second] - pos[1][p.first];
-				const Vec tmp = bdnorm.at(p.second);
-				if (tmp.norm() < n.norm()) bdnorm[p.second] = n;
-			}
-			for (const auto& p : bbMap) {
-				bdnorm[p.second] = bdnorm.at(p.second).normalized();
+		void b2normal() {
+			//bdnorm.clear();
+			//for (const auto& p : bbMap) {
+			//	Vec n;
+			//	n[0] = pos[0][p.second] - pos[0][p.first];
+			//	n[1] = pos[1][p.second] - pos[1][p.first];
+			//	bdnorm[p.second] = n;
+			//}
+			//for (const auto& p : bbMap) {
+			//	Vec n;
+			//	n[0] = pos[0][p.second] - pos[0][p.first];
+			//	n[1] = pos[1][p.second] - pos[1][p.first];
+			//	const Vec tmp = bdnorm.at(p.second);
+			//	if (tmp.norm() < n.norm()) bdnorm[p.second] = n;
+			//}
+			//for (const auto& p : bbMap) {
+			//	bdnorm[p.second] = bdnorm.at(p.second).normalized();
+			//}
+			for (int p = 0; p < np; p++) {
+				if (type[p] == BD1) {
+					Vec nv = Vec::Zero();
+					const int cx = cell->pos2cell(pos[0][p]);
+					const int cy = cell->pos2cell(pos[1][p]);
+					for (int i = 0; i < cell->blockSize::value; i++) {
+						const int key = cell->hash(cx, cy, i);
+						for (int m = 0; m < cell->linkList[key].size(); m++) {
+							const int q = cell->linkList[key][m];
+							if (q == p) continue;
+							const R dr[2] = { pos[0][q] - pos[0][p], pos[1][q] - pos[1][p] };
+							const R dr1 = sqrt(dr[0] * dr[0] + dr[1] * dr[1]);
+							if (dr1 > r0) continue;
+							const R w = ww(dr1);
+							nv[0] += w* dr[0] / dr1;
+							nv[1] += w* dr[1] / dr1;
+						}
+					}
+					nv.normalize();
+					bdnorm[p] = nv;
+				}
 			}
 		}
 

@@ -41,7 +41,7 @@ namespace SIM {
 			part->buildCell();
 			part->makeBdc();
 			part->b2b();
-			part->b2norm();
+			part->b2normal();
 			part->b2neumann();
 			part->b2dirichlet();
 			part->init_x();
@@ -413,8 +413,8 @@ namespace SIM {
 					coef.push_back(Tpl(p, p, 1.0));
 					continue;
 				}
-				R pqsum = 0.;
-				R pp = 0.;
+				R pqsum = R(0.0);
+				R pp = R(0.0);
 				MatPP* mm;
 				if (IS(part->bdc[p], T_NEUMANN))	mm = &(part->invNeu.at(p));
 				else								mm = &(part->invMat[p]);

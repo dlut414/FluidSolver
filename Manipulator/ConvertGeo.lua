@@ -25,7 +25,8 @@ else
 	io.output(file)
 		io.write(L1,"\n")
 		io.write(L2,"\n")
-		io.write(L3,"\n")
+		np, nb1, nb2 = string.match(L3, "(%S+)%s+(%S+)%s+(%S+)%s*")
+		io.write( string.format("%d %d %d\n", np-nb2, nb1, 0) )
 		for k,v in pairs(lines) do
 			io.write(v)
 		end

@@ -1,4 +1,4 @@
-﻿Build started 2016/03/23 20:46:57.
+﻿Build started 2016/03/24 15:56:04.
      1>Project "C:\Users\HU FANGYUAN\Documents\Visual Studio 2013\Projects\FluidSolver_v1.0\ThermalFlowProblemDll\ThermalFlowProblemDll.vcxproj" on node 3 (Build target(s)).
      1>ClCompile:
          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\CL.exe /c /I..\..\extern\eigen /I..\common /Zi /nologo /W3 /WX- /sdl /O2 /Oi /GL /D WIN32 /D NDEBUG /D _WINDOWS /D _USRDLL /D THERMALFLOWPROBLEMDLL_EXPORTS /D _WINDLL /D _UNICODE /D UNICODE /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Yu"stdafx.h" /Fp"x64\Release\ThermalFlowProblemDll.pch" /Fo"x64\Release\\" /Fd"x64\Release\vc120.pdb" /Gd /TP /errorReport:prompt ThermalFlowProblemDll.cpp
@@ -15,4 +15,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:09.31
+Time Elapsed 00:00:08.68
