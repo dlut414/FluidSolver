@@ -129,14 +129,26 @@ namespace SIM {
 			*(derived().part) >> ("./out/" + str + ".out");
 		}
 
-		__forceinline const R* positionX() const {
+		__forceinline const R* PositionX() const {
 			return derived().part->pos[0].data();
 		}
-		__forceinline const R* positionY() const {
+		__forceinline const R* PositionY() const {
 			return derived().part->pos[1].data();
 		}
-		__forceinline const R* scalar() const {
+		__forceinline const R* VelocityX() const {
+			return derived().part->vel[0].data();
+		}
+		__forceinline const R* VelocityY() const {
+			return derived().part->vel[1].data();
+		}
+		__forceinline const R* Pressure() const {
+			return derived().part->pres.data();
+		}
+		__forceinline const R* Temperature() const {
 			return derived().part->temp.data();
+		}
+		__forceinline const R* Divergence() const {
+			return derived().part->div.data();
 		}
 		__forceinline const int* type() const {
 			return (int*)(derived().part->type.data());
