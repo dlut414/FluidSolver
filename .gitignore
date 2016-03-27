@@ -44,10 +44,10 @@ Temporary Items
 
 x86
 x64
-x64\
-\x64
-\x64\
+x64/
+x86/
 *.log
 *.obj
 *.pdb
 out
+out/
