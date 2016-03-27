@@ -26,6 +26,11 @@ typedef SIM::ThermalFlowProblemDll2D Simulation;
 
 static VIS::Controller control;
 
+static void Render() {
+	//Visualization::Run(&control, Parameters::Dimension, Simulation::Number(), Simulation::Type(), Simulation::Position(), Simulation::Scalar());
+	Visualization::Run(&control, Simulation::Number(), Simulation::Type(), Simulation::PositionX(), Simulation::PositionY(), Simulation::Temperature());
+}
+
 static void callBack() {
 	if (control.b_save) {
 		Simulation::SaveData();
@@ -58,6 +63,18 @@ static void fps() {
 }
 static void onMouse(int button, int s, int x, int y) {
 	control.clickMouse(button, s, x, y);
+	if (button == GLUT_LEFT_BUTTON && s == GLUT_DOWN) {
+		const int pickID = Visualization::IntersectColorPick(&control, Simulation::Number(), x, y);
+		if (pickID == 0x00FFFFFF) return;
+		const Parameters::DataType* px = (Parameters::DataType*)Simulation::PositionX();
+		const Parameters::DataType* py = (Parameters::DataType*)Simulation::PositionY();
+		const Parameters::DataType* div = (Parameters::DataType*)Simulation::Divergence();
+		std::cout << " --------------------------------------------------------------------- " << std::endl;
+		std::cout << " Particle ID : " << pickID << std::endl;
+		std::cout << " Coordinate (x,y) : " << px[pickID] << ", " << py[pickID] << std::endl;
+		std::cout << " Divergence : " << div[pickID] << std::endl;
+		std::cout << " --------------------------------------------------------------------- " << std::endl;
+	}
 }
 static void onMotion(int x, int y) {
 	control.moveMouse(x, y);
@@ -91,15 +108,12 @@ static void onDisplay() {
 	control.m_mvp = control.m_projectionMat * control.m_viewModelMat;
 	control.m_mvpInv = glm::inverse(control.m_mvp);
 
-	//Visualization::Run(&control, Parameters::Dimension, Simulation::Number(), Simulation::Type(), Simulation::Position(), Simulation::Scalar());
-	Visualization::Run(&control, Simulation::Number(), Simulation::Type(), Simulation::PositionX(), Simulation::PositionY(), Simulation::Scalar());
+	Render();
 
 	glutSwapBuffers();
 	glutReportErrors();
 
 	callBack();
-
-	fps();
 
 	if (control.b_dirty) {
 		glutPostRedisplay();

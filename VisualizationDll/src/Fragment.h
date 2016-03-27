@@ -186,3 +186,16 @@ void outVort() {
 }
 
 );
+
+#define GLSL(version, shader)  "#version " #version "\n" #shader
+
+const GLchar* fragment_colorPick = GLSL(330 core,
+
+uniform vec4 colorID;
+out vec4 color;
+
+void main() {
+	color = colorID;
+	return;
+}
+);

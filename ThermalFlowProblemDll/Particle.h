@@ -42,7 +42,7 @@ namespace SIM {
 			pos[0].clear(); pos[1].clear(); pos_m1[0].clear(); pos_m1[1].clear();
 			vel[0].clear(); vel[1].clear(); vel_p1[0].clear(); vel_p1[1].clear(); vel_m1[0].clear(); vel_m1[1].clear();
 			pres.clear();
-			phi.clear(); vort.clear();
+			phi.clear(); vort.clear(); div.clear();
 		}
 		void operator >> (const std::string str) const {
 			std::ofstream file(str, std::ofstream::out);
@@ -80,7 +80,7 @@ namespace SIM {
 			vel[0].push_back(v[0]); vel[1].push_back(v[1]);
 			vel_p1[0].push_back(v[0]); vel_p1[1].push_back(v[1]);
 			vel_m1[0].push_back(v[0]); vel_m1[1].push_back(v[1]);
-			temp.push_back(tp); pres.push_back(R(0)); phi.push_back(R(0)); vort.push_back(R(0));
+			temp.push_back(tp); pres.push_back(R(0)); phi.push_back(R(0)); vort.push_back(R(0)); div.push_back(R(0));
 			bdc.push_back(0);
 		}
 
@@ -202,8 +202,8 @@ namespace SIM {
 		std::vector<R> vel_m1[2];
 
 		std::vector<R> temp;
-		std::vector<R> pnd;
 		std::vector<R> pres;
+		std::vector<R> div;
 		std::vector<pType> type;
 		std::vector<int> bdc;
 		std::vector<R> phi;

@@ -51,7 +51,7 @@ namespace VIS {
 
 		void clickMouse(int button, int state, int x, int y) {
 			m_mousePos = glm::ivec2(x, y);
-
+			if (state == GLUT_UP) return;
 			switch (button) {
 			case GLUT_LEFT_BUTTON:
 			{

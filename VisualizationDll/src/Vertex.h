@@ -69,3 +69,20 @@ void main() {
 }
 
 );
+
+#define GLSL(version, shader)  "#version " #version "\n" #shader
+
+const GLchar* vertex_colorPick = GLSL(330 core,
+
+uniform mat4 vMvp;
+
+layout(location = 1) in float vPosX;
+layout(location = 2) in float vPosY;
+
+void main() {
+	vec3 pos = vec3(vPosX, vPosY, 0.0f);
+	vec4 fPos = vMvp * vec4(pos, 1.0f);
+	gl_Position = fPos;
+	gl_PointSize = 4.0;
+}
+);

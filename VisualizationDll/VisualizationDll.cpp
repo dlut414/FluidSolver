@@ -41,6 +41,10 @@ namespace VIS {
 		drawer->Draw(controlPtr, num, tp, posX, posY, s);
 	}
 
+	int VisualizationDll::IntersectColorPick(const Controller* const controlPtr, const int& num, const GLuint& mouseX, const GLuint& mouseY) {
+		return drawer->IntersectColorPick(controlPtr, num, mouseX, mouseY);
+	}
+
 	void VisualizationDll::Finalize() {
 
 	}
