@@ -153,14 +153,6 @@ namespace SIM {
 					part->vel_p1[1][p] += du[1];
 				}
 			}
-#if OMP
-#pragma omp parallel for
-#endif
-			for (int p = 0; p < part->np; p++) {
-				if (part->type[p] == FLUID || part->type[p] == BD1) {
-					part->div[p] = part->Div(part->vel_p1[0].data(), part->vel_p1[1].data(), p);
-				}
-			}
 		}
 
 		void updatePosition_s1() {

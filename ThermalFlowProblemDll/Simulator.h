@@ -267,8 +267,8 @@ namespace SIM {
 			}
 		}
 
-		void check() const {
-			const auto* const part = derived().part;
+		void check() {
+			auto* const part = derived().part;
 			R velMax = std::numeric_limits<R>::min();
 			R phiMax = std::numeric_limits<R>::min();
 			R divMax = std::numeric_limits<R>::min();
@@ -279,7 +279,8 @@ namespace SIM {
 				const R uy = part->vel[1][p];
 				const R vel = sqrt(ux*ux + uy*uy);
 				const R phi = part->phi[p];
-				const R div = part->Div(part->vel[0].data(), part->vel[1].data(), p);
+				const R div = part->Div(part->vel_p1[0].data(), part->vel_p1[1].data(), p);
+				part->div[p] = div;
 				if (vel > velMax) {
 					velMax = vel;
 					idv = p;

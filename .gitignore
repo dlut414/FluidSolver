@@ -44,4 +44,9 @@ Temporary Items
 
 x64\
 x64
+\x64
+\x64\
+*.log
+*.obj
+*.pdb
 out
