@@ -53,3 +53,6 @@ Release/
 out
 out/*
 *.exe
+*.obj
+*.pch
+*.pch

@@ -73,6 +73,8 @@ namespace SIM {
 
 		void Redistribute() {
 			shi.StaticUpwindModel(part);
+			//shi.StaticWENOModel(part);
+			//shi.SpringUpwindModel(part, para);
 		}
 
 		void visTerm_i_q2r1() {

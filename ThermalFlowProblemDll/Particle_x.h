@@ -639,7 +639,7 @@ namespace SIM {
 						const R dis = sqrt(disx*disx + disy*disy);
 						const R w = ww(dis);
 						VecP npq;
-						part->poly(dr, npq.data());
+						poly(dr, npq.data());
 						mm[stcId] += (w* npq)* npq.transpose();
 						vv[stcId] += (w* npq)* (phi[q] - phi[p]);
 					}
@@ -651,10 +651,10 @@ namespace SIM {
 			VecP polyCoef[Stencils];
 			for (int i = 0; i < Stencils; i++) {
 				MatPP inv = MatPP::Zero();
-				if (abs(mm[i].determinant()) < part->eps_mat) {
+				if (abs(mm[i].determinant()) < eps_mat) {
 					return phi[p];
 					auto mm_ = mm[i].block<2, 2>(0, 0);
-					if (abs(mm_.determinant()) < part->eps_mat) {
+					if (abs(mm_.determinant()) < eps_mat) {
 						inv = MatPP::Zero();
 						inv(0, 0) = R(1) / eps;
 						inv(1, 1) = R(1) / eps;

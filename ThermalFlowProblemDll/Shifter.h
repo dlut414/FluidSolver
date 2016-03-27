@@ -52,15 +52,16 @@ namespace SIM {
 					if (part->type[p] != FLUID) continue;
 					R Dpq[2] = { 0.0, 0.0 };
 					const auto& cell = part->cell;
-					const int cx = cell->pos2cell(pos[0][p]);
-					const int cy = cell->pos2cell(pos[1][p]);
+					const int cx = cell->pos2cell(part->pos[0][p]);
+					const int cy = cell->pos2cell(part->pos[1][p]);
 					for (int i = 0; i < cell->blockSize::value; i++) {
 						const int key = cell->hash(cx, cy, i);
 						for (int m = 0; m < cell->linkList[key].size(); m++) {
 							const int q = cell->linkList[key][m];
+							if (q == p) continue;
 							const R dr[2] = { Dposx[q] - Dposx[p], Dposy[q] - Dposy[p] };
 							const R dr1 = sqrt(dr[0] * dr[0] + dr[1] * dr[1]);
-							if (dr1 > r0) continue;
+							if (dr1 > part->r0) continue;
 							const R w = part->ww(dr1);
 							const R coeff = w / dr1;
 							Dpq[0] -= coeff * dr[0];
@@ -76,7 +77,7 @@ namespace SIM {
 #endif
 			for (int p = 0; p < part->np; p++) {
 				if (part->type[p] != FLUID) continue;
-				const Vec u1 = part->derived().interpolateLSAU(part->vel[0], part->vel[1], p, Dposx[p], Dposy[p]);
+				const Vec u1 = part->derived().interpolateLSAU(part->vel[0].data(), part->vel[1].data(), p, Dposx[p], Dposy[p]);
 				Du1x[p] = u1[0];
 				Du1y[p] = u1[1];
 			}
@@ -85,7 +86,7 @@ namespace SIM {
 #endif
 			for (int p = 0; p < part->np; p++) {
 				if (part->type[p] != FLUID) continue;
-				const Vec u2 = part->derived().interpolateLSAU(part->vel_p1[0], part->vel_p1[1], p, Dposx[p], Dposy[p]);
+				const Vec u2 = part->derived().interpolateLSAU(part->vel_p1[0].data(), part->vel_p1[1].data(), p, Dposx[p], Dposy[p]);
 				Du2x[p] = u2[0];
 				Du2y[p] = u2[1];
 			}
@@ -94,7 +95,7 @@ namespace SIM {
 #endif
 			for (int p = 0; p < part->np; p++) {
 				if (part->type[p] != FLUID) continue;
-				Dtemp[p] = part->derived().interpolateLSAU(part->temp, p, Dposx[p], Dposy[p]);
+				Dtemp[p] = part->derived().interpolateLSAU(part->temp.data(), p, Dposx[p], Dposy[p]);
 			}
 #if OMP
 #pragma omp parallel for
@@ -170,23 +171,23 @@ namespace SIM {
 #endif
 			for (int p = 0; p < part->np; p++) {
 				if (part->type[p] != FLUID) continue;
-				Du1x[p] = part->derived().interpolateWENO(part->vel[0], p, part->pos_m1[0][p], part->pos_m1[1][p]);
-				Du1y[p] = part->derived().interpolateWENO(part->vel[1], p, part->pos_m1[0][p], part->pos_m1[1][p]);
+				Du1x[p] = part->derived().interpolateWENO(part->vel[0].data(), p, part->pos_m1[0][p], part->pos_m1[1][p]);
+				Du1y[p] = part->derived().interpolateWENO(part->vel[1].data(), p, part->pos_m1[0][p], part->pos_m1[1][p]);
 			}
 #if OMP
 #pragma omp parallel for
 #endif
 			for (int p = 0; p < part->np; p++) {
 				if (part->type[p] != FLUID) continue;
-				Du2x[p] = part->derived().interpolateWENO(part->vel_p1[0] p, part->pos_m1[0][p], part->pos_m1[1][p]);
-				Du2y[p] = part->derived().interpolateWENO(part->vel_p1[1] p, part->pos_m1[0][p], part->pos_m1[1][p]);
+				Du2x[p] = part->derived().interpolateWENO(part->vel_p1[0].data(), p, part->pos_m1[0][p], part->pos_m1[1][p]);
+				Du2y[p] = part->derived().interpolateWENO(part->vel_p1[1].data(), p, part->pos_m1[0][p], part->pos_m1[1][p]);
 			}
 #if OMP
 #pragma omp parallel for
 #endif
 			for (int p = 0; p < part->np; p++) {
 				if (part->type[p] != FLUID) continue;
-				Dtemp[p] = part->derived().interpolateWENO(part->temp, p, part->pos_m1[0][p], part->pos_m1[1][p]);
+				Dtemp[p] = part->derived().interpolateWENO(part->temp.data(), p, part->pos_m1[0][p], part->pos_m1[1][p]);
 			}
 #if OMP
 #pragma omp parallel for
