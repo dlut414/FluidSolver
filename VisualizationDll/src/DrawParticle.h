@@ -210,9 +210,9 @@ namespace VIS {
 			initShader();
 		}
 		void initShader() {
-			shaderObj.programID.push_back(shaderObj.LoadShader0());
-			shaderObj.programID.push_back(shaderObj.LoadShader1());
-			shaderObj.programID.push_back(shaderObj.LoadShader_colorPick());
+			shaderObj.programID.push_back(shaderObj.LoadShader_inline(vertex0, fragment0));
+			shaderObj.programID.push_back(shaderObj.LoadShader_inline(vertex1, fragment1));
+			shaderObj.programID.push_back(shaderObj.LoadShader_inline(vertex_colorPick, fragment_colorPick));
 			//shaderObj.programID.push_back(shaderObj.LoadShader("../VisualizationDll/shader0/vertex.glsl", "../VisualizationDll/shader0/fragment.glsl"));
 
 			//shaderObj.matrixID.push_back( glGetUniformLocation(shaderObj.programID[0], "vMvp") );
