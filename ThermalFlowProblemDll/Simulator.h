@@ -264,11 +264,12 @@ namespace SIM {
 #endif
 			for (int p = 0; p < part->np; p++) {
 				part->vort[p] = part->Rot(part->vel[0].data(), part->vel[1].data(), p);
+				part->div[p] = part->Div(part->vel_p1[0].data(), part->vel_p1[1].data(), p);
 			}
 		}
 
-		void check() {
-			auto* const part = derived().part;
+		void check() const {
+			const auto* const part = derived().part;
 			R velMax = std::numeric_limits<R>::min();
 			R phiMax = std::numeric_limits<R>::min();
 			R divMax = std::numeric_limits<R>::min();
@@ -279,8 +280,7 @@ namespace SIM {
 				const R uy = part->vel[1][p];
 				const R vel = sqrt(ux*ux + uy*uy);
 				const R phi = part->phi[p];
-				const R div = part->Div(part->vel_p1[0].data(), part->vel_p1[1].data(), p);
-				part->div[p] = div;
+				const R div = part->div[p];
 				if (vel > velMax) {
 					velMax = vel;
 					idv = p;

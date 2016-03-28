@@ -60,12 +60,11 @@ namespace SIM {
 			updateVelocity_q2();
 			updatePosition_s2();
 
+			calCell();
 			calInvMat();
 			calForVis();
 			check();
 
-			calCell();
-			calInvMat();
 			Redistribute();
 
 			sync();
@@ -398,7 +397,7 @@ namespace SIM {
 					VecP inner = VecP::Zero();
 					inner.block<2, 1>(0, 0) = part->bdnorm.at(p);
 					const VecP aa = part->invMat[p] * inner;
-					const R cst = part->p_neumann.at(p)*part->ww(0.0)* (1.0 / part->varrho) * (part->pn_lap_o * aa);
+					const R cst = part->p_neumann.at(p)*part->ww(0.0)* (1.0 / part->varrho) * (part->pn_lap_o.dot(aa));
 					mSol->b[p] -= cst;
 				}
 			}
