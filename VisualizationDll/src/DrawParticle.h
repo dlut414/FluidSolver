@@ -140,6 +140,42 @@ namespace VIS {
 			glDisableVertexAttribArray(3);
 		}
 
+		int IntersectColorPick(const Controller* const controlPtr, const int& num, const GLuint& mouseX, const GLuint& mouseY) const {
+			GLuint shaderProg = shaderObj.programID[2];
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			glUseProgram(shaderProg);
+			
+			GLuint colorID = glGetUniformLocation(shaderProg, "colorID");
+			GLuint MVPID = glGetUniformLocation(shaderObj.programID[2], "vMvp");
+			
+			glEnableVertexAttribArray(1);
+			glEnableVertexAttribArray(2);
+			for (int p = 0; p < num; p++) {
+				int r = (p & 0x000000FF) >> 0;
+				int g = (p & 0x0000FF00) >> 8;
+				int b = (p & 0x00FF0000) >> 16;
+
+				glUniform4f(colorID, r / 255.0f, g / 255.0f, b / 255.0f, 1.0f);
+				glUniformMatrix4fv(MVPID, 1, GL_FALSE, &(controlPtr->m_mvp[0][0]));
+
+				glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+				glVertexAttribPointer(1, 1, DataType<>::value, GL_FALSE, 0, (void*)0);
+
+				glBindBuffer(GL_ARRAY_BUFFER, vbo[2]);
+				glVertexAttribPointer(2, 1, DataType<>::value, GL_FALSE, 0, (void*)0);
+
+				glDrawArrays(GL_POINTS, p, 1);
+			}
+			glDisableVertexAttribArray(1);
+			glDisableVertexAttribArray(2);
+			glFlush();
+			glFinish();
+			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+			unsigned char data[4];
+			glReadPixels(mouseX, controlPtr->u_height-mouseY, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, data);
+			return ( data[0] + (data[1] << 8) + (data[2] << 16) );
+		}
+
 	public:
 		GLfloat r_bg_chessboard[36];
 
@@ -174,8 +210,9 @@ namespace VIS {
 			initShader();
 		}
 		void initShader() {
-			shaderObj.programID.push_back(shaderObj.LoadShader0());
-			shaderObj.programID.push_back(shaderObj.LoadShader1());
+			shaderObj.programID.push_back(shaderObj.LoadShader_inline(vertex0, fragment0));
+			shaderObj.programID.push_back(shaderObj.LoadShader_inline(vertex1, fragment1));
+			shaderObj.programID.push_back(shaderObj.LoadShader_inline(vertex_colorPick, fragment_colorPick));
 			//shaderObj.programID.push_back(shaderObj.LoadShader("../VisualizationDll/shader0/vertex.glsl", "../VisualizationDll/shader0/fragment.glsl"));
 
 			//shaderObj.matrixID.push_back( glGetUniformLocation(shaderObj.programID[0], "vMvp") );

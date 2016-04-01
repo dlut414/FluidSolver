@@ -41,7 +41,7 @@ namespace SIM {
 			part->buildCell();
 			part->makeBdc();
 			part->b2b();
-			part->b2norm();
+			part->b2normal();
 			part->b2neumann();
 			part->b2dirichlet();
 			part->init_x();
@@ -60,12 +60,11 @@ namespace SIM {
 			updateVelocity_q2();
 			updatePosition_s2();
 
+			calCell();
 			calInvMat();
 			calForVis();
 			check();
 
-			calCell();
-			calInvMat();
 			Redistribute();
 
 			sync();
@@ -73,6 +72,8 @@ namespace SIM {
 
 		void Redistribute() {
 			shi.StaticUpwindModel(part);
+			//shi.StaticWENOModel(part);
+			//shi.SpringUpwindModel(part, para);
 		}
 
 		void visTerm_i_q2r1() {
@@ -396,7 +397,7 @@ namespace SIM {
 					VecP inner = VecP::Zero();
 					inner.block<2, 1>(0, 0) = part->bdnorm.at(p);
 					const VecP aa = part->invMat[p] * inner;
-					const R cst = part->p_neumann.at(p)*part->ww(0.0)* (1.0 / part->varrho) * (part->pn_lap_o * aa);
+					const R cst = part->p_neumann.at(p)*part->ww(0.0)* (1.0 / part->varrho) * (part->pn_lap_o.dot(aa));
 					mSol->b[p] -= cst;
 				}
 			}
@@ -413,8 +414,8 @@ namespace SIM {
 					coef.push_back(Tpl(p, p, 1.0));
 					continue;
 				}
-				R pqsum = 0.;
-				R pp = 0.;
+				R pqsum = R(0.0);
+				R pp = R(0.0);
 				MatPP* mm;
 				if (IS(part->bdc[p], T_NEUMANN))	mm = &(part->invNeu.at(p));
 				else								mm = &(part->invMat[p]);

@@ -42,7 +42,7 @@ namespace SIM {
 			pos[0].clear(); pos[1].clear(); pos_m1[0].clear(); pos_m1[1].clear();
 			vel[0].clear(); vel[1].clear(); vel_p1[0].clear(); vel_p1[1].clear(); vel_m1[0].clear(); vel_m1[1].clear();
 			pres.clear();
-			phi.clear(); vort.clear();
+			phi.clear(); vort.clear(); div.clear();
 		}
 		void operator >> (const std::string str) const {
 			std::ofstream file(str, std::ofstream::out);
@@ -80,7 +80,7 @@ namespace SIM {
 			vel[0].push_back(v[0]); vel[1].push_back(v[1]);
 			vel_p1[0].push_back(v[0]); vel_p1[1].push_back(v[1]);
 			vel_m1[0].push_back(v[0]); vel_m1[1].push_back(v[1]);
-			temp.push_back(tp); pres.push_back(R(0)); phi.push_back(R(0)); vort.push_back(R(0));
+			temp.push_back(tp); pres.push_back(R(0)); phi.push_back(R(0)); vort.push_back(R(0)); div.push_back(R(0));
 			bdc.push_back(0);
 		}
 
@@ -101,41 +101,63 @@ namespace SIM {
 		}
 
 		void b2b() {
-			bbMap.clear();
-			for (int p = 0; p < np; p++) {
-				if (type[p] != BD2) continue;
-				R tmpdr = std::numeric_limits<R>::max();
-				int tmpbb = 0;
-				for (int q = 0; q < np; q++) {
-					if (q == p || type[q] != BD1) continue;
-					const R dr[2] = { pos[0][q] - pos[0][p], pos[1][q] - pos[1][p] };
-					const R dr1 = sqrt(dr[0] * dr[0] + dr[1] * dr[1]);
-					if (dr1 < tmpdr) {
-						tmpdr = dr1;
-						tmpbb = q;
-					}
-				}
-				bbMap[p] = tmpbb;
-			}
+			//bbMap.clear();
+			//for (int p = 0; p < np; p++) {
+			//	if (type[p] != BD2) continue;
+			//	R tmpdr = std::numeric_limits<R>::max();
+			//	int tmpbb = 0;
+			//	for (int q = 0; q < np; q++) {
+			//		if (q == p || type[q] != BD1) continue;
+			//		const R dr[2] = { pos[0][q] - pos[0][p], pos[1][q] - pos[1][p] };
+			//		const R dr1 = sqrt(dr[0] * dr[0] + dr[1] * dr[1]);
+			//		if (dr1 < tmpdr) {
+			//			tmpdr = dr1;
+			//			tmpbb = q;
+			//		}
+			//	}
+			//	bbMap[p] = tmpbb;
+			//}
 		}
 
-		void b2norm() {
-			bdnorm.clear();
-			for (const auto& p : bbMap) {
-				Vec n;
-				n[0] = pos[0][p.second] - pos[0][p.first];
-				n[1] = pos[1][p.second] - pos[1][p.first];
-				bdnorm[p.second] = n;
-			}
-			for (const auto& p : bbMap) {
-				Vec n;
-				n[0] = pos[0][p.second] - pos[0][p.first];
-				n[1] = pos[1][p.second] - pos[1][p.first];
-				const Vec tmp = bdnorm.at(p.second);
-				if (tmp.norm() < n.norm()) bdnorm[p.second] = n;
-			}
-			for (const auto& p : bbMap) {
-				bdnorm[p.second] = bdnorm.at(p.second).normalized();
+		void b2normal() {
+			//bdnorm.clear();
+			//for (const auto& p : bbMap) {
+			//	Vec n;
+			//	n[0] = pos[0][p.second] - pos[0][p.first];
+			//	n[1] = pos[1][p.second] - pos[1][p.first];
+			//	bdnorm[p.second] = n;
+			//}
+			//for (const auto& p : bbMap) {
+			//	Vec n;
+			//	n[0] = pos[0][p.second] - pos[0][p.first];
+			//	n[1] = pos[1][p.second] - pos[1][p.first];
+			//	const Vec tmp = bdnorm.at(p.second);
+			//	if (tmp.norm() < n.norm()) bdnorm[p.second] = n;
+			//}
+			//for (const auto& p : bbMap) {
+			//	bdnorm[p.second] = bdnorm.at(p.second).normalized();
+			//}
+			for (int p = 0; p < np; p++) {
+				if (type[p] == BD1) {
+					Vec nv = Vec::Zero();
+					const int cx = cell->pos2cell(pos[0][p]);
+					const int cy = cell->pos2cell(pos[1][p]);
+					for (int i = 0; i < cell->blockSize::value; i++) {
+						const int key = cell->hash(cx, cy, i);
+						for (int m = 0; m < cell->linkList[key].size(); m++) {
+							const int q = cell->linkList[key][m];
+							if (q == p) continue;
+							const R dr[2] = { pos[0][q] - pos[0][p], pos[1][q] - pos[1][p] };
+							const R dr1 = sqrt(dr[0] * dr[0] + dr[1] * dr[1]);
+							if (dr1 > r0) continue;
+							const R w = ww(dr1);
+							nv[0] += w* dr[0] / dr1;
+							nv[1] += w* dr[1] / dr1;
+						}
+					}
+					nv.normalize();
+					bdnorm[p] = nv;
+				}
 			}
 		}
 
@@ -180,8 +202,8 @@ namespace SIM {
 		std::vector<R> vel_m1[2];
 
 		std::vector<R> temp;
-		std::vector<R> pnd;
 		std::vector<R> pres;
+		std::vector<R> div;
 		std::vector<pType> type;
 		std::vector<int> bdc;
 		std::vector<R> phi;

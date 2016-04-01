@@ -11,6 +11,7 @@
 #include "stdafx.h"
 #include "ThermalFlowProblemDll.h"
 #include "FractionalStep_KM.h"
+#include "FractionalStep_DD.h"
 #include <PreInformation.h>
 
 namespace SIM {
@@ -36,15 +37,26 @@ namespace SIM {
 		return NPtr(objPtr->type());
 	}
 	NPtr ThermalFlowProblemDll2D::PositionX() {
-		return NPtr(objPtr->positionX());
+		return NPtr(objPtr->PositionX());
 	}
 	NPtr ThermalFlowProblemDll2D::PositionY() {
-		return NPtr(objPtr->positionY());
+		return NPtr(objPtr->PositionY());
 	}
-	NPtr ThermalFlowProblemDll2D::Scalar() {
-		return NPtr(objPtr->scalar());
+	NPtr ThermalFlowProblemDll2D::VelocityX() {
+		return NPtr(objPtr->VelocityX());
 	}
-
+	NPtr ThermalFlowProblemDll2D::VelocityY() {
+		return NPtr(objPtr->VelocityY());
+	}
+	NPtr ThermalFlowProblemDll2D::Pressure() {
+		return NPtr(objPtr->Pressure());
+	}
+	NPtr ThermalFlowProblemDll2D::Temperature() {
+		return NPtr(objPtr->Temperature());
+	}
+	NPtr ThermalFlowProblemDll2D::Divergence() {
+		return NPtr(objPtr->Divergence());
+	}
 	void ThermalFlowProblemDll2D::SaveData() {
 		objPtr->saveData();
 	}

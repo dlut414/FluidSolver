@@ -18,11 +18,9 @@ namespace SIM {
 		typedef Eigen::Triplet<R> Tpl;
 		typedef Eigen::Matrix<R, Eigen::Dynamic, 1> dVec;
 		typedef Eigen::SparseMatrix<R, Eigen::RowMajor> sMat;
-#if AUGMENT
-		typedef Eigen::IncompleteLUT<R> preconditioner;
-#else
-		typedef Eigen::DiagonalPreconditioner<R> preconditioner;
-#endif
+
+		typedef Eigen::IncompleteLUT<R> preconditionerILU;
+		typedef Eigen::DiagonalPreconditioner<R> preconditionerDia;
 	public:
 		MatSolver(const int& _n, const R& e)
 			: n(_n), Dn(D*_n), eps(e), 
@@ -35,145 +33,190 @@ namespace SIM {
 		~MatSolver() {}
 
 		void biCg() {
-			//solverBiCg.compute(a);
-			////x = solver1.solveWithGuess(b, 0.5*x);
-			//x = solverBiCg.solve(b);
-			//std::cout << " iterations ----------> " << solverBiCg.iterations() << std::endl;
-			//std::cout << " error ---------------> " << solverBiCg.error() << std::endl;
-			R rho;
-			R alpha;
-			R beta;
-			R omega;
-			R residual;
-			sMat pre(n + AG, n + AG);
-			std::vector<Tpl> coefList;
-			for (int p = 0; p < n; p++) {
-				coefList.push_back(Tpl(p, p, R(1.0) / a.coeff(p, p)));
-				x[p] = R(0.0);
-			}
-			pre.setFromTriplets(coefList.begin(), coefList.end());
-			a = pre * a;
-			b = pre * b;
-			vr = b - a*x;
-#if OMP
-#pragma omp parallel for
-#endif
-			for (int p = 0; p < n; p++) {
-				vr_hat[p] = vr[p];
-				vv[p] = vp[p] = R(0.0);
-			}
-			rho = alpha = omega = R(1.0);
-			int loop = 0;
-			for (loop = 0; loop < maxIter; loop++) {
-				const R rho_m1 = rho;
-				rho = vr_hat.dot(vr);
-				beta = (rho / rho_m1)*(alpha / omega);
-#if OMP
-#pragma omp parallel for
-#endif
-				for (int p = 0; p < n; p++) {
-					vp[p] = vr[p] + beta*(vp[p] - omega* vv[p]);
-				}
-				vv = a* vp;
-				alpha = rho / (vr_hat.dot(vv));
-#if OMP
-#pragma omp parallel for
-#endif
-				for (int p = 0; p < n; p++) {
-					vh[p] = x[p] + alpha*vp[p];
-					vs[p] = vr[p] - alpha* vv[p];
-				}
-				vt = a*vs;
-				omega = (vt.dot(vs)) / (vt.dot(vt));
-#if OMP
-#pragma omp parallel for
-#endif
-				for (int p = 0; p < n; p++) {
-					x[p] = vh[p] + omega*vs[p];
-				}
-				vr = b - a*x;
-				residual = sqrt(vr.dot(vr));
-				if (residual < eps) break;
-#if OMP
-#pragma omp parallel for
-#endif
-				for (int p = 0; p < n; p++) {
-					vr[p] = vs[p] - omega*vt[p];
-				}
-			}
-			std::cout << " iterations ----------> " << loop << std::endl;
-			std::cout << " error ---------------> " << residual << std::endl;
+			solverBiCgDia.compute(a);
+			//x = solverBiCgDia.solveWithGuess(b, x);
+			x = solverBiCgDia.solve(b);
+			std::cout << " iterations ----------> " << solverBiCgDia.iterations() << std::endl;
+			std::cout << " error ---------------> " << solverBiCgDia.error() << std::endl;
+//			R rho;
+//			R alpha;
+//			R beta;
+//			R omega;
+//			R residual;
+//			int loop = 0;
+//			sMat pre(n + AG, n + AG);
+//			std::vector<Tpl> coefList;
+//			for (int p = 0; p < n; p++) {
+//				coefList.push_back(Tpl(p, p, R(1.0) / a.coeff(p, p)));
+//				x[p] = R(0.0);
+//			}
+//#if AUGMENT
+//			coefList.push_back(Tpl(n,n,R(1.0)));
+//			x[n] = b[n] = R(0.0);
+//#endif
+//			pre.setFromTriplets(coefList.begin(), coefList.end());
+//			a = pre * a;
+//			b = pre * b;
+//			a.coeffRef(n, n) = R(1.0);
+//			vr = b - a*x;
+//			residual = sqrt(vr.dot(vr));
+//			if (residual < eps) {
+//				std::cout << " iterations ----------> " << loop << std::endl;
+//				std::cout << " error ---------------> " << residual << std::endl;
+//				return;
+//			}
+//#if OMP
+//#pragma omp parallel for
+//#endif
+//			for (int p = 0; p < n + AG; p++) {
+//				vr_hat[p] = vr[p];
+//				vv[p] = vp[p] = R(0.0);
+//			}
+//			rho = alpha = omega = R(1.0);
+//			for (loop = 0; loop < maxIter; loop++) {
+//				const R rho_m1 = rho;
+//				rho = vr_hat.dot(vr);
+//				if (abs(rho) < eps) rho = eps;
+//				beta = (rho / rho_m1)*(alpha / omega);
+//#if OMP
+//#pragma omp parallel for
+//#endif
+//				for (int p = 0; p < n + AG; p++) {
+//					vp[p] = vr[p] + beta*(vp[p] - omega* vv[p]);
+//				}
+//				vv = a* vp;
+//				R vr_hat_vv = vr_hat.dot(vv);
+//				if (abs(vr_hat_vv) < eps) vr_hat_vv = eps;
+//				alpha = rho / vr_hat_vv;
+//#if OMP
+//#pragma omp parallel for
+//#endif
+//				for (int p = 0; p < n + AG; p++) {
+//					vh[p] = x[p] + alpha*vp[p];
+//					vs[p] = vr[p] - alpha* vv[p];
+//				}
+//				vt = b - a * vh;
+//				residual = sqrt(vt.dot(vt));
+//				if (residual < eps) {
+//#if OMP
+//#pragma omp parallel for
+//#endif
+//					for (int p = 0; p < n + AG; p++) {
+//						x[p] = vh[p];
+//					}
+//					std::cout << " iterations ----------> " << loop << std::endl;
+//					std::cout << " error ---------------> " << residual << std::endl;
+//					return;
+//				}
+//				vt = a*vs;
+//				omega = (vt.dot(vs)) / (vt.dot(vt));
+//#if OMP
+//#pragma omp parallel for
+//#endif
+//				for (int p = 0; p < n + AG; p++) {
+//					x[p] = vh[p] + omega*vs[p];
+//				}
+//				vr = b - a*x;
+//				residual = sqrt(vr.dot(vr));
+//				if (residual < eps) break;
+//#if OMP
+//#pragma omp parallel for
+//#endif
+//				for (int p = 0; p < n + AG; p++) {
+//					vr[p] = vs[p] - omega*vt[p];
+//				}
+//			}
+//			std::cout << " iterations ----------> " << loop << std::endl;
+//			std::cout << " error ---------------> " << residual << std::endl;
 		}
 		void biCg_v() {
-			//solverBiCg.compute(au);
-			////u = solver2.solveWithGuess(rhs, 0.5*u);
-			//u = solverBiCg.solve(rhs);
-			//std::cout << " iterations ----------> " << solverBiCg.iterations() << std::endl;
-			//std::cout << " error ---------------> " << solverBiCg.error() << std::endl;
-			R rho;
-			R alpha;
-			R beta;
-			R omega;
-			R residual;
-			sMat pre(Dn, Dn);
-			std::vector<Tpl> coefList;
-			for (int p = 0; p < Dn; p++) {
-				coefList.push_back(Tpl(p, p, R(1.0) / au.coeff(p, p)));
-				u[p] = R(0.0);
-			}
-			pre.setFromTriplets(coefList.begin(), coefList.end());
-			au = pre * au;
-			rhs = pre * rhs;
-			Dvr = rhs - au*u;
-#if OMP
-#pragma omp parallel for
-#endif
-			for (int p = 0; p < Dn; p++) {
-				Dvr_hat[p] = Dvr[p];
-				Dvv[p] = Dvp[p] = R(0.0);
-			}
-			rho = alpha = omega = R(1.0);
-			int loop = 0;
-			for (loop = 0; loop < maxIter; loop++) {
-				const R rho_m1 = rho;
-				rho = Dvr_hat.dot(Dvr);
-				beta = (rho / rho_m1)*(alpha / omega);
-#if OMP
-#pragma omp parallel for
-#endif
-				for (int p = 0; p < Dn; p++) {
-					Dvp[p] = Dvr[p] + beta*(Dvp[p] - omega* Dvv[p]);
-				}
-				Dvv = au* Dvp;
-				alpha = rho / (Dvr_hat.dot(Dvv));
-#if OMP
-#pragma omp parallel for
-#endif
-				for (int p = 0; p < Dn; p++) {
-					Dvh[p] = u[p] + alpha*Dvp[p];
-					Dvs[p] = Dvr[p] - alpha* Dvv[p];
-				}
-				Dvt = au*Dvs;
-				omega = (Dvt.dot(Dvs)) / (Dvt.dot(Dvt));
-#if OMP
-#pragma omp parallel for
-#endif
-				for (int p = 0; p < Dn; p++) {
-					u[p] = Dvh[p] + omega*Dvs[p];
-				}
-				Dvr = rhs - au*u;
-				residual = sqrt(Dvr.dot(Dvr));
-				if (residual < eps) break;
-#if OMP
-#pragma omp parallel for
-#endif
-				for (int p = 0; p < Dn; p++) {
-					Dvr[p] = Dvs[p] - omega*Dvt[p];
-				}
-			}
-
-			std::cout << " iterations ----------> " << loop << std::endl;
-			std::cout << " error ---------------> " << residual << std::endl;
+			solverBiCgDia.compute(au);
+			u = solverBiCgDia.solveWithGuess(rhs, u);
+			u = solverBiCgDia.solve(rhs);
+			std::cout << " iterations ----------> " << solverBiCgDia.iterations() << std::endl;
+			std::cout << " error ---------------> " << solverBiCgDia.error() << std::endl;
+//			R rho;
+//			R alpha;
+//			R beta;
+//			R omega;
+//			R residual;
+//			int loop = 0;
+//			sMat pre(Dn, Dn);
+//			std::vector<Tpl> coefList;
+//			for (int p = 0; p < Dn; p++) {
+//				coefList.push_back(Tpl(p, p, R(1.0) / au.coeff(p, p)));
+//				u[p] = R(0.0);
+//			}
+//			pre.setFromTriplets(coefList.begin(), coefList.end());
+//			au = pre * au;
+//			rhs = pre * rhs;
+//			Dvr = rhs - au*u;
+//			residual = sqrt(Dvr.dot(Dvr));
+//			if (residual < eps) {
+//				std::cout << " iterations ----------> " << loop << std::endl;
+//				std::cout << " error ---------------> " << residual << std::endl;
+//				return;
+//			}
+//#if OMP
+//#pragma omp parallel for
+//#endif
+//			for (int p = 0; p < Dn; p++) {
+//				Dvr_hat[p] = Dvr[p];
+//				Dvv[p] = Dvp[p] = R(0.0);
+//			}
+//			rho = alpha = omega = R(1.0);
+//			for (loop = 0; loop < maxIter; loop++) {
+//				const R rho_m1 = rho;
+//				rho = Dvr_hat.dot(Dvr);
+//				beta = (rho / rho_m1)*(alpha / omega);
+//#if OMP
+//#pragma omp parallel for
+//#endif
+//				for (int p = 0; p < Dn; p++) {
+//					Dvp[p] = Dvr[p] + beta*(Dvp[p] - omega* Dvv[p]);
+//				}
+//				Dvv = au* Dvp;
+//				alpha = rho / (Dvr_hat.dot(Dvv));
+//#if OMP
+//#pragma omp parallel for
+//#endif
+//				for (int p = 0; p < Dn; p++) {
+//					Dvh[p] = u[p] + alpha*Dvp[p];
+//					Dvs[p] = Dvr[p] - alpha* Dvv[p];
+//				}
+//				Dvt = rhs - au * Dvh;
+//				residual = sqrt(Dvt.dot(Dvt));
+//				if (residual < eps) {
+//#if OMP
+//#pragma omp parallel for
+//#endif
+//					for (int p = 0; p < Dn; p++) {
+//						u[p] = Dvh[p];
+//					}
+//					std::cout << " iterations ----------> " << loop << std::endl;
+//					std::cout << " error ---------------> " << residual << std::endl;
+//					return;
+//				}
+//				Dvt = au*Dvs;
+//				omega = (Dvt.dot(Dvs)) / (Dvt.dot(Dvt));
+//#if OMP
+//#pragma omp parallel for
+//#endif
+//				for (int p = 0; p < Dn; p++) {
+//					u[p] = Dvh[p] + omega*Dvs[p];
+//				}
+//				Dvr = rhs - au*u;
+//				residual = sqrt(Dvr.dot(Dvr));
+//				if (residual < eps) break;
+//#if OMP
+//#pragma omp parallel for
+//#endif
+//				for (int p = 0; p < Dn; p++) {
+//					Dvr[p] = Dvs[p] - omega*Dvt[p];
+//				}
+//			}
+//			std::cout << " iterations ----------> " << loop << std::endl;
+//			std::cout << " error ---------------> " << residual << std::endl;
 		}
 		void qr() {
 			a.makeCompressed();
@@ -188,12 +231,12 @@ namespace SIM {
 			sMat at(n, n);
 			at = a.transpose();
 			a = (a*at);
-			solverBiCg.compute(a);
+			solverBiCgDia.compute(a);
 			//x = solver1.solveWithGuess(b, 0.5*x);
-			x = solverBiCg.solve(b);
+			x = solverBiCgDia.solve(b);
 			x = (at*x);
-			std::cout << " iterations ----------> " << solverBiCg.iterations() << std::endl;
-			std::cout << " error ---------------> " << solverBiCg.error() << std::endl;
+			std::cout << " iterations ----------> " << solverBiCgDia.iterations() << std::endl;
+			std::cout << " error ---------------> " << solverBiCgDia.error() << std::endl;
 		}
 		void ccBiCg_augment(const std::vector<enum pType>& type) {
 			sMat d(n + AG, n + AG);
@@ -206,16 +249,17 @@ namespace SIM {
 			d.setFromTriplets(coef.begin(), coef.end());
 			a = a + d;
 			b[n] = R(0.0);
-			solverBiCg.compute(a);
-			x = solverBiCg.solveWithGuess(b, x);
-			x = solverBiCg.solve(b);
-			std::cout << " iterations ----------> " << solverBiCg.iterations() << std::endl;
-			std::cout << " error ---------------> " << solverBiCg.error() << std::endl;
+			solverBiCgILU.compute(a);
+			//x = solverBiCgILU.solveWithGuess(b, x);
+			x = solverBiCgILU.solve(b);
+			std::cout << " iterations ----------> " << solverBiCgILU.iterations() << std::endl;
+			std::cout << " error ---------------> " << solverBiCgILU.error() << std::endl;
 //			R rho;
 //			R alpha;
 //			R beta;
 //			R omega;
 //			R residual;
+//			int loop = 0;
 //			sMat pre(n + AG, n + AG);
 //			std::vector<Tpl> coefList;
 //			for (int p = 0; p < n; p++) {
@@ -237,6 +281,12 @@ namespace SIM {
 //			a = a + d;
 //			b[n] = R(0.0);
 //			vr = b - a*x;
+			//residual = sqrt(vr.dot(vr));
+			//if (residual < eps) {
+			//	std::cout << " iterations ----------> " << loop << std::endl;
+			//	std::cout << " error ---------------> " << residual << std::endl;
+			//	return;
+			//}
 //#if OMP
 //#pragma omp parallel for
 //#endif
@@ -245,7 +295,6 @@ namespace SIM {
 //				vv[p] = vp[p] = R(0.0);
 //			}
 //			rho = alpha = omega = R(1.0);
-//			int loop = 0;
 //			for (loop = 0; loop < maxIter; loop++) {
 //				const R rho_m1 = rho;
 //				rho = vr_hat.dot(vr);
@@ -265,6 +314,19 @@ namespace SIM {
 //					vh[p] = x[p] + alpha*vp[p];
 //					vs[p] = vr[p] - alpha* vv[p];
 //				}
+//			vt = b - a * vh;
+//			residual = sqrt(vt.dot(vt));
+//			if (residual < eps) {
+//#if OMP
+//#pragma omp parallel for
+//#endif
+//				for (int p = 0; p < n + AG; p++) {
+//					x[p] = vh[p];
+//				}
+//				std::cout << " iterations ----------> " << loop << std::endl;
+//				std::cout << " error ---------------> " << residual << std::endl;
+//				return;
+//			}
 //				vt = a*vs;
 //				omega = (vt.dot(vs)) / (vt.dot(vt));
 //#if OMP
@@ -290,8 +352,8 @@ namespace SIM {
 			sMat at(n, n);
 			at = a.transpose();
 			dVec e(n), zero(n);
-			solverBiCg.compute(at);
-			e = solverBiCg.solve(0.*zero);
+			solverBiCgDia.compute(at);
+			e = solverBiCgDia.solve(0.*zero);
 			const R e2 = e.dot(e);
 			if (e2 > eps) {
 				b = b - (b.dot(e) / e2)*e;
@@ -328,7 +390,8 @@ namespace SIM {
 		R eps;
 		sMat a, au;
 		dVec x, b, u, rhs;
-		Eigen::BiCGSTAB< sMat, preconditioner > solverBiCg;
+		Eigen::BiCGSTAB< sMat, preconditionerILU > solverBiCgILU;
+		Eigen::BiCGSTAB< sMat, preconditionerDia > solverBiCgDia;
 		Eigen::SparseQR< sMat, Eigen::NaturalOrdering<int> > solverQR;
 
 	private:
@@ -340,12 +403,12 @@ namespace SIM {
 			for (int i = 0; i < D*n; i++) {
 				u[i] = rhs[i] = (0.0);
 			}
-#if AUGMENT
-			solverBiCg.preconditioner().setDroptol(eps);
-			solverBiCg.preconditioner().setFillfactor(1);
-#endif
-			solverBiCg.setMaxIterations(maxIter);
-			solverBiCg.setTolerance(eps);
+			solverBiCgILU.preconditioner().setDroptol(eps);
+			solverBiCgILU.preconditioner().setFillfactor(1);
+			solverBiCgILU.setMaxIterations(maxIter);
+			solverBiCgILU.setTolerance(eps);
+			solverBiCgDia.setMaxIterations(maxIter);
+			solverBiCgDia.setTolerance(eps);
 			solverQR.setPivotThreshold(1.0 / n);
 		}
 		void fina() {}

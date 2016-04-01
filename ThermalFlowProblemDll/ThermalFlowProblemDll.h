@@ -26,7 +26,11 @@ namespace SIM {
 		static THERMALFLOWPROBLEMDLL_API NPtr Type();
 		static THERMALFLOWPROBLEMDLL_API NPtr PositionX();
 		static THERMALFLOWPROBLEMDLL_API NPtr PositionY();
-		static THERMALFLOWPROBLEMDLL_API NPtr Scalar();
+		static THERMALFLOWPROBLEMDLL_API NPtr VelocityX();
+		static THERMALFLOWPROBLEMDLL_API NPtr VelocityY();
+		static THERMALFLOWPROBLEMDLL_API NPtr Pressure();
+		static THERMALFLOWPROBLEMDLL_API NPtr Temperature();
+		static THERMALFLOWPROBLEMDLL_API NPtr Divergence();
 		static THERMALFLOWPROBLEMDLL_API void SaveData();
 		static THERMALFLOWPROBLEMDLL_API void SensorOut();
 	};
