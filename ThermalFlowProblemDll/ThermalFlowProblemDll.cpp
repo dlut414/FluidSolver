@@ -16,7 +16,7 @@
 
 namespace SIM {
 
-	typedef FractionalStep_DD<Parameters::DataType, Parameters::Dimension, Parameters::Order> FS;
+	typedef FractionalStep_KM<Parameters::DataType, Parameters::Dimension, Parameters::Order> FS;
 	typedef FS* FSPtr;
 
 	static FSPtr objPtr;
