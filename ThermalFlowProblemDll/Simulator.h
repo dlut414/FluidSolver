@@ -39,7 +39,7 @@ namespace SIM {
 		typedef Eigen::Matrix<R, 2, 2> Mat;
 		typedef Eigen::Triplet<R> Tpl;
 	public:
-		Simulator() { timeStep = 0; }
+		Simulator() { numOfSteps = 0; }
 		~Simulator() {}
 
 		Derived& derived() { return *static_cast<Derived*>(this); }
@@ -70,20 +70,20 @@ namespace SIM {
 			derived().init_();
 			mSol = new MatSolver<R,2>(int(derived().part->np), para.eps);
 			std::cout << " Particle number : " << derived().part->np << std::endl;
-			R tmp = cfl();
+			R tmp = timeStep();
 			para.dt = tmp < para.dtMax ? tmp : para.dtMax;
-			timeStep = int(derived().part->ct / para.dt);
+			numOfSteps = int(derived().part->ct / para.dt);
 		}
 
 		void mainLoop() {
 			auto* const part = derived().part;
 			while (part->ct <= para.tt) {
-				std::cout << " step ----------------------------------> " << timeStep << std::endl;
-				R tmp = cfl();
+				std::cout << " step ----------------------------------> " << numOfSteps << std::endl;
+				R tmp = timeStep();
 				para.dt = tmp < para.dtMax ? tmp : para.dtMax;
 				part->updateCell();
 				derived().step();
-				part->ct += para.dt;	timeStep++;
+				part->ct += para.dt;	numOfSteps++;
 				std::cout << " time --------> " << part->ct << std::endl;
 				std::cout << " dt ----------> " << para.dt << std::endl;
 			}
@@ -95,12 +95,12 @@ namespace SIM {
 			if (part->ct > para.tt) {
 				saveData();
 			}
-			std::cout << " step ----------------------------------> " << timeStep << std::endl;
-			R tmp = cfl();
+			std::cout << " step ----------------------------------> " << numOfSteps << std::endl;
+			R tmp = timeStep();
 			para.dt = tmp < para.dtMax ? tmp : para.dtMax;
 			part->updateCell();
 			derived().step();
-			part->ct += para.dt;	timeStep++;
+			part->ct += para.dt;	numOfSteps++;
 			std::cout << " time --------> " << part->ct << std::endl;
 			std::cout << " dt ----------> " << para.dt << std::endl;
 			return part->ct;
@@ -228,8 +228,8 @@ namespace SIM {
 			}
 		}
 
-		R cfl() {
-			R umax = 0.;
+		R timeStep() {
+			R umax = R(0);
 			const auto* const part = derived().part;
 			for (int p = 0; p < part->np; p++) {
 				const R ux = part->vel[0][p];
@@ -238,7 +238,11 @@ namespace SIM {
 				if (tmp > umax) umax = tmp;
 			}
 			para.umax = umax;
-			return para.cfl * part->dp / umax;
+			//return para.cfl * part->dp / umax;
+			const R term1 = 4 * para.Pr / (umax* umax);
+			const R term2 = para.Pr*(part->dp*part->dp) / 2;
+			const R ret = term1 < term2 ? term1 : term2;
+			return ret;
 		}
 
 		void calCell() {
@@ -318,7 +322,7 @@ namespace SIM {
 		}
 
 	protected:
-		int timeStep;
+		int numOfSteps;
 	};
 
 	template <typename R, typename Derived>

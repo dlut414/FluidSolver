@@ -56,3 +56,7 @@ out/*
 *.obj
 *.pch
 *.pch
+*.log
+*.obj
+*.tlog
+*.dll
