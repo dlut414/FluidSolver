@@ -60,3 +60,6 @@ out/*
 *.obj
 *.tlog
 *.dll
+*.obj
+*.pch
+*.vcxproj

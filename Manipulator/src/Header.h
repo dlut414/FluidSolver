@@ -23,4 +23,6 @@
 #include <glm/gtx/transform.hpp>
 #include <glm/gtx/quaternion.hpp>
 
+#include <AntTweakBar.h>
+
 #endif // HEADER_PCH_H_INCLUDED

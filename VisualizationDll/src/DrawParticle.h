@@ -80,6 +80,8 @@ namespace VIS {
 			glDisableVertexAttribArray(0);
 			glDisableVertexAttribArray(1);
 			glDisableVertexAttribArray(2);
+
+			glUseProgram(0);
 		}
 
 		template <typename I, typename V, typename T>
@@ -138,6 +140,8 @@ namespace VIS {
 			glDisableVertexAttribArray(1);
 			glDisableVertexAttribArray(2);
 			glDisableVertexAttribArray(3);
+
+			glUseProgram(0);
 		}
 
 		int IntersectColorPick(const Controller* const controlPtr, const int& num, const GLuint& mouseX, const GLuint& mouseY) const {
@@ -168,6 +172,7 @@ namespace VIS {
 			}
 			glDisableVertexAttribArray(1);
 			glDisableVertexAttribArray(2);
+			glUseProgram(0);
 			glFlush();
 			glFinish();
 			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);

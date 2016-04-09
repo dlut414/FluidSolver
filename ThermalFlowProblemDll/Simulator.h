@@ -241,7 +241,7 @@ namespace SIM {
 			//return para.cfl * part->dp / umax;
 			const R term1 = 4 * para.Pr / (umax* umax);
 			const R term2 = para.Pr*(part->dp*part->dp) / 2;
-			const R ret = term1 < term2 ? term1 : term2;
+			const R ret = para.cfl* (term1 < term2 ? term1 : term2);
 			return ret;
 		}
 

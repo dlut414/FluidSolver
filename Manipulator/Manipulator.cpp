@@ -25,10 +25,17 @@ typedef VIS::VisualizationDll Visualization;
 typedef SIM::ThermalFlowProblemDll2D Simulation;
 
 static VIS::Controller control;
+static TwBar* GUIBar;
 
 static void Render() {
 	//Visualization::Run(&control, Parameters::Dimension, Simulation::Number(), Simulation::Type(), Simulation::Position(), Simulation::Scalar());
 	Visualization::Run(&control, Simulation::Number(), Simulation::Type(), Simulation::PositionX(), Simulation::PositionY(), Simulation::Temperature());
+}
+
+static void setTwVisible(TwBar* const bar, const int visible) {
+	TwSetParam(GUIBar, NULL, "visible", TW_PARAM_INT32, 1, &visible);
+	Render();
+	glutSwapBuffers();
 }
 
 static void callBack() {
@@ -41,12 +48,14 @@ static void callBack() {
 		control.b_sens = false;
 	}
 	if (control.b_bmp) {
+		setTwVisible(GUIBar, 0);
 		static Bitmap bm;
 		static int i = 0;
 		char name[256];
 		sprintf_s(name, "./out/bm%04d.bmp", i++);
 		bm.SaveAsBMP(name);
 		control.b_bmp = false;
+		setTwVisible(GUIBar, 1);
 	}
 	if (!control.b_stop) {
 		Simulation::Run();
@@ -89,6 +98,7 @@ static void onReshape(int width, int height) {
 	glLoadIdentity();
 	gluPerspective(-90.0f, float(control.u_width) / float(control.u_height), 1.0f, 100.0f);
 	control.reshapeWindow();
+	TwWindowSize(control.u_width, control.u_height);
 }
 static void onKeyboard(unsigned char key, int a, int b) {
 	glutPostRedisplay();
@@ -109,6 +119,7 @@ static void onDisplay() {
 	control.m_mvpInv = glm::inverse(control.m_mvp);
 
 	Render();
+	TwDraw();
 
 	glutSwapBuffers();
 	glutReportErrors();
@@ -139,6 +150,11 @@ static void Initialize(int argc, char** argv) {
 
 	Simulation::Initialize();
 	Visualization::Initialize();
+
+	TwInit(TW_OPENGL, NULL);
+	TwWindowSize(control.u_width, control.u_height);
+	GUIBar = TwNewBar("GUI");
+	TwDefine(" GUI size='150 300' ");
 }
 
 static void Run() {
@@ -146,7 +162,7 @@ static void Run() {
 }
 
 static void Finalize() {
-
+	TwTerminate();
 }
 
 
