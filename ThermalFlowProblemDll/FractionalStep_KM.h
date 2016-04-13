@@ -361,6 +361,89 @@ namespace SIM {
 			mSol->a.setFromTriplets(coef.begin(), coef.end());
 		}
 
+		void makeLhs_p_DivGrad() {
+			typedef Eigen::Matrix<R, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> dMat;
+			typedef Eigen::SparseMatrix<R, Eigen::RowMajor> sMat;
+			sMat mGradx(part->np, part->np);
+			sMat mGrady(part->np, part->np);
+			//sMat mDG(part->np, part->np);
+			std::vector<Tpl> coefx;
+			std::vector<Tpl> coefy;
+			coef.clear();
+			coefx.clear();
+			coefy.clear();
+			for (int p = 0; p < part->np; p++) {
+				if (part->type[p] == BD2) {
+					coef.push_back(Tpl(p, p, 1.));
+					continue;
+				}
+				R ppx = R(0);
+				R ppy = R(0);
+				MatPP* mm;
+				if (IS(part->bdc[p], P_NEUMANN))	mm = &(part->invNeu.at(p));
+				else								mm = &(part->invMat[p]);
+				const auto& cell = part->cell;
+				const int cx = cell->pos2cell(part->pos[0][p]);
+				const int cy = cell->pos2cell(part->pos[1][p]);
+				for (int i = 0; i < cell->blockSize::value; i++) {
+					const int key = cell->hash(cx, cy, i);
+					for (int m = 0; m < cell->linkList[key].size(); m++) {
+						const int q = cell->linkList[key][m];
+						if (part->type[q] == BD2 || p == q) continue;
+						const R dr[2] = { part->pos[0][q] - part->pos[0][p], part->pos[1][q] - part->pos[1][p] };
+						const R dr1 = sqrt(dr[0] * dr[0] + dr[1] * dr[1]);
+						if (dr1 > part->r0) continue;
+						const R w = part->ww(dr1);
+						VecP npq;
+						part->poly(dr, npq.data());
+						const VecP aa = (*mm) * (w* npq);
+						const R pqx = part->pn_px_o* aa;
+						const R pqy = part->pn_py_o* aa;
+						ppx -= pqx;
+						ppy -= pqy;
+						coefx.push_back(Tpl(p, q, pqx));
+						coefy.push_back(Tpl(p, q, pqy));
+					}
+				}
+				coefx.push_back(Tpl(p, p, ppx));
+				coefy.push_back(Tpl(p, p, ppy));
+			}
+			mGradx.setFromTriplets(coefx.begin(), coefx.end());
+			mGrady.setFromTriplets(coefy.begin(), coefy.end());
+
+			for (int p = 0; p < part->np; p++) {
+				std::cout << " p " << p << std::endl;
+				if (part->type[p] == BD2) {
+					coef.push_back(Tpl(p, p, 1.));
+					continue;
+				}
+				MatPP* mm = &(part->invMat[p]);
+				const auto& cell = part->cell;
+				const int cx = cell->pos2cell(part->pos[0][p]);
+				const int cy = cell->pos2cell(part->pos[1][p]);
+				for (int i = 0; i < cell->blockSize::value; i++) {
+					const int key = cell->hash(cx, cy, i);
+					for (int m = 0; m < cell->linkList[key].size(); m++) {
+						const int q = cell->linkList[key][m];
+						if (part->type[q] == BD2 || p == q) continue;
+						const R dr[2] = { part->pos[0][q] - part->pos[0][p], part->pos[1][q] - part->pos[1][p] };
+						const R dr1 = sqrt(dr[0] * dr[0] + dr[1] * dr[1]);
+						if (dr1 > part->r0) continue;
+						const R w = part->ww(dr1);
+						VecP npq;
+						part->poly(dr, npq.data());
+						const VecP aa = (*mm) * (w* npq);
+						const R pqx = part->pn_px_o* aa;
+						const R pqy = part->pn_py_o* aa;
+						mSol->a.row(p) += (pqx* mGradx.row(q));
+						mSol->a.row(p) += (pqy* mGrady.row(q));
+						mSol->a.row(p) -= (pqx* mGradx.row(p));
+						mSol->a.row(p) -= (pqy* mGrady.row(p));
+					}
+				}
+			}
+		}
+
 		void makeRhs_p_q2() {
 			const R coefL = (3.0) / (2.0* para.dt);
 #if OMP
