@@ -26,6 +26,8 @@ namespace SIM {
 	class Particle_x<R,2,P> : public Particle<R,2,Particle_x<R,2,P>> {
 		typedef mMath::Polynomial_A<R,2,P> PN;
 		typedef mMath::Derivative_A<R,2,P> DR;
+		typedef mMath::Polynomial_A<R,2,P+1> PNH;
+		typedef mMath::Derivative_A<R,2,P+1> DRH;
 		typedef Eigen::Matrix<int,2,1> iVec;
 		typedef Eigen::Matrix<R,2,1> Vec;
 		typedef Eigen::Matrix<R,2,2> Mat;
@@ -37,6 +39,7 @@ namespace SIM {
 		~Particle_x() {}
 
 		__forceinline void poly(const R* in, R* out) const { PN::Run(varrho, in, out); }
+		__forceinline void polyH(const R* in, R* out) const { PNH::Run(varrho, in, out); }
 
 		const R DerX(const R* const phi, const int& p) const {
 			VecP vv = VecP::Zero();
@@ -738,7 +741,7 @@ namespace SIM {
 					inv = MatPP::Zero();
 					if (abs(mpn.determinant()) < eps_mat) {
 #if DEBUG
-						std::cout << " ID: " << p << " --- " << " Determinant defficiency: " << mpn.determinant() << std::endl;
+						std::cout << " (updateInvMat) ID: " << p << " --- " << " Determinant defficiency: " << mpn.determinant() << std::endl;
 #endif
 						auto mpn_ = mpn.block<2, 2>(0, 0);
 						if (abs(mpn_.determinant()) < eps_mat) inv = MatPP::Zero();
@@ -751,7 +754,7 @@ namespace SIM {
 				invRef = MatPP::Zero();
 				if (abs(mm.determinant()) < eps_mat) {
 #if DEBUG
-					std::cout << " ID: " << p << " --- " << " Determinant defficiency: " << mm.determinant() << std::endl;
+					std::cout << " (updateInvMat) ID: " << p << " --- " << " Determinant defficiency: " << mm.determinant() << std::endl;
 #endif
 					auto mm_ = mm.block<2, 2>(0, 0);
 					if (abs(mm_.determinant()) < eps_mat) invRef = MatPP::Zero();
@@ -781,6 +784,47 @@ namespace SIM {
 			DR::Run<1, 1>(varrho, zero.data(), pn_pp_o.block<1, PN::value>(1, 0).data());
 			DR::Run<0, 2>(varrho, zero.data(), pn_pp_o.block<1, PN::value>(2, 0).data());
 			pn_lap_o = pn_pxx_o + pn_pyy_o;
+
+			DRH::Run<1, 0>(varrho, zero.data(), pnH_px_o.data());
+			DRH::Run<0, 1>(varrho, zero.data(), pnH_py_o.data());
+		}
+
+		const R DivH(const R* const phix, const R* const phiy, const int& p) const {
+			typedef Eigen::Matrix<R,PNH::value,1> VecPH;
+			typedef Eigen::Matrix<R,PNH::value,PNH::value> MatPPH;
+			MatPPH mm = MatPPH::Zero();
+			VecPH vvx = VecPH::Zero();
+			VecPH vvy = VecPH::Zero();
+			const int cx = cell->pos2cell(pos[0][p]);
+			const int cy = cell->pos2cell(pos[1][p]);
+			for (int i = 0; i < cell->blockSize::value; i++) {
+				const int key = cell->hash(cx, cy, i);
+				for (int m = 0; m < cell->linkList[key].size(); m++) {
+					const int q = cell->linkList[key][m];
+					if (type[q] == BD2) continue;
+					const R dr[2] = { pos[0][q] - pos[0][p], pos[1][q] - pos[1][p] };
+					const R dr1 = sqrt(dr[0] * dr[0] + dr[1] * dr[1]);
+					if (dr1 > r0) continue;
+					const R w = ww(dr1);
+					VecPH npq;
+					polyH(dr, npq.data());
+					mm += (w* npq)* npq.transpose();
+					vvx += w * (phix[q] - phix[p]) * npq;
+					vvy += w * (phiy[q] - phiy[p]) * npq;
+				}
+			}
+			if (abs(mm.determinant()) < eps_mat) {
+#if DEBUG
+				std::cout << " (DivH) ID: " << p << " --- " << " Determinant defficiency: " << mm.determinant() << std::endl;
+#endif
+				auto mm_ = mm.block<2, 2>(0, 0);
+				if (abs(mm_.determinant()) < eps_mat) invRef = MatPP::Zero();
+				else invRef.block<2, 2>(0, 0) = mm_.inverse();
+			}
+			else invRef = mm.inverse();
+			const R pupx = pnH_px_o* mm * vvx;
+			const R pvpy = pnH_py_o* mm * vvy;
+			return pupx + pvpy;
 		}
 
 	public:
@@ -796,6 +840,9 @@ namespace SIM {
 		Eigen::Matrix<R, 2, PN::value, Eigen::RowMajor>						pn_p_o;
 		Eigen::Matrix<R, mMath::H<2, 2>::value, PN::value, Eigen::RowMajor>	pn_pp_o;
 		Eigen::Matrix<R, 1, PN::value, Eigen::RowMajor>						pn_lap_o;
+
+		Eigen::Matrix<R, 1, PNH::value, Eigen::RowMajor>					pnH_px_o;
+		Eigen::Matrix<R, 1, PNH::value, Eigen::RowMajor>					pnH_py_o;
 	};
 
 	template <typename R, int P>
