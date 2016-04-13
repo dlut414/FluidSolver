@@ -12,6 +12,7 @@
 #include "ThermalFlowProblemDll.h"
 #include "FractionalStep_KM.h"
 #include "FractionalStep_DD.h"
+#include "FractionalStep_KM_DC.h"
 #include <PreInformation.h>
 
 namespace SIM {

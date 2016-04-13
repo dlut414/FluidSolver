@@ -813,17 +813,18 @@ namespace SIM {
 					vvy += w * (phiy[q] - phiy[p]) * npq;
 				}
 			}
+			MatPPH inv = MatPPH::Zero();
 			if (abs(mm.determinant()) < eps_mat) {
 #if DEBUG
 				std::cout << " (DivH) ID: " << p << " --- " << " Determinant defficiency: " << mm.determinant() << std::endl;
 #endif
 				auto mm_ = mm.block<2, 2>(0, 0);
-				if (abs(mm_.determinant()) < eps_mat) invRef = MatPP::Zero();
-				else invRef.block<2, 2>(0, 0) = mm_.inverse();
+				if (abs(mm_.determinant()) < eps_mat) inv = MatPPH::Zero();
+				else inv.block<2, 2>(0, 0) = mm_.inverse();
 			}
-			else invRef = mm.inverse();
-			const R pupx = pnH_px_o* mm * vvx;
-			const R pvpy = pnH_py_o* mm * vvy;
+			else inv = mm.inverse();
+			const R pupx = pnH_px_o* inv * vvx;
+			const R pvpy = pnH_py_o* inv * vvy;
 			return pupx + pvpy;
 		}
 
