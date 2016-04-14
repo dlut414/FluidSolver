@@ -46,7 +46,8 @@ x86
 x64
 x64/*
 x86/*
-Release/
+Release
+Debug
 *.log
 *.obj
 *.pdb
@@ -62,4 +63,3 @@ out/*
 *.dll
 *.obj
 *.pch
-*.vcxproj
