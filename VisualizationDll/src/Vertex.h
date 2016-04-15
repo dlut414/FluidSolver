@@ -16,24 +16,24 @@ uniform mat4 vProjectionMat;
 
 layout(location = 0) in int vType;
 layout(location = 1) in vec3 vPos;
-layout(location = 2) in float v3;
-layout(location = 3) in float v4;
+layout(location = 2) in float vS1;
+layout(location = 3) in float vS2;
 
 flat out int fType;
 out vec4 fPos;
-out float f3;
-out float f4;
+out float fS1;
+out float fS2;
 
 void main() {
-	vec3 pos = vec3(vPos.x, vPos.y, 0.2f*v3);
+	vec3 pos = vec3(vPos.x, vPos.y, 0.2f*vS1);
 	fType = vType;
 	fPos = vMvp * vec4(pos, 1.0f);
 
-	f3 = v3;
-	f4 = v4;
+	fS1 = vS1;
+	fS2 = vS2;
 
 	gl_Position = fPos;
-	gl_PointSize = 4.;// +scal / 5.e10;
+	gl_PointSize = 4.0f;// +scal / 5.e10;
 }
 
 );
@@ -83,6 +83,6 @@ void main() {
 	vec3 pos = vec3(vPosX, vPosY, 0.0f);
 	vec4 fPos = vMvp * vec4(pos, 1.0f);
 	gl_Position = fPos;
-	gl_PointSize = 4.0;
+	gl_PointSize = 4.0f;
 }
 );

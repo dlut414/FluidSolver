@@ -44,15 +44,15 @@ namespace VIS {
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			glUseProgram(shaderObj.programID[0]);
 			
-			//glUniform1i(shaderObj.intID[0], controlPtr->i_visFlag);
-			//glUniform1f(shaderObj.floatID[0], controlPtr->f_visRange);
+			//glUniform1f(shaderObj.floatID[0], controlPtr->f_sRangeMax);
+			//glUniform1f(shaderObj.floatID[1], controlPtr->f_sRangeMin);
 			//glUniformMatrix4fv(shaderObj.matrixID[0], 1, GL_FALSE, &(controlPtr->m_mvp[0][0]));
 			//glUniformMatrix4fv(shaderObj.matrixID[1], 1, GL_FALSE, &(controlPtr->m_mvpInv[0][0]));
 			//glUniformMatrix4fv(shaderObj.matrixID[2], 1, GL_FALSE, &(controlPtr->m_modelMat[0][0]));
 			//glUniformMatrix4fv(shaderObj.matrixID[3], 1, GL_FALSE, &(controlPtr->m_viewMat[0][0]));
 			//glUniformMatrix4fv(shaderObj.matrixID[4], 1, GL_FALSE, &(controlPtr->m_projectionMat[0][0]));
-			glUniform1i(glGetUniformLocation(shaderObj.programID[0], "flag"), controlPtr->i_visFlag);
-			glUniform1f(glGetUniformLocation(shaderObj.programID[0], "range"), controlPtr->f_visRange);
+			glUniform1f(glGetUniformLocation(shaderObj.programID[0], "sRangeMax"), controlPtr->f_sRangeMax);
+			glUniform1f(glGetUniformLocation(shaderObj.programID[0], "sRangeMin"), controlPtr->f_sRangeMin);
 			glUniformMatrix4fv(glGetUniformLocation(shaderObj.programID[0], "vMvp"), 1, GL_FALSE, &(controlPtr->m_mvp[0][0]));
 			glUniformMatrix4fv(glGetUniformLocation(shaderObj.programID[0], "fMvpInv"), 1, GL_FALSE, &(controlPtr->m_mvpInv[0][0]));
 			glUniformMatrix4fv(glGetUniformLocation(shaderObj.programID[0], "vModelMat"), 1, GL_FALSE, &(controlPtr->m_modelMat[0][0]));
@@ -94,7 +94,7 @@ namespace VIS {
 			glClearDepth(1);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-			///use program0
+			///use program1
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) printf("0 not ready\n");
 			glViewport(0, 0, controlPtr->u_width, controlPtr->u_height);
@@ -105,8 +105,8 @@ namespace VIS {
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			glUseProgram(shaderObj.programID[1]);
 
-			glUniform1i(glGetUniformLocation(shaderObj.programID[1], "flag"), controlPtr->i_visFlag);
-			glUniform1f(glGetUniformLocation(shaderObj.programID[1], "range"), controlPtr->f_visRange);
+			glUniform1f(glGetUniformLocation(shaderObj.programID[1], "sRangeMax"), controlPtr->f_sRangeMax);
+			glUniform1f(glGetUniformLocation(shaderObj.programID[1], "sRangeMin"), controlPtr->f_sRangeMin);
 			glUniformMatrix4fv(glGetUniformLocation(shaderObj.programID[1], "vMvp"), 1, GL_FALSE, &(controlPtr->m_mvp[0][0]));
 			glUniformMatrix4fv(glGetUniformLocation(shaderObj.programID[1], "fMvpInv"), 1, GL_FALSE, &(controlPtr->m_mvpInv[0][0]));
 			glUniformMatrix4fv(glGetUniformLocation(shaderObj.programID[1], "vModelMat"), 1, GL_FALSE, &(controlPtr->m_modelMat[0][0]));
@@ -225,8 +225,8 @@ namespace VIS {
 			//shaderObj.matrixID.push_back( glGetUniformLocation(shaderObj.programID[0], "vModelMat") );
 			//shaderObj.matrixID.push_back( glGetUniformLocation(shaderObj.programID[0], "vViewMat") );
 			//shaderObj.matrixID.push_back( glGetUniformLocation(shaderObj.programID[0], "vProjectionMat") );
-			//shaderObj.intID.push_back(glGetUniformLocation(shaderObj.programID[0], "flag"));
-			//shaderObj.floatID.push_back(glGetUniformLocation(shaderObj.programID[0], "range"));
+			//shaderObj.floatID.push_back(glGetUniformLocation(shaderObj.programID[0], "sRangeMax"));
+			//shaderObj.floatID.push_back(glGetUniformLocation(shaderObj.programID[0], "sRangeMin"));
 		}
 	};
 

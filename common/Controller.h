@@ -11,9 +11,12 @@
 
 namespace VIS {
 
+	enum DISPLAYMODE { DMODE_ONE = 1, DMODE_TWO = 2, DMODE_THREE = 3, DMODE_FOUR = 4, };
+
 	class Controller {
 	public:
 		Controller() {
+			m_mode = DMODE_ONE;
 			f_scaleVel = 0.0010f;
 			f_panVel = 0.001f;
 			f_visScaleVel = 0.1f;
@@ -40,8 +43,8 @@ namespace VIS {
 			b_bmp = false;
 			u_width = 1024;
 			u_height = 800;
-			i_visFlag = 1;
-			f_visRange = 1.0f;
+			f_sRangeMax = 1.0f;
+			f_sRangeMin = -1.0f;
 
 			m_camera.SetPosition(m_initCameraPosition);
 			//m_camera.SetProjectionRH(45.0f, float(u_width)/float(u_height), f_near, f_far);
@@ -137,20 +140,6 @@ namespace VIS {
 			case 0x10: //ctrl p
 				b_bmp = true;
 				break;
-			case 0x31: //1
-				i_visFlag = 1;
-				break;
-			case 0x32: //2
-				i_visFlag = 2;
-				break;
-			case 0x5d: // ]
-				f_visRange *= (1.f + f_visScaleVel);
-				std::cout << "range: " << f_visRange << std::endl;
-				break;
-			case 0x5b: // [
-				f_visRange *= (1.f - f_visScaleVel);
-				std::cout << "range: " << f_visRange << std::endl;
-				break;
 			default:
 				break;
 			}
@@ -158,6 +147,7 @@ namespace VIS {
 		}
 
 	public:
+		DISPLAYMODE m_mode;
 		Camera      m_camera;
 		glm::ivec2  m_mousePos;
 		glm::quat   m_rotation;
@@ -189,8 +179,8 @@ namespace VIS {
 		int         i_mouseButton;
 		int         i_file;
 
-		int			i_visFlag;
-		float		f_visRange;
+		float		f_sRangeMax;
+		float		f_sRangeMin;
 
 	private:
 		float       f_scaleVel;
