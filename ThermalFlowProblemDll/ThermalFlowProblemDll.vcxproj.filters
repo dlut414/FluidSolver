@@ -66,6 +66,9 @@
     <ClInclude Include="FractionalStep_KM_DC.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="FractionalStep_KM_DC_A.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

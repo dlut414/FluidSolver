@@ -324,7 +324,7 @@ namespace SIM {
 			MatPP inv = MatPP::Zero();
 			if (abs(mm.determinant()) < eps_mat) {
 #if DEBUG
-				std::cout << " ID: " << p << " --- " << " Determinant defficiency: " << mm.determinant() << std::endl;
+				std::cout << " (interpolateLSA) ID: " << p << " --- " << " Determinant defficiency: " << mm.determinant() << std::endl;
 #endif
 				auto mm_ = mm.block<2, 2>(0, 0);
 				if (abs(mm_.determinant()) < eps_mat) {
@@ -370,7 +370,7 @@ namespace SIM {
 			MatPP inv = MatPP::Zero();
 			if (abs(mm.determinant()) < eps_mat) {
 #if DEBUG
-				std::cout << " ID: " << p << " --- " << " Determinant defficiency: " << mm.determinant() << std::endl;
+				std::cout << " (interpolateLSA) ID: " << p << " --- " << " Determinant defficiency: " << mm.determinant() << std::endl;
 #endif
 				auto mm_ = mm.block<2, 2>(0, 0);
 				if (abs(mm_.determinant()) < eps_mat) {
@@ -421,7 +421,7 @@ namespace SIM {
 			MatPP inv = MatPP::Zero();
 			if (abs(mm.determinant()) < eps_mat) {
 #if DEBUG
-				std::cout << " ID: " << p << " --- " << " Determinant defficiency: " << mm.determinant() << std::endl;
+				std::cout << " (interpolateLSAU) ID: " << p << " --- " << " Determinant defficiency: " << mm.determinant() << std::endl;
 #endif
 				auto mm_ = mm.block<2, 2>(0, 0);
 				if (abs(mm_.determinant()) < eps_mat) {
@@ -467,7 +467,7 @@ namespace SIM {
 			MatPP inv = MatPP::Zero();
 			if (abs(mm.determinant()) < eps_mat) {
 #if DEBUG
-				std::cout << " ID: " << p << " --- " << " Determinant defficiency: " << mm.determinant() << std::endl;
+				std::cout << " (interpolateLSAU) ID: " << p << " --- " << " Determinant defficiency: " << mm.determinant() << std::endl;
 #endif
 				auto mm_ = mm.block<2, 2>(0, 0);
 				if (abs(mm_.determinant()) < eps_mat) {
@@ -826,6 +826,43 @@ namespace SIM {
 			const R pupx = pnH_px_o* inv * vvx;
 			const R pvpy = pnH_py_o* inv * vvy;
 			return pupx + pvpy;
+		}
+
+		const void DivGrad(const R* const phi, R* const DG) const {
+			std::vector<Vec> gradient(np);
+#if OMP
+#pragma omp parallel for
+#endif
+			for (int p = 0; p < np; p++) {
+				gradient[p] = Grad(phi, p);
+			}
+#if OMP
+#pragma omp parallel for
+#endif
+			for (int p = 0; p < np; p++) {
+				VecP vvx = VecP::Zero();
+				VecP vvy = VecP::Zero();
+				const int cx = cell->pos2cell(pos[0][p]);
+				const int cy = cell->pos2cell(pos[1][p]);
+				for (int i = 0; i < cell->blockSize::value; i++) {
+					const int key = cell->hash(cx, cy, i);
+					for (int m = 0; m < cell->linkList[key].size(); m++) {
+						const int q = cell->linkList[key][m];
+						if (type[q] == BD2) continue;
+						const R dr[2] = { pos[0][q] - pos[0][p], pos[1][q] - pos[1][p] };
+						const R dr1 = sqrt(dr[0] * dr[0] + dr[1] * dr[1]);
+						if (dr1 > r0) continue;
+						const R w = ww(dr1);
+						VecP npq;
+						poly(dr, npq.data());
+						vvx += w * (gradient[q][0] - gradient[p][0]) * npq;
+						vvy += w * (gradient[q][1] - gradient[p][1]) * npq;
+					}
+				}
+				const R pupx = pn_px_o* invMat[p] * vvx;
+				const R pvpy = pn_py_o* invMat[p] * vvy;
+				DG[p] = pupx + pvpy;
+			}
 		}
 
 	public:
