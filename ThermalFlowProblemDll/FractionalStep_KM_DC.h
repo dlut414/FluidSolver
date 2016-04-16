@@ -47,8 +47,6 @@ namespace SIM {
 			part->init_x();
 			sen = new Sensor<R,2,Particle_x<R,2,P>>(part);
 			*sen << "Sensor.in";
-			divL.resize(part->np, R(0));
-			divH.resize(part->np, R(0));
 		}
 
 		void step() {
@@ -59,6 +57,7 @@ namespace SIM {
 			temperatureTerm_i_q1();
 
 			syncPos();
+			updateVelocity_q2();
 			updatePosition_s2();
 
 			calCell();
@@ -96,16 +95,9 @@ namespace SIM {
 		}
 
 		void presTerm_i_q2() {
-			for (int p = 0; p < part->np; p++) {
-				divL[p] = part->Div(part->vel_p1[0].data(), part->vel_p1[1].data(), p);
-				divH[p] = part->DivH(part->vel_p1[0].data(), part->vel_p1[1].data(), p);
-			}
-			for (int i = 0; i < 3; i++) {
-				makeLhs_p();
-				makeRhs_p_q2();
-				solvMat_phi();
-				updateVelocity_q2();
-			}
+			makeLhs_p();
+			makeRhs_p_q2();
+			solvMat_phi();
 		}
 
 		void presTerm_i_q1() {
@@ -379,10 +371,10 @@ namespace SIM {
 					mSol->b[p] = 0.0;
 					continue;
 				}
-				const R div = part->Div(part->vel_p1[0].data(), part->vel_p1[1].data(), p);
-				mSol->b[p] = coefL * (div + (divH[p] - divL[p]));
-				divL[p] = div;
-				divH[p] = part->DivH(part->vel_p1[0].data(), part->vel_p1[1].data(), p);
+				const R div_local = part->Div(part->vel_p1[0].data(), part->vel_p1[1].data(), p);
+				const R divL_old_local = part->Div(part->vel[0].data(), part->vel[1].data(), p);
+				const R divH_old_local = part->DivH(part->vel[0].data(), part->vel[1].data(), p);
+				mSol->b[p] = coefL * (div_local + (divH_old_local - divL_old_local));
 				if (IS(part->bdc[p], P_NEUMANN)) {
 					VecP inner = VecP::Zero();
 					inner.block<2,1>(0, 0) = part->bdnorm.at(p);
@@ -508,8 +500,6 @@ namespace SIM {
 	private:
 		Shifter<R,2> shi;
 		std::vector<Tpl> coef;
-		std::vector<R> divL;
-		std::vector<R> divH;
 	};
 
 	template <typename R, int P>

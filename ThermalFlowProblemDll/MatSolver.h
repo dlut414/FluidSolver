@@ -243,8 +243,8 @@ namespace SIM {
 			std::vector<Tpl> coef;
 			for (int p = 0; p<n; p++) {
 				if (type[p] == BD2) continue;
-				coef.push_back(Tpl(n, p, 1.));
-				coef.push_back(Tpl(p, n, 1.));
+				coef.push_back(Tpl(n, p, R(1)));
+				coef.push_back(Tpl(p, n, R(1)));
 			}
 			d.setFromTriplets(coef.begin(), coef.end());
 			a = a + d;

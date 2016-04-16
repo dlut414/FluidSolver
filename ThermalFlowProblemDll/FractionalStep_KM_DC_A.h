@@ -96,10 +96,14 @@ namespace SIM {
 		}
 
 		void presTerm_i_q2() {
-			for (int i = 0; i < 3; i++) {
+			for (int i = 0; i < 1; i++) {
 				makeLhs_p();
 				makeRhs_p_q2();
 				solvMat_phi();
+			}
+			for (int p = 0; p < part->np; p++) {
+				//std::cout << (R(3.0) / (R(2.0)* para.dt))* part->Div(part->vel_p1[0].data(), part->vel_p1[1].data(), p) - part->Lap(part->phi.data(), p) - mSol->x[part->np] << std::endl;
+				//std::cout << (mSol->a.row(p).dot( mSol->x)) - mSol->b[p] << std::endl;
 			}
 		}
 
@@ -328,7 +332,7 @@ namespace SIM {
 			coef.clear();
 			for (int p = 0; p < part->np; p++) {
 				if (part->type[p] == BD2) {
-					coef.push_back(Tpl(p, p, 1.));
+					coef.push_back(Tpl(p, p, R(1)));
 					continue;
 				}
 				R pqsum = R(0);
@@ -372,7 +376,7 @@ namespace SIM {
 #endif
 			for (int p = 0; p < part->np; p++) {
 				if (part->type[p] == BD2) {
-					mSol->b[p] = 0.0;
+					mSol->b[p] = R(0);
 					continue;
 				}
 				const R div_local = part->Div(part->vel_p1[0].data(), part->vel_p1[1].data(), p);
