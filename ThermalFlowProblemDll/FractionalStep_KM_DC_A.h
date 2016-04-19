@@ -101,10 +101,10 @@ namespace SIM {
 				makeRhs_p_q2();
 				solvMat_phi();
 			}
-			for (int p = 0; p < part->np; p++) {
-				//std::cout << (R(3.0) / (R(2.0)* para.dt))* part->Div(part->vel_p1[0].data(), part->vel_p1[1].data(), p) - part->Lap(part->phi.data(), p) - mSol->x[part->np] << std::endl;
-				//std::cout << (mSol->a.row(p).dot( mSol->x)) - mSol->b[p] << std::endl;
-			}
+			//for (int p = 0; p < part->np; p++) {
+			//	//std::cout << (R(3.0) / (R(2.0)* para.dt))* part->Div(part->vel_p1[0].data(), part->vel_p1[1].data(), p) - part->Lap(part->phi.data(), p) - mSol->x[part->np] << std::endl;
+			//	//std::cout << (mSol->a.row(p).dot( mSol->x)) - mSol->b[p] << std::endl;
+			//}
 		}
 
 		void presTerm_i_q1() {
@@ -315,8 +315,13 @@ namespace SIM {
 #endif
 			for (int p = 0; p < part->np; p++) {
 				if (part->type[p] == BD1 || part->type[p] == BD2) {
-					mSol->rhs[2 * p + 0] = part->vel[0][p];
-					mSol->rhs[2 * p + 1] = part->vel[1][p];
+					const R coef_local = R(2) / R(3);
+					const Vec lap_local = part->Lap(part->vel[0].data(), part->vel[1].data(), p);
+					const R volumeForce_local = para.Ra* para.Pr* part->temp[p];
+					mSol->rhs[2 * p + 0] = coef_local* (para.dt*(para.Pr* lap_local[0]) + R(2)*part->vel[0][p] - R(0.5)*part->vel_m1[0][p]);
+					mSol->rhs[2 * p + 1] = coef_local* (para.dt*(para.Pr* lap_local[1] + volumeForce_local) + R(2)*part->vel[1][p] - R(0.5)*part->vel_m1[1][p]);
+					//mSol->rhs[2 * p + 0] = part->vel[0][p];
+					//mSol->rhs[2 * p + 1] = part->vel[1][p];
 					continue;
 				}
 				const R coefL = 1.0 / (2.0* para.dt * para.Pr);

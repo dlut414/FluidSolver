@@ -222,7 +222,6 @@ namespace SIM {
 #pragma omp parallel for
 #endif
 			for (int p = 0; p < part->np; p++) {
-				if (part->type[p] != FLUID) continue;
 				part->vel_p1[0][p] = mSol->u[2*p];
 				part->vel_p1[1][p] = mSol->u[2*p+1];
 			}
@@ -268,7 +267,7 @@ namespace SIM {
 #endif
 			for (int p = 0; p < part->np; p++) {
 				part->vort[p] = part->Rot(part->vel[0].data(), part->vel[1].data(), p);
-				part->div[p] = part->Div(part->vel_p1[0].data(), part->vel_p1[1].data(), p);
+				part->div[p] = part->Div(part->vel[0].data(), part->vel[1].data(), p);
 			}
 		}
 
