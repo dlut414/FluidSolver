@@ -14,6 +14,7 @@
 #include "FractionalStep_DD.h"
 #include "FractionalStep_KM_DC.h"
 #include "FractionalStep_KM_DC_A.h"
+#include "FractionalStep_X.h"
 #include <PreInformation.h>
 
 namespace SIM {

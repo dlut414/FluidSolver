@@ -257,7 +257,7 @@ namespace SIM {
 				if (IS(part->bdc[p], P_NEUMANN)) {
 					VecP inner = VecP::Zero();
 					inner.block<2, 1>(0, 0) = part->bdnorm.at(p);
-					const VecP aa = part->invMat[p] * inner;
+					const VecP aa = part->invNeu.at(p)* inner;
 					const R cst = part->p_neumann.at(p)*part->ww(0.0)* (1.0 / part->varrho) * (part->pn_lap_o.dot(aa));
 					mSol->b[p] -= cst;
 				}
@@ -326,7 +326,7 @@ namespace SIM {
 				if (IS(part->bdc[p], T_NEUMANN)) {
 					VecP inner = VecP::Zero();
 					inner.block<2, 1>(0, 0) = part->bdnorm.at(p);
-					const VecP aa = part->invMat[p] * inner;
+					const VecP aa = part->invNeu.at(p)* inner;
 					const R cst = part->p_neumann.at(p)*part->ww(0.0)* (1.0 / part->varrho) * (part->pn_lap_o.dot(aa));
 					mSol->b[p] -= cst;
 				}

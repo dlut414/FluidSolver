@@ -151,6 +151,7 @@
     <ClInclude Include="FractionalStep_KM.h" />
     <ClInclude Include="FractionalStep_KM_DC.h" />
     <ClInclude Include="FractionalStep_KM_DC_A.h" />
+    <ClInclude Include="FractionalStep_X.h" />
     <ClInclude Include="Header.h" />
     <ClInclude Include="LinkCell.h" />
     <ClInclude Include="MatSolver.h" />
