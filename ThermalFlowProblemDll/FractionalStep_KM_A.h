@@ -5,9 +5,9 @@
 * Author: HUFANGYUAN
 * Released under CC BY-NC
 */
-//FractionalStep_X.h
-///defination of class FractionalStep_X
-/// solve pressure term first then viscousity term; 
+//FractionalStep_KM_A.h
+///defination of class FractionalStep_KM_A (Kim & Moin)
+/// FractionalStep scheme with modified Dirichlet condition for velocity and Neumann condition for Pressure
 #pragma once
 #include "Simulator.h"
 #include "Particle_x.h"
@@ -16,13 +16,13 @@
 namespace SIM {
 	
 	template <typename R, int D, int P>
-	class FractionalStep_X : public Simulator<R,D,FractionalStep_X<R,D,P>> {};
+	class FractionalStep_KM_A : public Simulator<R,D,FractionalStep_KM_A<R,D,P>> {};
 
 	template <typename R, int P>
-	class FractionalStep_X<R,1,P> : public Simulator<R,1,FractionalStep_X<R,1,P>> {};
+	class FractionalStep_KM_A<R,1,P> : public Simulator<R,1,FractionalStep_KM_A<R,1,P>> {};
 
 	template <typename R, int P>
-	class FractionalStep_X<R,2,P> : public Simulator<R,2,FractionalStep_X<R,2,P>> {
+	class FractionalStep_KM_A<R,2,P> : public Simulator<R,2,FractionalStep_KM_A<R,2,P>> {
 		typedef mMath::Polynomial_A<R,2,P> PN;
 		typedef mMath::Derivative_A<R,2,P> DR;
 		typedef Eigen::Matrix<R,PN::value,1> VecP;
@@ -30,8 +30,8 @@ namespace SIM {
 		typedef Eigen::Matrix<R,PN::value,PN::value> MatPP;
 		typedef Eigen::Triplet<R> Tpl;
 	public:
-		FractionalStep_X() {}
-		~FractionalStep_X() {}
+		FractionalStep_KM_A() {}
+		~FractionalStep_KM_A() {}
 
 		void init_() {
 			part = new Particle_x<R,2,P>();
@@ -47,15 +47,14 @@ namespace SIM {
 			part->init_x();
 			sen = new Sensor<R,2,Particle_x<R,2,P>>(part);
 			*sen << "Sensor.in";
-			Div_old.resize(part->np);
 		}
 
 		void step() {
 			calInvMat();
 
-			temperatureTerm_i_q1();
-			presTerm_i_q2();
 			visTerm_i_q2r0();
+			presTerm_i_q2();
+			temperatureTerm_i_q1();
 
 			syncPos();
 			updateVelocity_q2();
@@ -145,14 +144,23 @@ namespace SIM {
 #pragma omp parallel for
 #endif
 			for (int p = 0; p < part->np; p++) {
-				part->pres[p] = part->phi[p];
+				if (part->type[p] == FLUID || part->type[p] == BD1) {
+					part->pres[p] = part->phi[p];
+				}
 			}
 #if OMP
 #pragma omp parallel for
 #endif
 			for (int p = 0; p < part->np; p++) {
-				part->vel_p1[0][p] = part->vel[0][p];
-				part->vel_p1[1][p] = part->vel[1][p];
+				if (part->type[p] == FLUID) {
+					const Vec du = -coefL * part->Grad(part->phi.data(), p);
+					part->vel_p1[0][p] += du[0];
+					part->vel_p1[1][p] += du[1];
+				}
+				else if (part->type[p] == BD1) {
+					part->vel_p1[0][p] = part->vel[0][p];
+					part->vel_p1[1][p] = part->vel[1][p];
+				}
 			}
 		}
 
@@ -308,15 +316,18 @@ namespace SIM {
 #endif
 			for (int p = 0; p < part->np; p++) {
 				if (part->type[p] == BD1 || part->type[p] == BD2) {
-					mSol->rhs[2 * p + 0] = part->vel[0][p];
-					mSol->rhs[2 * p + 1] = part->vel[1][p];
+					const R coef_local = R(2) / R(3);
+					const Vec lap_local = part->Lap(part->vel[0].data(), part->vel[1].data(), p);
+					const R volumeForce_local = para.Ra* para.Pr* part->temp[p];
+					mSol->rhs[2 * p + 0] = coef_local* (para.dt*(para.Pr* lap_local[0]) + R(2)*part->vel[0][p] - R(0.5)*part->vel_m1[0][p]);
+					mSol->rhs[2 * p + 1] = coef_local* (para.dt*(para.Pr* lap_local[1] + volumeForce_local) + R(2)*part->vel[1][p] - R(0.5)*part->vel_m1[1][p]);
+					//mSol->rhs[2 * p + 0] = part->vel[0][p];
+					//mSol->rhs[2 * p + 1] = part->vel[1][p];
 					continue;
 				}
 				const R coefL = R(1) / (R(2)* para.dt * para.Pr);
-				const R coefP = R(1) / para.Pr;
-				const Vec p_grad_local = part->Grad(part->phi.data(), p);
-				const R rhsx = coefL* (R(4)* part->vel[0][p] - part->vel_m1[0][p]) - coefP* p_grad_local[0];
-				const R rhsy = coefL* (R(4)* part->vel[1][p] - part->vel_m1[1][p]) + para.Ra* part->temp[p] - coefP* p_grad_local[1];
+				const R rhsx = coefL* (R(4)* part->vel[0][p] - part->vel_m1[0][p]);
+				const R rhsy = coefL* (R(4)* part->vel[1][p] - part->vel_m1[1][p]) + para.Ra* part->temp[p];
 				mSol->rhs[2 * p + 0] = rhsx;
 				mSol->rhs[2 * p + 1] = rhsy;
 			}
@@ -364,21 +375,19 @@ namespace SIM {
 		}
 
 		void makeRhs_p_q2() {
-			const R RaPr = para.Ra* para.Pr;
-			const R one_over_dt = R(1) / para.dt;
+			const R coefL = R(3) / (R(2)* para.dt);
 #if OMP
 #pragma omp parallel for
 #endif
 			for (int p = 0; p < part->np; p++) {
-				const R pt_py_local = part->DerY(part->temp.data(), p);
-				const R div_u_local = part->Div(part->vel[0].data(), part->vel[1].data(), p);
-				const R div_um1_local = part->Div(part->vel_m1[0].data(), part->vel_m1[1].data(), p);
-				mSol->b[p] = RaPr * pt_py_local + one_over_dt* (R(2)* div_u_local - R(0.5)* div_um1_local);
+				const R div_local = part->Div(part->vel_p1[0].data(), part->vel_p1[1].data(), p);
+				const R LP_old_local = part->Lap(part->phi.data(), p);
+				mSol->b[p] = coefL * div_local;
 				if (IS(part->bdc[p], P_NEUMANN)) {
 					Vec& normal = part->bdnorm.at(p);
 					VecP inner = VecP::Zero();
-					inner.block<2, 1>(0, 0) = normal;
-					const Vec lap_ustar_local = part->Lap(part->vel_p1[0].data(), part->vel_p1[1].data(), p);
+					inner.block<2,1>(0, 0) = normal;
+					const Vec lap_ustar_local = part->Lap(part->vel[0].data(), part->vel[1].data(), p);
 					const R neumannX = para.Pr* lap_ustar_local[0];
 					const R neumannY = para.Pr* lap_ustar_local[1] + para.Ra* para.Pr* part->temp[p];
 					const R neumann = neumannX* normal[0] + neumannY* normal[1];
@@ -507,9 +516,8 @@ namespace SIM {
 	private:
 		Shifter<R,2> shi;
 		std::vector<Tpl> coef;
-		std::vector<R> Div_old;
 	};
 
 	template <typename R, int P>
-	class FractionalStep_X<R,3,P> : public Simulator<R,3,FractionalStep_X<R,3,P>>  {};
+	class FractionalStep_KM_A<R,3,P> : public Simulator<R,3,FractionalStep_KM_A<R,3,P>>  {};
 }

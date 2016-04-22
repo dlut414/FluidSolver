@@ -10,7 +10,7 @@
 
 #include "stdafx.h"
 #include "ThermalFlowProblemDll.h"
-#include "FractionalStep_KM.h"
+#include "FractionalStep_KM_A.h"
 #include "FractionalStep_DD.h"
 #include "FractionalStep_KM_DC.h"
 #include "FractionalStep_KM_DC_A.h"
@@ -19,7 +19,7 @@
 
 namespace SIM {
 
-	typedef FractionalStep_KM_DC_A<Parameters::DataType, Parameters::Dimension, Parameters::Order> FS;
+	typedef FractionalStep_KM_A<Parameters::DataType, Parameters::Dimension, Parameters::Order> FS;
 	typedef FS* FSPtr;
 
 	static FSPtr objPtr;

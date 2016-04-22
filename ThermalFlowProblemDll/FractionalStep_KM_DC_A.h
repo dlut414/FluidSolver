@@ -7,7 +7,7 @@
 */
 //FractionalStep_KM_DC_A.h
 ///defination of class FractionalStep_KM_DC_A (Kim & Moin - using deferred correction)
-
+///using Deferred Correction (DC) in the source term of pressure poisson equation
 #pragma once
 #include "Simulator.h"
 #include "Particle_x.h"
@@ -96,7 +96,7 @@ namespace SIM {
 		}
 
 		void presTerm_i_q2() {
-			for (int i = 0; i < 1; i++) {
+			for (int i = 0; i < 5; i++) {
 				makeLhs_p();
 				makeRhs_p_q2();
 				solvMat_phi();

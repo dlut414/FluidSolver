@@ -27,9 +27,6 @@
     <ClInclude Include="ThermalFlowProblemDll.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="FractionalStep_KM.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Particle.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -70,6 +67,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="FractionalStep_X.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FractionalStep_KM_A.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FractionalStep_KM-deprecated.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
