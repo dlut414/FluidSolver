@@ -140,19 +140,12 @@ namespace SIM {
 		}
 
 		void updateVelocity_q2() {
-			const R coefL = (2.0* para.dt) / (3.0);
+			const R coefL = (R(2)* para.dt) / (R(3));
 #if OMP
 #pragma omp parallel for
 #endif
 			for (int p = 0; p < part->np; p++) {
 				part->pres[p] = part->phi[p];
-			}
-#if OMP
-#pragma omp parallel for
-#endif
-			for (int p = 0; p < part->np; p++) {
-				part->vel_p1[0][p] = part->vel[0][p];
-				part->vel_p1[1][p] = part->vel[1][p];
 			}
 		}
 
@@ -312,11 +305,11 @@ namespace SIM {
 					mSol->rhs[2 * p + 1] = part->vel[1][p];
 					continue;
 				}
-				const R coefL = R(1) / (R(2)* para.dt * para.Pr);
-				const R coefP = R(1) / para.Pr;
+				const R coef_vel_local = R(1) / (R(2)* para.dt * para.Pr);
+				const R coef_pres_local = R(1) / para.Pr;
 				const Vec p_grad_local = part->Grad(part->phi.data(), p);
-				const R rhsx = coefL* (R(4)* part->vel[0][p] - part->vel_m1[0][p]) - coefP* p_grad_local[0];
-				const R rhsy = coefL* (R(4)* part->vel[1][p] - part->vel_m1[1][p]) + para.Ra* part->temp[p] - coefP* p_grad_local[1];
+				const R rhsx = coef_vel_local* (R(4)* part->vel[0][p] - part->vel_m1[0][p]) - coef_pres_local* p_grad_local[0];
+				const R rhsy = coef_vel_local* (R(4)* part->vel[1][p] - part->vel_m1[1][p]) + para.Ra* part->temp[p] - coef_pres_local* p_grad_local[1];
 				mSol->rhs[2 * p + 0] = rhsx;
 				mSol->rhs[2 * p + 1] = rhsy;
 			}

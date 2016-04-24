@@ -90,7 +90,7 @@ namespace SIM {
 			vel[0].push_back(v[0]); vel[1].push_back(v[1]);
 			vel_p1[0].push_back(v[0]); vel_p1[1].push_back(v[1]);
 			vel_m1[0].push_back(v[0]); vel_m1[1].push_back(v[1]);
-			temp.push_back(tp); pres.push_back(R(0)); phi.push_back(R(0)); vort.push_back(R(0)); div.push_back(R(0));
+			temp.push_back(tp); temp_m1.push_back(tp); pres.push_back(R(0)); phi.push_back(R(0)); vort.push_back(R(0)); div.push_back(R(0));
 			bdc.push_back(0);
 		}
 
@@ -132,6 +132,7 @@ namespace SIM {
 		void b2normal() {
 			for (int p = 0; p < np; p++) {
 				if (type[p] == BD1) {
+					Vec gc = Vec::Zero();
 					Mat mm = Mat::Zero();
 					const int cx = cell->pos2cell(pos[0][p]);
 					const int cy = cell->pos2cell(pos[1][p]);
@@ -142,11 +143,12 @@ namespace SIM {
 							if (q == p || type[q] != BD1) continue;
 							const R dr[2] = { pos[0][q] - pos[0][p], pos[1][q] - pos[1][p] };
 							const R dr1 = sqrt(dr[0] * dr[0] + dr[1] * dr[1]);
-							if (dr1 > r0) continue;
+							if (dr1 > 1.1* dp) continue;
 							const R w = ww(dr1);
 							Vec nv = Vec::Zero();
 							nv[0] = w* dr[0] / dr1;
 							nv[1] = w* dr[1] / dr1;
+							gc += nv;
 							mm += nv* nv.transpose();
 						}
 					}
@@ -176,8 +178,7 @@ namespace SIM {
 						eigenvec[1] = mm(1, 0) / (eigenvalue - mm(1, 1));
 					}
 					else {
-						eigenvec[0] = R(1);
-						eigenvec[1] = R(1);
+						eigenvec = gc;
 					}
 					eigenvec.normalize();
 					bdnorm[p] = eigenvec;
@@ -226,6 +227,7 @@ namespace SIM {
 		std::vector<R> vel_m1[2];
 
 		std::vector<R> temp;
+		std::vector<R> temp_m1;
 		std::vector<R> pres;
 		std::vector<R> div;
 		std::vector<pType> type;

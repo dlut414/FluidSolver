@@ -6,7 +6,7 @@
 * Published under CC BY-NC
 */
 // ThermalFlowProblemDll_.cpp : Defines the exported functions for the DLL application.
-//
+/// specify the schemes by defining different solver classes
 
 #include "stdafx.h"
 #include "ThermalFlowProblemDll.h"
@@ -19,7 +19,7 @@
 
 namespace SIM {
 
-	typedef FractionalStep_KM_A<Parameters::DataType, Parameters::Dimension, Parameters::Order> FS;
+	typedef FractionalStep_X<Parameters::DataType, Parameters::Dimension, Parameters::Order> FS;
 	typedef FS* FSPtr;
 
 	static FSPtr objPtr;

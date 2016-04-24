@@ -36,6 +36,7 @@ namespace SIM {
 			std::vector<R> Du2x(part->np, R(0));
 			std::vector<R> Du2y(part->np, R(0));
 			std::vector<R> Dtemp(part->np, R(0));
+			std::vector<R> Dtemp_m1(part->np, R(0));
 			const R coef = para.umax* para.dt;
 #if OMP
 #pragma omp parallel for
@@ -96,6 +97,7 @@ namespace SIM {
 			for (int p = 0; p < part->np; p++) {
 				if (part->type[p] != FLUID) continue;
 				Dtemp[p] = part->derived().interpolateLSAU(part->temp.data(), p, Dposx[p], Dposy[p]);
+				Dtemp_m1[p] = part->derived().interpolateLSAU(part->temp_m1.data(), p, Dposx[p], Dposy[p]);
 			}
 #if OMP
 #pragma omp parallel for
@@ -109,6 +111,7 @@ namespace SIM {
 				part->vel_p1[0][p] = Du2x[p];
 				part->vel_p1[1][p] = Du2y[p];
 				part->temp[p] = Dtemp[p];
+				part->temp_m1[p] = Dtemp_m1[p];
 			}
 		}
 
@@ -119,6 +122,7 @@ namespace SIM {
 			std::vector<R> Du2x(part->np, R(0));
 			std::vector<R> Du2y(part->np, R(0));
 			std::vector<R> Dtemp(part->np, R(0));
+			std::vector<R> Dtemp_m1(part->np, R(0));
 #if OMP
 #pragma omp parallel for
 #endif
@@ -143,6 +147,7 @@ namespace SIM {
 			for (int p = 0; p < part->np; p++) {
 				if (part->type[p] != FLUID) continue;
 				Dtemp[p] = part->derived().interpolateLSAU(part->temp.data(), p, part->pos_m1[0][p], part->pos_m1[1][p]);
+				Dtemp_m1[p] = part->derived().interpolateLSAU(part->temp_m1.data(), p, part->pos_m1[0][p], part->pos_m1[1][p]);
 			}
 #if OMP
 #pragma omp parallel for
@@ -156,6 +161,7 @@ namespace SIM {
 				part->vel_p1[0][p] = Du2x[p];
 				part->vel_p1[1][p] = Du2y[p];
 				part->temp[p] = Dtemp[p];
+				part->temp_m1[p] = Dtemp_m1[p];
 			}
 		}
 
@@ -166,6 +172,7 @@ namespace SIM {
 			std::vector<R> Du2x(part->np, R(0));
 			std::vector<R> Du2y(part->np, R(0));
 			std::vector<R> Dtemp(part->np, R(0));
+			std::vector<R> Dtemp_m1(part->np, R(0));
 #if OMP
 #pragma omp parallel for
 #endif
@@ -188,6 +195,7 @@ namespace SIM {
 			for (int p = 0; p < part->np; p++) {
 				if (part->type[p] != FLUID) continue;
 				Dtemp[p] = part->derived().interpolateWENO(part->temp.data(), p, part->pos_m1[0][p], part->pos_m1[1][p]);
+				Dtemp_m1[p] = part->derived().interpolateWENO(part->temp_m1.data(), p, part->pos_m1[0][p], part->pos_m1[1][p]);
 			}
 #if OMP
 #pragma omp parallel for
@@ -201,6 +209,7 @@ namespace SIM {
 				part->vel_p1[0][p] = Du2x[p];
 				part->vel_p1[1][p] = Du2y[p];
 				part->temp[p] = Dtemp[p];
+				part->temp_m1[p] = Dtemp_m1[p];
 			}
 		}
 
