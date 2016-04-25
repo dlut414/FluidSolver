@@ -100,8 +100,8 @@ namespace SIM {
 			makeRhs_p_q2();
 			solvMat_phi();
 			//for (int p = 0; p < part->np; p++) {
-			//	//std::cout << (R(3.0) / (R(2.0)* para.dt))* part->Div(part->vel_p1[0].data(), part->vel_p1[1].data(), p) - part->Lap(part->phi.data(), p) - mSol->x[part->np] << std::endl;
-			//	//std::cout << (mSol->a.row(p).dot( mSol->x)) - mSol->b[p] << std::endl;
+			//	//if (p == 165) PRINT( (R(3.0) / (R(2.0)* para.dt))* part->Div(part->vel_p1[0].data(), part->vel_p1[1].data(), p) - part->Lap(part->phi.data(), p) - mSol->x[part->np] );
+			//	//if (p == 165) PRINT( (mSol->a.row(p).dot( mSol->x)) - mSol->b[p] );
 			//}
 		}
 

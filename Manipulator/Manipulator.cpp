@@ -91,10 +91,11 @@ static void onMouse(int button, int s, int x, int y) {
 			const Parameters::DataType* px = (Parameters::DataType*)Simulation::PositionX();
 			const Parameters::DataType* py = (Parameters::DataType*)Simulation::PositionY();
 			const Parameters::DataType* div = (Parameters::DataType*)Simulation::Divergence();
+			const Parameters::DataType* pres = (Parameters::DataType*)Simulation::Pressure();
 			std::cout << " --------------------------------------------------------------------- " << std::endl;
 			std::cout << " Particle ID : " << pickID << std::endl;
 			std::cout << " Coordinate (x,y) : " << px[pickID] << ", " << py[pickID] << std::endl;
-			std::cout << " Divergence : " << div[pickID] << std::endl;
+			std::cout << " Divergence : " << div[pickID] << "    " << " Pressure : " << pres[pickID] << std::endl;
 			std::cout << " --------------------------------------------------------------------- " << std::endl;
 		}
 	}
