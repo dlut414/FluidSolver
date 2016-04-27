@@ -53,7 +53,7 @@ namespace SIM {
 		void step() {
 			calInvMat();
 
-			temperatureTerm_i_q1();
+			temperatureTerm_i_CN1();
 			presTerm_i_q2();
 			visTerm_i_q2r0();
 
@@ -111,9 +111,9 @@ namespace SIM {
 			solvMat_phi();
 		}
 
-		void temperatureTerm_i_q1() {
-			makeLhs_t();
-			makeRhs_t_q1();
+		void temperatureTerm_i_CN1() {
+			makeLhs_t_CN1();
+			makeRhs_t_CN1();
 			solvMat_t();
 		}
 
@@ -406,7 +406,7 @@ namespace SIM {
 			}
 		}
 
-		void makeLhs_t() {
+		void makeLhs_t_CN1() {
 			coef.clear();
 			for (int p = 0; p < part->np; p++) {
 				if (part->type[p] == BD2) {
@@ -450,7 +450,7 @@ namespace SIM {
 			mSol->a.setFromTriplets(coef.begin(), coef.end());
 		}
 
-		void makeRhs_t_q1() {
+		void makeRhs_t_CN1() {
 			const R coefL = 0.5* para.dt;
 #if OMP
 #pragma omp parallel for

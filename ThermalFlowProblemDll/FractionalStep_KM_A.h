@@ -53,12 +53,12 @@ namespace SIM {
 			calInvMat();
 
 			temperatureTerm_i_q1CN();
-			visTerm_i_q1r0();
-			presTerm_i_q1();
+			visTerm_i_q2r0();
+			presTerm_i_q2();
 
 			syncPos();
-			updateVelocity_q1();
-			updatePosition_s1();
+			updateVelocity_q2();
+			updatePosition_s2();
 
 			calCell();
 			calInvMat();
@@ -149,7 +149,7 @@ namespace SIM {
 		}
 
 		void updateVelocity_q2() {
-			const R coef_local = (2.0* para.dt) / (3.0);
+			const R coef_local = (R(2)* para.dt) / R(3);
 #if OMP
 #pragma omp parallel for
 #endif
@@ -240,7 +240,7 @@ namespace SIM {
 						coef.push_back(Tpl(2 * p + 1, 2 * q + 1, pq));
 					}
 				}
-				pp += 3.0 / (2.0 * para.dt * para.Pr);
+				pp += R(3) / (R(2) * para.dt * para.Pr);
 				coef.push_back(Tpl(2 * p, 2 * p, pp));
 				coef.push_back(Tpl(2 * p + 1, 2 * p + 1, pp));
 			}
@@ -399,7 +399,6 @@ namespace SIM {
 #endif
 			for (int p = 0; p < part->np; p++) {
 				const R div_local = part->Div(part->vel_p1[0].data(), part->vel_p1[1].data(), p);
-				const R LP_old_local = part->Lap(part->phi.data(), p);
 				mSol->b[p] = coefL * div_local;
 				if (IS(part->bdc[p], P_NEUMANN)) {
 					Vec& normal = part->bdnorm.at(p);
@@ -488,7 +487,7 @@ namespace SIM {
 		}
 
 		void makeRhs_t_q1CN() {
-			const R coefL = R(0.5)* para.dt;
+			const R coef_local = R(0.5)* para.dt;
 #if OMP
 #pragma omp parallel for
 #endif
@@ -501,7 +500,7 @@ namespace SIM {
 					mSol->b[p] = part->t_dirichlet.at(p);
 					continue;
 				}
-				mSol->b[p] = part->temp[p] + coefL* part->Lap(part->temp.data(), p);
+				mSol->b[p] = part->temp[p] + coef_local* part->Lap(part->temp.data(), p);
 				if (IS(part->bdc[p], T_NEUMANN)) {
 					VecP inner = VecP::Zero();
 					inner.block<2,1>(0, 0) = part->bdnorm.at(p);
