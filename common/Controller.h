@@ -33,14 +33,14 @@ namespace VIS {
 			f_near = 0.001f;
 			f_far = 1000.f;
 
-			b_init = false;
-			b_dirty = true;
-			b_stop = true;
-			b_leave = false;
-			b_point = false;
-			b_save = false;
-			b_sens = false;
-			b_bmp = false;
+			i_init = 0;
+			i_dirty = 1;
+			i_stop = 1;
+			i_leave = 0;
+			i_point = 0;
+			i_save = 0;
+			i_sens = 1;
+			i_bmp = 0;
 			u_width = 1024;
 			u_height = 800;
 			f_sRangeMax = 1.0f;
@@ -98,27 +98,27 @@ namespace VIS {
 				break;
 			}
 			}
-			b_dirty = true;
+			i_dirty = 1;
 		}
 		void rollMouse(int button, int dir, int x, int y) {
 			m_scale *= dir * f_scaleVel;
-			b_dirty = true;
+			i_dirty = 1;
 		}
 
 		void reshapeWindow() {
-			b_dirty = true;
+			i_dirty = 1;
 		}
 
 		void pressKey(unsigned char key, int a, int b) {
 			switch (key) {
 			case 0x1b: //esc
-				b_leave = true; 
+				i_leave = 1; 
 				break;
 			case 0x0d: //enter
-				b_stop = !b_stop; 
+				i_stop = !i_stop; 
 				break;
 			case 0x70: //p
-				b_point = !b_point; 
+				i_point = !i_point; 
 				break;
 			case 0x20: //space
 				m_scale = m_initScale;
@@ -126,24 +126,24 @@ namespace VIS {
 				m_pan = m_initPan;
 				break;
 			case 0x2c: //,
-				b_init = true;
+				i_init = 1;
 				break;
 			case 0x2e: //.
-				b_init = true;
+				i_init = 1;
 				break;
 			case 0x53: //S
-				b_save = true;
+				i_save = 1;
 				break;
 			case 0x73: //s
-				b_sens = !b_sens;
+				i_sens = !i_sens;
 				break;
 			case 0x10: //ctrl p
-				b_bmp = true;
+				i_bmp = 1;
 				break;
 			default:
 				break;
 			}
-			b_dirty = true;
+			i_dirty = 1;
 		}
 
 	public:
@@ -168,14 +168,14 @@ namespace VIS {
 		GLuint      u_width;
 		GLuint      u_height;
 
-		bool        b_init;
-		bool        b_dirty;
-		bool        b_stop;
-		bool        b_leave;
-		bool        b_point;
-		bool		b_save;
-		bool		b_sens;
-		bool		b_bmp;
+		int			i_init;
+		int			i_dirty;
+		int			i_stop;
+		int			i_leave;
+		int			i_point;
+		int			i_save;
+		int			i_sens;
+		int			i_bmp;
 		int         i_mouseButton;
 		int         i_file;
 
