@@ -289,7 +289,7 @@ namespace SIM {
 				}
 				const R coefL = (R(1.0) / para.dt * para.Pr);
 				const R rhsx = coefL* part->vel[0][p];
-				const R rhsy = coefL* part->vel[0][p] + para.Ra* part->temp[p];
+				const R rhsy = coefL* part->vel[1][p] + para.Ra* part->temp[p];
 				mSol->rhs[2 * p + 0] = rhsx;
 				mSol->rhs[2 * p + 1] = rhsy;
 			}
