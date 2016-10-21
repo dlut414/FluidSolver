@@ -53,12 +53,12 @@ namespace SIM {
 			calInvMat();
 
 			temperatureTerm_i_q1CN();
-			visTerm_i_q2r0();
-			presTerm_i_q2();
+			visTerm_i_q1r0();
+			presTerm_i_q1();
 
 			syncPos();
-			updateVelocity_q2();
-			updatePosition_s2();
+			updateVelocity_q1();
+			updatePosition_s1();
 
 			calCell();
 			calInvMat();
@@ -71,9 +71,12 @@ namespace SIM {
 		}
 
 		void Redistribute() {
-			shi.StaticUpwindModel(part);
+			//shi.SpringLSIModel(part, para);
+			//shi.SpringULSIModel(part, para);
+			//shi.StaticLSIModel(part);
+			shi.StaticULSIModel(part);
+
 			//shi.StaticWENOModel(part);
-			//shi.SpringUpwindModel(part, para);
 		}
 
 		void visTerm_i_q2r1() {
@@ -175,15 +178,22 @@ namespace SIM {
 		}
 
 		void updatePosition_s1() {
-			//const R coef_local = R(0.5)* para.dt;
+//			const R coef_local = R(0.5)* para.dt;
+//#if OMP
+//#pragma omp parallel for
+//#endif
+//			for (int p = 0; p < part->np; p++) {
+//				if (part->type[p] == FLUID) {
+//					part->pos[0][p] += coef_local * (part->vel[0][p] + part->vel_p1[0][p]);
+//					part->pos[1][p] += coef_local * (part->vel[1][p] + part->vel_p1[1][p]);
+//				}
+//			}
 			const R coef_local = para.dt;
 #if OMP
 #pragma omp parallel for
 #endif
 			for (int p = 0; p < part->np; p++) {
 				if (part->type[p] == FLUID) {
-					//part->pos[0][p] += coef_local * (part->vel[0][p] + part->vel_p1[0][p]);
-					//part->pos[1][p] += coef_local * (part->vel[1][p] + part->vel_p1[1][p]);
 					part->pos[0][p] += coef_local * (part->vel[0][p]);
 					part->pos[1][p] += coef_local * (part->vel[1][p]);
 				}
@@ -210,6 +220,7 @@ namespace SIM {
 	private:
 		void makeLhs_v_q2() {
 			coef.clear();
+			R coefI_local = R(3) / (R(2) * para.dt * para.Pr);
 			for (int p = 0; p < part->np; p++) {
 				if (part->type[p] == BD1 || part->type[p] == BD2) {
 					coef.push_back(Tpl(2 * p, 2 * p, R(1)));
@@ -240,7 +251,7 @@ namespace SIM {
 						coef.push_back(Tpl(2 * p + 1, 2 * q + 1, pq));
 					}
 				}
-				pp += R(3) / (R(2) * para.dt * para.Pr);
+				pp += coefI_local;
 				coef.push_back(Tpl(2 * p, 2 * p, pp));
 				coef.push_back(Tpl(2 * p + 1, 2 * p + 1, pp));
 			}
@@ -329,23 +340,23 @@ namespace SIM {
 		}
 
 		void makeRhs_v_q2r0() {
+			const R two_over_three = R(2) / R(3);
+			const R coef_local = R(1) / (R(2)* para.dt * para.Pr);
 #if OMP
 #pragma omp parallel for
 #endif
 			for (int p = 0; p < part->np; p++) {
 				if (part->type[p] == BD1 || part->type[p] == BD2) {
-					const R coef_local = R(2) / R(3);
 					const Vec lap_local = part->Lap(part->vel[0].data(), part->vel[1].data(), p);
 					const R volumeForce_local = para.Ra* para.Pr* part->temp[p];
-					mSol->rhs[2 * p + 0] = coef_local* (R(2)*part->vel[0][p] - R(0.5)*part->vel_m1[0][p] + para.dt*(para.Pr* lap_local[0]));
-					mSol->rhs[2 * p + 1] = coef_local* (R(2)*part->vel[1][p] - R(0.5)*part->vel_m1[1][p] + para.dt*(para.Pr* lap_local[1] + volumeForce_local));
+					mSol->rhs[2 * p + 0] = two_over_three* (R(2)*part->vel[0][p] - R(0.5)*part->vel_m1[0][p] + para.dt*(para.Pr* lap_local[0]));
+					mSol->rhs[2 * p + 1] = two_over_three* (R(2)*part->vel[1][p] - R(0.5)*part->vel_m1[1][p] + para.dt*(para.Pr* lap_local[1] + volumeForce_local));
 					//mSol->rhs[2 * p + 0] = part->vel[0][p];
 					//mSol->rhs[2 * p + 1] = part->vel[1][p];
 					continue;
 				}
-				const R coefL = R(1) / (R(2)* para.dt * para.Pr);
-				const R rhsx = coefL* (R(4)* part->vel[0][p] - part->vel_m1[0][p]);
-				const R rhsy = coefL* (R(4)* part->vel[1][p] - part->vel_m1[1][p]) + para.Ra* part->temp[p];
+				const R rhsx = coef_local* (R(4)* part->vel[0][p] - part->vel_m1[0][p]);
+				const R rhsy = coef_local* (R(4)* part->vel[1][p] - part->vel_m1[1][p]) + para.Ra* part->temp[p];
 				mSol->rhs[2 * p + 0] = rhsx;
 				mSol->rhs[2 * p + 1] = rhsy;
 			}
@@ -393,13 +404,13 @@ namespace SIM {
 		}
 
 		void makeRhs_p_q2() {
-			const R coefL = R(3) / (R(2)* para.dt);
+			const R coef_local = R(3) / (R(2)* para.dt);
 #if OMP
 #pragma omp parallel for
 #endif
 			for (int p = 0; p < part->np; p++) {
 				const R div_local = part->Div(part->vel_p1[0].data(), part->vel_p1[1].data(), p);
-				mSol->b[p] = coefL * div_local;
+				mSol->b[p] = coef_local * div_local;
 				if (IS(part->bdc[p], P_NEUMANN)) {
 					Vec& normal = part->bdnorm.at(p);
 					VecP inner = VecP::Zero();

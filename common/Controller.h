@@ -1,9 +1,9 @@
 /*
- * LICENCE
- * copyright 2014 ~ ****
- * Some rights reserved.
- * Author: HUFANGYUAN
- * Released under CC BY-NC
+* LICENCE
+* copyright 2014 ~ ****
+* Some rights reserved.
+* Author: HUFANGYUAN
+* Released under CC BY-NC
 */
 #pragma once
 #include "Header.h"
@@ -25,7 +25,7 @@ namespace VIS {
 			m_rotation = m_initRotation = glm::angleAxis<float>(-glm::pi<float>() * 0.f, glm::vec3(1, 0, 0));;
 			m_pan = m_initPan = glm::vec3(0.f, 0.f, 0.f);
 
-			m_initCameraPosition = glm::vec3(0.5f, 0.5f, 1.5f);
+			m_initCameraPosition = glm::vec3(0.5f, 0.5f, 2.0f);
 			m_initCameraRotation = glm::angleAxis<float>(glm::pi<float>() * 0.0f, glm::vec3(1, 0, 0));
 
 			f_pointRadius = 2.0f;
@@ -39,16 +39,18 @@ namespace VIS {
 			i_leave = 0;
 			i_point = 0;
 			i_save = 0;
-			i_sens = 1;
+			i_sens = 0;
 			i_bmp = 0;
-			u_width = 1024;
+			i_senSwitch = 1;
+			i_bmpSwitch = 1;
+			u_width = 800;
 			u_height = 800;
 			f_sRangeMax = 1.0f;
 			f_sRangeMin = -1.0f;
 
 			m_camera.SetPosition(m_initCameraPosition);
 			//m_camera.SetProjectionRH(45.0f, float(u_width)/float(u_height), f_near, f_far);
-			m_camera.SetProjectionOR(-0.6f*float(u_width)/float(u_height), 0.6f*float(u_width)/float(u_height), -0.6f, 0.6f, f_near, f_far);
+			m_camera.SetProjectionOR(-0.56f*float(u_width) / float(u_height), 0.56f*float(u_width) / float(u_height), -0.56f, 0.56f, f_near, f_far);
 		}
 		~Controller() {}
 
@@ -112,13 +114,13 @@ namespace VIS {
 		void pressKey(unsigned char key, int a, int b) {
 			switch (key) {
 			case 0x1b: //esc
-				i_leave = 1; 
+				i_leave = 1;
 				break;
 			case 0x0d: //enter
-				i_stop = !i_stop; 
+				i_stop = !i_stop;
 				break;
 			case 0x70: //p
-				i_point = !i_point; 
+				i_point = !i_point;
 				break;
 			case 0x20: //space
 				m_scale = m_initScale;
@@ -176,6 +178,8 @@ namespace VIS {
 		int			i_save;
 		int			i_sens;
 		int			i_bmp;
+		int			i_senSwitch;
+		int			i_bmpSwitch;
 		int         i_mouseButton;
 		int         i_file;
 

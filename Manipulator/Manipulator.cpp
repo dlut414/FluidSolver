@@ -51,30 +51,32 @@ static void setTwVisible(TwBar* const bar, const int visible) {
 }
 
 static void callBack() {
-	static int outSwitch = 0;
+	static int outSwitchS = 0;
+	static int outSwitchP = 0;
+	static int count = 0;
 	if (control.i_save) {
 		Simulation::SaveData();
 		control.i_save = 0;
 	}
-	if (control.i_sens && outSwitch) {
+	if (control.i_sens || (outSwitchS && control.i_senSwitch)) {
 		Simulation::SensorOut();
-		outSwitch = 0;
+		outSwitchS = 0;
 	}
-	if (control.i_bmp && outSwitch) {
+	if (control.i_bmp || (outSwitchP && control.i_bmpSwitch)) {
 		setTwVisible(GUIBar, 0);
 		static Bitmap bm;
 		static int i = 0;
 		char name[256];
 		sprintf_s(name, "./out/bm%04d.bmp", i++);
 		bm.SaveAsBMP(name);
-		outSwitch = 0;
 		setTwVisible(GUIBar, 1);
+		outSwitchP = 0;
 	}
 	if (!control.i_stop) {
 		Simulation::Run();
-		static int count = 0;
 		if (count++ % 50 == 0) {
-			outSwitch = 1;
+			outSwitchS = 1;
+			outSwitchP = 1;
 		}
 		control.i_dirty = 1;
 	}
@@ -193,8 +195,8 @@ static void Initialize(int argc, char** argv) {
 	TwDefine(" GUI/Range group='Display' ");
 	TwEnumVal ev_switch[] = { { 0, "Off" }, { 1, "On" }, };
 	TwType onoff = TwDefineEnum("onoff", ev_switch, 2);
-	TwAddVarRW(GUIBar, "Sensors", onoff, &control.i_sens, " group='Output' ");
-	TwAddVarRW(GUIBar, "Bmp", onoff, &control.i_bmp, " group='Output' ");
+	TwAddVarRW(GUIBar, "Sensors", onoff, &control.i_senSwitch, " group='Output' ");
+	TwAddVarRW(GUIBar, "Bmp", onoff, &control.i_bmpSwitch, " group='Output' ");
 	TwAddButton(GUIBar, "RunStop", ButtonRun_callback, NULL, " label='Run' ");
 }
 
