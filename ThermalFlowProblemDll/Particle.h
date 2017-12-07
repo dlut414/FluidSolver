@@ -1,5 +1,14 @@
 /*
+* LICENCE
+* copyright 2014 ~ ****
+* Some rights reserved.
+* Author: HUFANGYUAN
+* Released under CC BY-NC
 */
+//Particle.h
+///defination of class Particle
+///2016.4.22 fixed bug in b2normal() --- 
+/// normal calculation is different when initial particles position are random
 #pragma once
 #include <iostream>
 #include <fstream>
@@ -30,6 +39,7 @@ namespace SIM {
 	public:
 		typedef Eigen::Matrix<int,2,1> iVec;
 		typedef Eigen::Matrix<R,2,1> Vec;
+		typedef Eigen::Matrix<R,2,2> Mat;
 	public:
 		Particle() {}
 		~Particle() {}
@@ -80,7 +90,7 @@ namespace SIM {
 			vel[0].push_back(v[0]); vel[1].push_back(v[1]);
 			vel_p1[0].push_back(v[0]); vel_p1[1].push_back(v[1]);
 			vel_m1[0].push_back(v[0]); vel_m1[1].push_back(v[1]);
-			temp.push_back(tp); pres.push_back(R(0)); phi.push_back(R(0)); vort.push_back(R(0)); div.push_back(R(0));
+			temp.push_back(tp); temp_m1.push_back(tp); pres.push_back(R(0)); phi.push_back(R(0)); vort.push_back(R(0)); div.push_back(R(0));
 			bdc.push_back(0);
 		}
 
@@ -120,43 +130,58 @@ namespace SIM {
 		}
 
 		void b2normal() {
-			//bdnorm.clear();
-			//for (const auto& p : bbMap) {
-			//	Vec n;
-			//	n[0] = pos[0][p.second] - pos[0][p.first];
-			//	n[1] = pos[1][p.second] - pos[1][p.first];
-			//	bdnorm[p.second] = n;
-			//}
-			//for (const auto& p : bbMap) {
-			//	Vec n;
-			//	n[0] = pos[0][p.second] - pos[0][p.first];
-			//	n[1] = pos[1][p.second] - pos[1][p.first];
-			//	const Vec tmp = bdnorm.at(p.second);
-			//	if (tmp.norm() < n.norm()) bdnorm[p.second] = n;
-			//}
-			//for (const auto& p : bbMap) {
-			//	bdnorm[p.second] = bdnorm.at(p.second).normalized();
-			//}
 			for (int p = 0; p < np; p++) {
 				if (type[p] == BD1) {
-					Vec nv = Vec::Zero();
+					Vec gc = Vec::Zero();
+					Mat mm = Mat::Zero();
 					const int cx = cell->pos2cell(pos[0][p]);
 					const int cy = cell->pos2cell(pos[1][p]);
 					for (int i = 0; i < cell->blockSize::value; i++) {
 						const int key = cell->hash(cx, cy, i);
 						for (int m = 0; m < cell->linkList[key].size(); m++) {
 							const int q = cell->linkList[key][m];
-							if (q == p) continue;
+							if (q == p || type[q] != BD1) continue;
 							const R dr[2] = { pos[0][q] - pos[0][p], pos[1][q] - pos[1][p] };
 							const R dr1 = sqrt(dr[0] * dr[0] + dr[1] * dr[1]);
-							if (dr1 > r0) continue;
+							if (dr1 > 1.1* dp) continue;
 							const R w = ww(dr1);
-							nv[0] += w* dr[0] / dr1;
-							nv[1] += w* dr[1] / dr1;
+							Vec nv = Vec::Zero();
+							nv[0] = w* dr[0] / dr1;
+							nv[1] = w* dr[1] / dr1;
+							gc += nv;
+							mm += nv* nv.transpose();
 						}
 					}
-					nv.normalize();
-					bdnorm[p] = nv;
+					const R trace_mm = mm(0, 0) + mm(1, 1);
+					const R det_mm = mm(0, 0)*mm(1, 1) - mm(1, 0)*mm(0, 1);
+					const R sq = sqrt(trace_mm*trace_mm - R(4)*det_mm);
+					Vec lambda;
+					lambda[0] = R(0.5)* (trace_mm + sq);
+					lambda[1] = R(0.5)* (trace_mm - sq);
+					const R eigenvalue = (lambda[0] < lambda[1]) ? lambda[0] : lambda[1];
+					Vec eigenvec;
+					const R eps = R(1E-6);
+					if (abs(eigenvalue - mm(0, 0)) > eps) {
+						eigenvec[0] = mm(0, 1) / (eigenvalue - mm(0, 0));
+						eigenvec[1] = R(1);
+					}
+					else if(abs(mm(0,1)) > eps) {
+						eigenvec[0] = R(1);
+						eigenvec[1] = (eigenvalue - mm(0, 0)) / mm(0, 1);
+					}
+					else if (abs(mm(1, 0)) > eps) {
+						eigenvec[0] = (eigenvalue - mm(1, 1)) / mm(1, 0);
+						eigenvec[1] = R(1);
+					}
+					else if (abs(eigenvalue - mm(1, 1)) > eps) {
+						eigenvec[0] = R(1);
+						eigenvec[1] = mm(1, 0) / (eigenvalue - mm(1, 1));
+					}
+					else {
+						eigenvec = gc;
+					}
+					eigenvec.normalize();
+					bdnorm[p] = eigenvec;
 				}
 			}
 		}
@@ -202,6 +227,7 @@ namespace SIM {
 		std::vector<R> vel_m1[2];
 
 		std::vector<R> temp;
+		std::vector<R> temp_m1;
 		std::vector<R> pres;
 		std::vector<R> div;
 		std::vector<pType> type;

@@ -6,8 +6,8 @@
 * Released under CC BY-NC
 */
 //FractionalStep_X.h
-///defination of class FractionalStep_X (Kim & Moin - using deferred correction)
-
+///defination of class FractionalStep_X
+/// solve pressure term first then viscousity term; 
 #pragma once
 #include "Simulator.h"
 #include "Particle_x.h"
@@ -53,7 +53,7 @@ namespace SIM {
 		void step() {
 			calInvMat();
 
-			temperatureTerm_i_q1();
+			temperatureTerm_i_CN1();
 			presTerm_i_q2();
 			visTerm_i_q2r0();
 
@@ -100,8 +100,8 @@ namespace SIM {
 			makeRhs_p_q2();
 			solvMat_phi();
 			//for (int p = 0; p < part->np; p++) {
-			//	//std::cout << (R(3.0) / (R(2.0)* para.dt))* part->Div(part->vel_p1[0].data(), part->vel_p1[1].data(), p) - part->Lap(part->phi.data(), p) - mSol->x[part->np] << std::endl;
-			//	//std::cout << (mSol->a.row(p).dot( mSol->x)) - mSol->b[p] << std::endl;
+			//	//if (p == 165) PRINT( (R(3.0) / (R(2.0)* para.dt))* part->Div(part->vel_p1[0].data(), part->vel_p1[1].data(), p) - part->Lap(part->phi.data(), p) - mSol->x[part->np] );
+			//	//if (p == 165) PRINT( (mSol->a.row(p).dot( mSol->x)) - mSol->b[p] );
 			//}
 		}
 
@@ -111,9 +111,9 @@ namespace SIM {
 			solvMat_phi();
 		}
 
-		void temperatureTerm_i_q1() {
-			makeLhs_t();
-			makeRhs_t_q1();
+		void temperatureTerm_i_CN1() {
+			makeLhs_t_CN1();
+			makeRhs_t_CN1();
 			solvMat_t();
 		}
 
@@ -140,19 +140,12 @@ namespace SIM {
 		}
 
 		void updateVelocity_q2() {
-			const R coefL = (2.0* para.dt) / (3.0);
+			const R coefL = (R(2)* para.dt) / (R(3));
 #if OMP
 #pragma omp parallel for
 #endif
 			for (int p = 0; p < part->np; p++) {
 				part->pres[p] = part->phi[p];
-			}
-#if OMP
-#pragma omp parallel for
-#endif
-			for (int p = 0; p < part->np; p++) {
-				part->vel_p1[0][p] = part->vel[0][p];
-				part->vel_p1[1][p] = part->vel[1][p];
 			}
 		}
 
@@ -296,7 +289,7 @@ namespace SIM {
 				}
 				const R coefL = (R(1.0) / para.dt * para.Pr);
 				const R rhsx = coefL* part->vel[0][p];
-				const R rhsy = coefL* part->vel[0][p] + para.Ra* part->temp[p];
+				const R rhsy = coefL* part->vel[1][p] + para.Ra* part->temp[p];
 				mSol->rhs[2 * p + 0] = rhsx;
 				mSol->rhs[2 * p + 1] = rhsy;
 			}
@@ -312,11 +305,11 @@ namespace SIM {
 					mSol->rhs[2 * p + 1] = part->vel[1][p];
 					continue;
 				}
-				const R coefL = R(1) / (R(2)* para.dt * para.Pr);
-				const R coefP = R(1) / para.Pr;
+				const R coef_vel_local = R(1) / (R(2)* para.dt * para.Pr);
+				const R coef_pres_local = R(1) / para.Pr;
 				const Vec p_grad_local = part->Grad(part->phi.data(), p);
-				const R rhsx = coefL* (R(4)* part->vel[0][p] - part->vel_m1[0][p]) - coefP* p_grad_local[0];
-				const R rhsy = coefL* (R(4)* part->vel[1][p] - part->vel_m1[1][p]) + para.Ra* part->temp[p] - coefP* p_grad_local[1];
+				const R rhsx = coef_vel_local* (R(4)* part->vel[0][p] - part->vel_m1[0][p]) - coef_pres_local* p_grad_local[0];
+				const R rhsy = coef_vel_local* (R(4)* part->vel[1][p] - part->vel_m1[1][p]) + para.Ra* part->temp[p] - coef_pres_local* p_grad_local[1];
 				mSol->rhs[2 * p + 0] = rhsx;
 				mSol->rhs[2 * p + 1] = rhsy;
 			}
@@ -383,7 +376,6 @@ namespace SIM {
 					const R neumannY = para.Pr* lap_ustar_local[1] + para.Ra* para.Pr* part->temp[p];
 					const R neumann = neumannX* normal[0] + neumannY* normal[1];
 					const VecP aa = part->invNeu.at(p)* inner;
-					//const R cst = part->p_neumann.at(p)*part->ww(R(0))* (R(1) / part->varrho) * (part->pn_lap_o.dot(aa));
 					const R cst = neumann *part->ww(R(0))* (R(1) / part->varrho) * (part->pn_lap_o.dot(aa));
 					mSol->b[p] -= cst;
 				}
@@ -414,7 +406,7 @@ namespace SIM {
 			}
 		}
 
-		void makeLhs_t() {
+		void makeLhs_t_CN1() {
 			coef.clear();
 			for (int p = 0; p < part->np; p++) {
 				if (part->type[p] == BD2) {
@@ -458,7 +450,7 @@ namespace SIM {
 			mSol->a.setFromTriplets(coef.begin(), coef.end());
 		}
 
-		void makeRhs_t_q1() {
+		void makeRhs_t_CN1() {
 			const R coefL = 0.5* para.dt;
 #if OMP
 #pragma omp parallel for

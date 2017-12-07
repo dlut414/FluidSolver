@@ -27,8 +27,8 @@ namespace SIM {
 		Shifter() {}
 		~Shifter() {}
 
-		template <typename Der, int LOOP = 5>
-		void SpringUpwindModel(Particle<R,2,Der>* const part, const Parameter<R,2>& para) const {
+		template <typename Der, int LOOP = 3>
+		void SpringLSIModel(Particle<R, 2, Der>* const part, const Parameter<R, 2>& para) const {
 			std::vector<R> Dposx(part->np, R(0));
 			std::vector<R> Dposy(part->np, R(0));
 			std::vector<R> Du1x(part->np, R(0));
@@ -36,6 +36,145 @@ namespace SIM {
 			std::vector<R> Du2x(part->np, R(0));
 			std::vector<R> Du2y(part->np, R(0));
 			std::vector<R> Dtemp(part->np, R(0));
+			std::vector<R> Dtemp_m1(part->np, R(0));
+			const R coef = para.umax* para.dt;
+#if OMP
+#pragma omp parallel for
+#endif
+			for (int p = 0; p < part->np; p++) {
+				Dposx[p] = part->pos[0][p];
+				Dposy[p] = part->pos[1][p];
+			}
+			for (int iter = 0; iter < LOOP; iter++) {
+#if OMP
+#pragma omp parallel for
+#endif
+				for (int p = 0; p < part->np; p++) {
+					if (part->type[p] != FLUID) continue;
+					R Dpq[2] = { 0.0, 0.0 };
+					const auto& cell = part->cell;
+					const int cx = cell->pos2cell(part->pos[0][p]);
+					const int cy = cell->pos2cell(part->pos[1][p]);
+					for (int i = 0; i < cell->blockSize::value; i++) {
+						const int key = cell->hash(cx, cy, i);
+						for (int m = 0; m < cell->linkList[key].size(); m++) {
+							const int q = cell->linkList[key][m];
+							if (q == p) continue;
+							const R dr[2] = { Dposx[q] - Dposx[p], Dposy[q] - Dposy[p] };
+							const R dr1 = sqrt(dr[0] * dr[0] + dr[1] * dr[1]);
+							if (dr1 > part->r0) continue;
+							const R w = part->ww(dr1);
+							const R coeff = w / dr1;
+							Dpq[0] -= coeff * dr[0];
+							Dpq[1] -= coeff * dr[1];
+						}
+					}
+					Dposx[p] += coef* Dpq[0];
+					Dposy[p] += coef* Dpq[1];
+				}
+			}
+#if OMP
+#pragma omp parallel for
+#endif
+			for (int p = 0; p < part->np; p++) {
+				if (part->type[p] != FLUID) continue;
+				const Vec u1 = part->derived().interpolateLSA(part->vel[0].data(), part->vel[1].data(), p, Dposx[p], Dposy[p]);
+				Du1x[p] = u1[0];
+				Du1y[p] = u1[1];
+			}
+#if OMP
+#pragma omp parallel for
+#endif
+			for (int p = 0; p < part->np; p++) {
+				if (part->type[p] != FLUID) continue;
+				const Vec u2 = part->derived().interpolateLSA(part->vel_p1[0].data(), part->vel_p1[1].data(), p, Dposx[p], Dposy[p]);
+				Du2x[p] = u2[0];
+				Du2y[p] = u2[1];
+			}
+#if OMP
+#pragma omp parallel for
+#endif
+			for (int p = 0; p < part->np; p++) {
+				if (part->type[p] != FLUID) continue;
+				Dtemp[p] = part->derived().interpolateLSA(part->temp.data(), p, Dposx[p], Dposy[p]);
+				Dtemp_m1[p] = part->derived().interpolateLSA(part->temp_m1.data(), p, Dposx[p], Dposy[p]);
+			}
+#if OMP
+#pragma omp parallel for
+#endif
+			for (int p = 0; p < part->np; p++) {
+				if (part->type[p] != FLUID) continue;
+				part->pos[0][p] = Dposx[p];
+				part->pos[1][p] = Dposy[p];
+				part->vel[0][p] = Du1x[p];
+				part->vel[1][p] = Du1y[p];
+				part->vel_p1[0][p] = Du2x[p];
+				part->vel_p1[1][p] = Du2y[p];
+				part->temp[p] = Dtemp[p];
+				part->temp_m1[p] = Dtemp_m1[p];
+			}
+		}
+
+		template <typename Der>
+		void StaticLSIModel(Particle<R, 2, Der>* const part) const {
+			std::vector<R> Du1x(part->np, R(0));
+			std::vector<R> Du1y(part->np, R(0));
+			std::vector<R> Du2x(part->np, R(0));
+			std::vector<R> Du2y(part->np, R(0));
+			std::vector<R> Dtemp(part->np, R(0));
+			std::vector<R> Dtemp_m1(part->np, R(0));
+#if OMP
+#pragma omp parallel for
+#endif
+			for (int p = 0; p < part->np; p++) {
+				if (part->type[p] != FLUID) continue;
+				const Vec u1 = part->derived().interpolateLSA(part->vel[0].data(), part->vel[1].data(), p, part->pos_m1[0][p], part->pos_m1[1][p]);
+				Du1x[p] = u1[0];
+				Du1y[p] = u1[1];
+			}
+#if OMP
+#pragma omp parallel for
+#endif
+			for (int p = 0; p < part->np; p++) {
+				if (part->type[p] != FLUID) continue;
+				const Vec u2 = part->derived().interpolateLSA(part->vel_p1[0].data(), part->vel_p1[1].data(), p, part->pos_m1[0][p], part->pos_m1[1][p]);
+				Du2x[p] = u2[0];
+				Du2y[p] = u2[1];
+			}
+#if OMP
+#pragma omp parallel for
+#endif
+			for (int p = 0; p < part->np; p++) {
+				if (part->type[p] != FLUID) continue;
+				Dtemp[p] = part->derived().interpolateLSA(part->temp.data(), p, part->pos_m1[0][p], part->pos_m1[1][p]);
+				Dtemp_m1[p] = part->derived().interpolateLSA(part->temp_m1.data(), p, part->pos_m1[0][p], part->pos_m1[1][p]);
+			}
+#if OMP
+#pragma omp parallel for
+#endif
+			for (int p = 0; p < part->np; p++) {
+				if (part->type[p] != FLUID) continue;
+				part->pos[0][p] = part->pos_m1[0][p];
+				part->pos[1][p] = part->pos_m1[1][p];
+				part->vel[0][p] = Du1x[p];
+				part->vel[1][p] = Du1y[p];
+				part->vel_p1[0][p] = Du2x[p];
+				part->vel_p1[1][p] = Du2y[p];
+				part->temp[p] = Dtemp[p];
+				part->temp_m1[p] = Dtemp_m1[p];
+			}
+		}
+
+		template <typename Der, int LOOP = 3>
+		void SpringULSIModel(Particle<R,2,Der>* const part, const Parameter<R,2>& para) const {
+			std::vector<R> Dposx(part->np, R(0));
+			std::vector<R> Dposy(part->np, R(0));
+			std::vector<R> Du1x(part->np, R(0));
+			std::vector<R> Du1y(part->np, R(0));
+			std::vector<R> Du2x(part->np, R(0));
+			std::vector<R> Du2y(part->np, R(0));
+			std::vector<R> Dtemp(part->np, R(0));
+			std::vector<R> Dtemp_m1(part->np, R(0));
 			const R coef = para.umax* para.dt;
 #if OMP
 #pragma omp parallel for
@@ -96,6 +235,7 @@ namespace SIM {
 			for (int p = 0; p < part->np; p++) {
 				if (part->type[p] != FLUID) continue;
 				Dtemp[p] = part->derived().interpolateLSAU(part->temp.data(), p, Dposx[p], Dposy[p]);
+				Dtemp_m1[p] = part->derived().interpolateLSAU(part->temp_m1.data(), p, Dposx[p], Dposy[p]);
 			}
 #if OMP
 #pragma omp parallel for
@@ -109,16 +249,18 @@ namespace SIM {
 				part->vel_p1[0][p] = Du2x[p];
 				part->vel_p1[1][p] = Du2y[p];
 				part->temp[p] = Dtemp[p];
+				part->temp_m1[p] = Dtemp_m1[p];
 			}
 		}
 
 		template <typename Der>
-		void StaticUpwindModel(Particle<R,2,Der>* const part) const {
+		void StaticULSIModel(Particle<R,2,Der>* const part) const {
 			std::vector<R> Du1x(part->np, R(0));
 			std::vector<R> Du1y(part->np, R(0));
 			std::vector<R> Du2x(part->np, R(0));
 			std::vector<R> Du2y(part->np, R(0));
 			std::vector<R> Dtemp(part->np, R(0));
+			std::vector<R> Dtemp_m1(part->np, R(0));
 #if OMP
 #pragma omp parallel for
 #endif
@@ -143,6 +285,7 @@ namespace SIM {
 			for (int p = 0; p < part->np; p++) {
 				if (part->type[p] != FLUID) continue;
 				Dtemp[p] = part->derived().interpolateLSAU(part->temp.data(), p, part->pos_m1[0][p], part->pos_m1[1][p]);
+				Dtemp_m1[p] = part->derived().interpolateLSAU(part->temp_m1.data(), p, part->pos_m1[0][p], part->pos_m1[1][p]);
 			}
 #if OMP
 #pragma omp parallel for
@@ -156,6 +299,7 @@ namespace SIM {
 				part->vel_p1[0][p] = Du2x[p];
 				part->vel_p1[1][p] = Du2y[p];
 				part->temp[p] = Dtemp[p];
+				part->temp_m1[p] = Dtemp_m1[p];
 			}
 		}
 
@@ -166,6 +310,7 @@ namespace SIM {
 			std::vector<R> Du2x(part->np, R(0));
 			std::vector<R> Du2y(part->np, R(0));
 			std::vector<R> Dtemp(part->np, R(0));
+			std::vector<R> Dtemp_m1(part->np, R(0));
 #if OMP
 #pragma omp parallel for
 #endif
@@ -188,6 +333,7 @@ namespace SIM {
 			for (int p = 0; p < part->np; p++) {
 				if (part->type[p] != FLUID) continue;
 				Dtemp[p] = part->derived().interpolateWENO(part->temp.data(), p, part->pos_m1[0][p], part->pos_m1[1][p]);
+				Dtemp_m1[p] = part->derived().interpolateWENO(part->temp_m1.data(), p, part->pos_m1[0][p], part->pos_m1[1][p]);
 			}
 #if OMP
 #pragma omp parallel for
@@ -201,6 +347,7 @@ namespace SIM {
 				part->vel_p1[0][p] = Du2x[p];
 				part->vel_p1[1][p] = Du2y[p];
 				part->temp[p] = Dtemp[p];
+				part->temp_m1[p] = Dtemp_m1[p];
 			}
 		}
 

@@ -211,6 +211,7 @@ namespace SIM {
 #pragma omp parallel for
 #endif
 			for (int p = 0; p < int(part->np); p++) {
+				part->temp_m1[p] = part->temp[p];
 				part->temp[p] = mSol->x[p];
 			}
 		}

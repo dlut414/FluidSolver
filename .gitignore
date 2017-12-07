@@ -64,3 +64,6 @@ out/*
 *.obj
 *.pch
 *.suo
+*.pch
+*.pch
+*.pch

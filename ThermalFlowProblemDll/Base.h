@@ -42,7 +42,7 @@ namespace SIM {
 	public:
 		void init(const R& _k) {
 			k = _k; r0 = k* dp;
-			eps = std::numeric_limits<R>::epsilon();
+			eps = static_cast<R>(1.e-6);
 			eps_mat = static_cast<R>(1.e-6);
 		}
 

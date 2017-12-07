@@ -25,4 +25,7 @@
 
 #include <AntTweakBar.h>
 
+#define __FILENAME__ (strrchr(__FILE__, '\\') ? strrchr(__FILE__, '\\') + 1 : __FILE__)
+#define PRINT(x) std::cout << __FILENAME__ << " @Ln " << __LINE__ << ": " << #x << " = " << x << std::endl;
+
 #endif // HEADER_PCH_H_INCLUDED

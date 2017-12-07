@@ -1,12 +1,19 @@
 /*
+* LICENCE
+* copyright 2014 ~ ****
+* Some rights reserved.
+* Author: HUFANGYUAN
+* Released under CC BY-NC
 */
 #pragma once
-
+#include <string.h>
 #define DEBUG 1
 #define LEGACY 0
 #define NTHREAD 4
 #define OMP	1
 #define BD_OPT 0
+#define __FILENAME__ (strrchr(__FILE__, '\\') ? strrchr(__FILE__, '\\') + 1 : __FILE__)
+#define PRINT(x) std::cout << __FILENAME__ << " @Ln " << __LINE__ << ": " << #x << " = " << x << std::endl;
 
 enum pType {
 	FLUID = 0,

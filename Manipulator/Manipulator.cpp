@@ -51,32 +51,34 @@ static void setTwVisible(TwBar* const bar, const int visible) {
 }
 
 static void callBack() {
-	if (control.b_save) {
+	static int outSwitchS = 0;
+	static int outSwitchP = 0;
+	static int count = 0;
+	if (control.i_save) {
 		Simulation::SaveData();
-		control.b_save = false;
+		control.i_save = 0;
 	}
-	if (control.b_sens) {
+	if (control.i_sens || (outSwitchS && control.i_senSwitch)) {
 		Simulation::SensorOut();
-		control.b_sens = false;
+		outSwitchS = 0;
 	}
-	if (control.b_bmp) {
+	if (control.i_bmp || (outSwitchP && control.i_bmpSwitch)) {
 		setTwVisible(GUIBar, 0);
 		static Bitmap bm;
 		static int i = 0;
 		char name[256];
 		sprintf_s(name, "./out/bm%04d.bmp", i++);
 		bm.SaveAsBMP(name);
-		control.b_bmp = false;
 		setTwVisible(GUIBar, 1);
+		outSwitchP = 0;
 	}
-	if (!control.b_stop) {
+	if (!control.i_stop) {
 		Simulation::Run();
-		static int count = 0;
 		if (count++ % 50 == 0) {
-			control.b_bmp = true;
-			control.b_sens = true;
+			outSwitchS = 1;
+			outSwitchP = 1;
 		}
-		control.b_dirty = true;
+		control.i_dirty = 1;
 	}
 }
 static void fps() {
@@ -91,10 +93,11 @@ static void onMouse(int button, int s, int x, int y) {
 			const Parameters::DataType* px = (Parameters::DataType*)Simulation::PositionX();
 			const Parameters::DataType* py = (Parameters::DataType*)Simulation::PositionY();
 			const Parameters::DataType* div = (Parameters::DataType*)Simulation::Divergence();
+			const Parameters::DataType* pres = (Parameters::DataType*)Simulation::Pressure();
 			std::cout << " --------------------------------------------------------------------- " << std::endl;
 			std::cout << " Particle ID : " << pickID << std::endl;
 			std::cout << " Coordinate (x,y) : " << px[pickID] << ", " << py[pickID] << std::endl;
-			std::cout << " Divergence : " << div[pickID] << std::endl;
+			std::cout << " Divergence : " << div[pickID] << "    " << " Pressure : " << pres[pickID] << std::endl;
 			std::cout << " --------------------------------------------------------------------- " << std::endl;
 		}
 	}
@@ -144,23 +147,23 @@ static void onDisplay() {
 
 	callBack();
 
-	if (control.b_dirty) {
+	if (control.i_dirty) {
 		glutPostRedisplay();
-		control.b_dirty = false;
+		control.i_dirty = 0;
 	}
-	if (control.b_leave) {
+	if (control.i_leave) {
 		glutLeaveMainLoop();
 	}
 }
 
 void TW_CALL ButtonRun_callback(void*) {
-	if (control.b_stop) {
+	if (control.i_stop) {
 		TwDefine(" GUI/RunStop label='Stop' ");
 	}
 	else {
 		TwDefine(" GUI/RunStop label='Run' ");
 	}
-	control.b_stop = !control.b_stop;
+	control.i_stop = !control.i_stop;
 	TwDraw();
 }
 
@@ -190,6 +193,10 @@ static void Initialize(int argc, char** argv) {
 	TwAddVarRW(GUIBar, "Min", TW_TYPE_FLOAT, &control.f_sRangeMin, " group='Range' ");
 	TwAddVarRW(GUIBar, "Max", TW_TYPE_FLOAT, &control.f_sRangeMax, " group='Range' ");
 	TwDefine(" GUI/Range group='Display' ");
+	TwEnumVal ev_switch[] = { { 0, "Off" }, { 1, "On" }, };
+	TwType onoff = TwDefineEnum("onoff", ev_switch, 2);
+	TwAddVarRW(GUIBar, "Sensors", onoff, &control.i_senSwitch, " group='Output' ");
+	TwAddVarRW(GUIBar, "Bmp", onoff, &control.i_bmpSwitch, " group='Output' ");
 	TwAddButton(GUIBar, "RunStop", ButtonRun_callback, NULL, " label='Run' ");
 }
 
